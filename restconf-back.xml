@@ -1,0 +1,660 @@
+<references title="Normative References">
+
+  <reference anchor="RFC2119">
+    <front>
+      <title>Key words for use in RFCs to Indicate Requirement Levels</title>
+      <author initials="S." surname="Bradner" fullname="S.  Bradner">
+        <organization>Harvard University</organization>
+      </author>
+      <date month="March" year="1997"/>
+      <abstract>
+        <t>In many standards track documents several words are used to signify the requirements in the specification.  These words are often capitalized.  This document defines these words as they should be interpreted in IETF documents.</t>
+      </abstract>
+    </front>
+    <seriesInfo name="BCP" value="14"/>
+    <seriesInfo name="RFC" value="2119"/>
+    <format type="TXT" octets="4723" target="ftp://ftp.isi.edu/in-notes/rfc2119.txt"/>
+  </reference>
+
+
+  <reference anchor="RFC2246">
+    <front>
+      <title>The TLS Protocol, Version 1.0</title>
+      <author initials="T.D" surname="Dierks" fullname="Tim  Dierks">
+        <organization>Certicom</organization>
+      </author>
+      <author initials="C.A" surname="Allen" fullname="Christopher  Allen">
+        <organization>Certicom</organization>
+      </author>
+      <date month="January" year="1999"/>
+      <abstract>
+        <t>This document specifies Version 1.0 of the Transport Layer Security
+        (TLS) protocol. The TLS protocol provides communications privacy over
+        the Internet. The protocol allows client/server applications to
+        communicate in a way that is designed to prevent eavesdropping,
+        tampering, or message forgery.</t>
+      </abstract>
+    </front>
+    <seriesInfo name="RFC" value="2246"/>
+    <format type="HTTP" octets="205788" target="http://tools.ietf.org/html/rfc2246"/>
+  </reference>
+
+
+<reference anchor='RFC2396'>
+
+<front>
+<title abbrev='URI Generic Syntax'>Uniform Resource Identifiers (URI): Generic Syntax</title>
+<author initials='T.' surname='Berners-Lee' fullname='Tim Berners-Lee'>
+<organization abbrev='MIT/LCS'>World Wide Web Consortium</organization>
+<address>
+<postal>
+<street>MIT Laboratory for Computer Science, NE43-356</street>
+<street>545 Technology Square</street>
+<city>Cambridge</city>
+<region>MA</region>
+<code>02139</code></postal>
+<facsimile>+1(617)258-8682</facsimile>
+<email>timbl@w3.org</email></address></author>
+<author initials='R.T.' surname='Fielding' fullname='Roy T. Fielding'>
+<organization abbrev='U.C. Irvine'>Department of Information and Computer Science</organization>
+<address>
+<postal>
+<street>University of California, Irvine</street>
+<city>Irvine</city>
+<region>CA</region>
+<code>92697-3425</code></postal>
+<facsimile>+1(949)824-1715</facsimile>
+<email>fielding@ics.uci.edu</email></address></author>
+<author initials='L.' surname='Masinter' fullname='Larry Masinter'>
+<organization abbrev='Xerox Corporation'>Xerox PARC</organization>
+<address>
+<postal>
+<street>3333 Coyote Hill Road</street>
+<city>Palo Alto</city>
+<region>CA</region>
+<code>94034</code></postal>
+<facsimile>+1(415)812-4333</facsimile>
+<email>masinter@parc.xerox.com</email></address></author>
+<date year='1998' month='August' />
+<area>Applications</area>
+<keyword>uniform resource</keyword>
+<keyword>URI</keyword>
+<abstract>
+<t>
+   A Uniform Resource Identifier (URI) is a compact string of characters
+   for identifying an abstract or physical resource.  This document
+   defines the generic syntax of URI, including both absolute and
+   relative forms, and guidelines for their use; it revises and replaces
+   the generic definitions in RFC 1738 and RFC 1808.
+</t>
+<t>
+   This document defines a grammar that is a superset of all valid URI,
+   such that an implementation can parse the common components of a URI
+   reference without knowing the scheme-specific requirements of every
+   possible identifier type.  This document does not define a generative
+   grammar for URI; that task will be performed by the individual
+   specifications of each URI scheme.
+</t></abstract>
+<note title='IESG Note'>
+<t>
+   This paper describes a "superset" of operations that can be applied
+   to URI.  It consists of both a grammar and a description of basic
+   functionality for URI.  To understand what is a valid URI, both the
+   grammar and the associated description have to be studied.  Some of
+   the functionality described is not applicable to all URI schemes, and
+   some operations are only possible when certain media types are
+   retrieved using the URI, regardless of the scheme used.
+</t></note></front>
+
+<seriesInfo name='RFC' value='2396' />
+<format type='TXT' octets='83639' target='http://www.rfc-editor.org/rfc/rfc2396.txt' />
+<format type='HTML' octets='130638' target='http://xml.resource.org/public/rfc/html/rfc2396.html' />
+<format type='XML' octets='104983' target='http://xml.resource.org/public/rfc/xml/rfc2396.xml' />
+</reference>
+<!-- end RFC 2396 -->
+
+
+<reference anchor="RFC2616">
+
+<front>
+<title abbrev="HTTP/1.1">Hypertext Transfer Protocol -- HTTP/1.1</title>
+<author initials="R." surname="Fielding" fullname="Roy T. Fielding">
+<organization abbrev="UC Irvine">Department of Information and Computer Science</organization>
+<address>
+<postal>
+<street>University of California, Irvine</street>
+<city>Irvine</city>
+<region>CA</region>
+<code>92697-3425</code></postal>
+<facsimile>+1(949)824-1715</facsimile>
+<email>fielding@ics.uci.edu</email></address></author>
+<author initials="J." surname="Gettys" fullname="James Gettys">
+<organization abbrev="Compaq/W3C">World Wide Web Consortium</organization>
+<address>
+<postal>
+<street>MIT Laboratory for Computer Science, NE43-356</street>
+<street>545 Technology Square</street>
+<city>Cambridge</city>
+<region>MA</region>
+<code>02139</code></postal>
+<facsimile>+1(617)258-8682</facsimile>
+<email>jg@w3.org</email></address></author>
+<author initials="J." surname="Mogul" fullname="Jeffrey C. Mogul">
+<organization abbrev="Compaq">Compaq Computer Corporation</organization>
+<address>
+<postal>
+<street>Western Research Laboratory</street>
+<street>250 University Avenue</street>
+<city>Palo Alto</city>
+<region>CA</region>
+<code>94305</code></postal>
+<email>mogul@wrl.dec.com</email></address></author>
+<author initials="H." surname="Frystyk" fullname="Henrik Frystyk Nielsen">
+<organization abbrev="W3C/MIT">World Wide Web Consortium</organization>
+<address>
+<postal>
+<street>MIT Laboratory for Computer Science, NE43-356</street>
+<street>545 Technology Square</street>
+<city>Cambridge</city>
+<region>MA</region>
+<code>02139</code></postal>
+<facsimile>+1(617)258-8682</facsimile>
+<email>frystyk@w3.org</email></address></author>
+<author initials="L." surname="Masinter" fullname="Larry Masinter">
+<organization abbrev="Xerox">Xerox Corporation</organization>
+<address>
+<postal>
+<street>MIT Laboratory for Computer Science, NE43-356</street>
+<street>3333 Coyote Hill Road</street>
+<city>Palo Alto</city>
+<region>CA</region>
+<code>94034</code></postal>
+<email>masinter@parc.xerox.com</email></address></author>
+<author initials="P." surname="Leach" fullname="Paul J. Leach">
+<organization abbrev="Microsoft">Microsoft Corporation</organization>
+<address>
+<postal>
+<street>1 Microsoft Way</street>
+<city>Redmond</city>
+<region>WA</region>
+<code>98052</code></postal>
+<email>paulle@microsoft.com</email></address></author>
+<author initials="T." surname="Berners-Lee" fullname="Tim Berners-Lee">
+<organization abbrev="W3C/MIT">World Wide Web Consortium</organization>
+<address>
+<postal>
+<street>MIT Laboratory for Computer Science, NE43-356</street>
+<street>545 Technology Square</street>
+<city>Cambridge</city>
+<region>MA</region>
+<code>02139</code></postal>
+<facsimile>+1(617)258-8682</facsimile>
+<email>timbl@w3.org</email></address></author>
+<date year="1999" month="June"/>
+<abstract>
+<t>
+   The Hypertext Transfer Protocol (HTTP) is an application-level
+   protocol for distributed, collaborative, hypermedia information
+   systems. It is a generic, stateless, protocol which can be used for
+   many tasks beyond its use for hypertext, such as name servers and
+   distributed object management systems, through extension of its
+   request methods, error codes and headers . A feature of HTTP is
+   the typing and negotiation of data representation, allowing systems
+   to be built independently of the data being transferred.
+</t>
+<t>
+   HTTP has been in use by the World-Wide Web global information
+   initiative since 1990. This specification defines the protocol
+   referred to as "HTTP/1.1", and is an update to RFC 2068 .
+</t></abstract></front>
+
+<seriesInfo name="RFC" value="2616"/>
+<format type="TXT" octets="422317" target="http://www.rfc-editor.org/rfc/rfc2616.txt"/>
+<format type="PS" octets="5529857" target="http://www.rfc-editor.org/rfc/rfc2616.ps"/>
+<format type="PDF" octets="550558" target="http://www.rfc-editor.org/rfc/rfc2616.pdf"/>
+<format type="HTML" octets="636125" target="http://xml.resource.org/public/rfc/html/rfc2616.html"/>
+<format type="XML" octets="493420" target="http://xml.resource.org/public/rfc/xml/rfc2616.xml"/>
+</reference>  
+
+  <reference anchor='RFC2818'>
+    <front>
+      <title>The IETF XML Registry</title>
+      <author initials='E.R.' surname='Rescorla' fullname='Erir Rescorla'>
+	<organization>RTFM, Inc.</organization></author>
+      <date year='2000' month='May' />
+      <abstract>
+        <t>This memo describes how to use TLS to secure HTTP connections over
+   the Internet. Current practice is to layer HTTP over SSL (the
+   predecessor to TLS), distinguishing secured traffic from insecure
+   traffic by the use of a different server port. This document
+   documents that practice using TLS. A companion document describes a
+   method for using HTTP/TLS over the same port as normal HTTP
+   [RFC2817].</t>
+      </abstract>
+    </front>
+    <seriesInfo name='RFC' value='2818' />
+    <format type='HTTP' octets='26507' target='http://tools.ietf.org/html/rfc2818' />
+  </reference>
+  
+
+  <reference anchor='RFC3688'>
+    <front>
+      <title>The IETF XML Registry</title>
+      <author initials='M.' surname='Mealling' fullname='M. Mealling'>
+	<organization /></author>
+      <date year='2004' month='January' />
+      <abstract>
+	<t>This document describes an IANA maintained registry for IETF standards which use Extensible Markup Language (XML) related items such as Namespaces, Document Type Declarations (DTDs), Schemas, and Resource Description Framework (RDF) Schemas.</t></abstract></front>
+    
+    <seriesInfo name='BCP' value='81' />
+    <seriesInfo name='RFC' value='3688' />
+    <format type='TXT' octets='17325' target='http://www.rfc-editor.org/rfc/rfc3688.txt' />
+  </reference>
+  
+<reference anchor="RFC3986">
+
+<front>
+<title abbrev="URI Generic Syntax">Uniform Resource Identifier (URI): Generic Syntax</title>
+<author initials="T." surname="Berners-Lee" fullname="Tim Berners-Lee">
+<organization abbrev="W3C/MIT">World Wide Web Consortium</organization>
+<address>
+<postal>
+<street>Massachusetts Institute of Technology</street>
+<street>77 Massachusetts Avenue</street>
+<city>Cambridge</city>
+<region>MA</region>
+<code>02139</code>
+<country>USA</country></postal>
+<phone>+1-617-253-5702</phone>
+<facsimile>+1-617-258-5999</facsimile>
+<email>timbl@w3.org</email>
+<uri>http://www.w3.org/People/Berners-Lee/</uri></address></author>
+<author initials="R." surname="Fielding" fullname="Roy T. Fielding">
+<organization abbrev="Day Software">Day Software</organization>
+<address>
+<postal>
+<street>5251 California Ave., Suite 110</street>
+<city>Irvine</city>
+<region>CA</region>
+<code>92617</code>
+<country>USA</country></postal>
+<phone>+1-949-679-2960</phone>
+<facsimile>+1-949-679-2972</facsimile>
+<email>fielding@gbiv.com</email>
+<uri>http://roy.gbiv.com/</uri></address></author>
+<author initials="L." surname="Masinter" fullname="Larry Masinter">
+<organization abbrev="Adobe Systems">Adobe Systems Incorporated</organization>
+<address>
+<postal>
+<street>345 Park Ave</street>
+<city>San Jose</city>
+<region>CA</region>
+<code>95110</code>
+<country>USA</country></postal>
+<phone>+1-408-536-3024</phone>
+<email>LMM@acm.org</email>
+<uri>http://larry.masinter.net/</uri></address></author>
+<date year="2005" month="January"/>
+<area>Applications</area>
+<keyword>uniform resource identifier</keyword>
+<keyword>URI</keyword>
+<keyword>URL</keyword>
+<keyword>URN</keyword>
+<keyword>WWW</keyword>
+<keyword>resource</keyword>
+<abstract>
+<t>
+A Uniform Resource Identifier (URI) is a compact sequence of characters
+that identifies an abstract or physical resource.  This specification
+defines the generic URI syntax and a process for resolving URI references
+that might be in relative form, along with guidelines and security
+considerations for the use of URIs on the Internet.
+The URI syntax defines a grammar that is a superset of all valid URIs,
+allowing an implementation to parse the common components of a URI
+reference without knowing the scheme-specific requirements of every
+possible identifier.  This specification does not define a generative
+grammar for URIs; that task is performed by the individual
+specifications of each URI scheme.
+</t></abstract></front>
+
+<seriesInfo name="STD" value="66"/>
+<seriesInfo name="RFC" value="3986"/>
+<format type="TXT" octets="141811" target="http://www.rfc-editor.org/rfc/rfc3986.txt"/>
+<format type="HTML" octets="213584" target="http://xml.resource.org/public/rfc/html/rfc3986.html"/>
+<format type="XML" octets="163534" target="http://xml.resource.org/public/rfc/xml/rfc3986.xml"/>
+</reference>
+
+  <reference anchor='RFC5277'>
+      <front>
+	<title>NETCONF Event Notifications</title>
+	<author initials='S.C.' surname='Chisholm' fullname='S. Chisholm'>
+	  <organization>Nortel</organization>
+	</author>
+	<author initials='H.T.' surname='Trevino' fullname='H. Trevino'>
+	  <organization>Cisco</organization>
+	</author>
+	<date year='2008' month='July'/>
+        <abstract>
+	<t>YANG is a data modeling language used to model configuration and state data manipulated by the Network Configuration Protocol (NETCONF), NETCONF remote procedure calls, and NETCONF notifications. [STANDARDS TRACK]</t>
+      </abstract>
+      </front>
+      <seriesInfo name='RFC' value='5277'/>
+    <format type="HTML" octets="96192" target="http://tools.ietf.org/html/rfc5277.html"/>
+  </reference>
+
+
+  <reference anchor='RFC5280'>
+      <front>
+	<title>Internet X.509 Public Key Infrastructure Certificate
+             and Certificate Revocation List (CRL) Profile</title>
+
+	<author initials='D.C.' surname='Cooper' fullname='David Cooper'>
+	  <organization>NIST</organization>
+	</author>
+	<author initials='S.S.' surname='Santesson' fullname='Stefan Santesson'>
+	  <organization>Microsoft</organization>
+	</author>
+	<author initials='S.F.' surname='Farrell' fullname='Stephen Farrell'>
+	  <organization>Trinity College Dublin</organization>
+	</author>
+	<author initials='S.B.' surname='Boeyen' fullname='Sharon Boeyen'>
+	  <organization>Entrust</organization>
+	</author>
+	<author initials='R.H.' surname='Housley' fullname='Russell Housley'>
+	  <organization>Vigil Security</organization>
+	</author>
+	<author initials='T.P.' surname='Polk' fullname='Tim Polk'>
+	  <organization>NIST</organization>
+	</author>
+	<date year='2008' month='May'/>
+        <abstract>
+          <t>This memo profiles the X.509 v3 certificate and X.509 v2 certificate
+   revocation list (CRL) for use in the Internet.  An overview of this
+   approach and model is provided as an introduction.  The X.509 v3
+   certificate format is described in detail, with additional
+   information regarding the format and semantics of Internet name
+   forms.  Standard certificate extensions are described and two
+   Internet-specific extensions are defined.  A set of required
+   certificate extensions is specified.  The X.509 v2 CRL format is
+   described in detail along with standard and Internet-specific
+   extensions.  An algorithm for X.509 certification path validation is
+   described.  An ASN.1 module and examples are provided in the
+   appendices.</t>
+      </abstract>
+      </front>
+      <seriesInfo name='RFC' value='5280'/>
+    <format type="HTML" octets="430252" target="http://tools.ietf.org/html/rfc5280"/>
+  </reference>
+
+
+
+
+
+<reference anchor="RFC5789">
+
+<front>
+<title>PATCH Method for HTTP</title>
+<author initials="L." surname="Dusseault" fullname="L. Dusseault">
+<organization/></author>
+<author initials="J." surname="Snell" fullname="J. Snell">
+<organization/></author>
+<date year="2010" month="March"/>
+<abstract>
+<t>Several applications extending the Hypertext Transfer Protocol (HTTP) require a feature to do partial resource modification.  The existing HTTP PUT method only allows a complete replacement of a document.  This proposal adds a new HTTP method, PATCH, to modify an existing HTTP resource. [STANDARDS-TRACK]</t></abstract></front>
+
+<seriesInfo name="RFC" value="5789"/>
+<format type="TXT" octets="21706" target="http://www.rfc-editor.org/rfc/rfc5789.txt"/>
+</reference>
+
+<!--
+<reference anchor='RFC5785'>
+<front>
+<title>Defining Well-Known Uniform Resource Identifiers (URIs)</title>
+<author initials='M.' surname='Nottingham' fullname='M. Nottingham'>
+<organization /></author>
+<author initials='E.' surname='Hammer-Lahav' fullname='E. Hammer-Lahav'>
+<organization /></author>
+<date year='2010' month='April' />
+<abstract>
+<t>This memo defines a path prefix for "well-known locations", "/.well-known/", in selected Uniform Resource Identifier (URI) schemes. [STANDARDS-TRACK]</t></abstract></front>
+<seriesInfo name='RFC' value='5785' />
+<format type='TXT' octets='13779' target='http://www.rfc-editor.org/rfc/rfc5785.txt' />
+</reference>
+-->
+
+  <reference anchor='RFC5988'>
+      <front>
+	<title>Web Linking</title>
+	<author initials='M.N.' surname='Nottingham' fullname='Mark Nottingham'>
+	  <organization/>
+	</author>
+	<date year='2010' month='October'/>
+      </front>
+      <seriesInfo name='RFC' value='5988'/>
+  </reference>
+
+  <reference anchor="RFC6020">
+    <front>
+      <title>YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</title>
+      <author initials="M." surname="Bjorklund" fullname="M. Bjorklund">
+	<organization/>
+      </author>
+      <date year="2010" month="October"/>
+      <abstract>
+	<t>YANG is a data modeling language used to model configuration and state data manipulated by the Network Configuration Protocol (NETCONF), NETCONF remote procedure calls, and NETCONF notifications. [STANDARDS TRACK]</t>
+      </abstract>
+    </front>
+    <seriesInfo name="RFC" value="6020"/>
+    <format type="TXT" octets="324178" target="http://www.rfc-editor.org/rfc/rfc6020.txt"/>
+  </reference>
+
+
+  <reference anchor='RFC6241'>
+      <front>
+	<title>Network Configuration Protocol (NETCONF)</title>
+	<author initials='R.' surname='Enns' fullname='R. Enns' role="editor">
+	  <organization/>
+	</author>
+	<author initials='M.' surname='Bjorklund' fullname='M. Bjorklund' role="editor">
+	  <organization/>
+	</author>
+	<author initials='J.' surname='Schoenwaelder' fullname='J. Schoenwaelder' role="editor">
+	  <organization/>
+	</author>
+	<author initials='A.' surname='Bierman' fullname='A. Bierman' role="editor">
+	  <organization/>
+	</author>
+	<date year='2011' month='June'/>
+      </front>
+      <seriesInfo name='RFC' value='6241'/>
+  </reference>
+
+
+<reference anchor="RFC6536">
+<front>
+<title>Network Configuration Protocol (NETCONF) Access Control Model</title>
+<author initials="A." surname="Bierman" fullname="A. Bierman">
+<organization/></author>
+<author initials="M." surname="Bjorklund" fullname="M. Bjorklund">
+<organization/></author>
+<date year="2012" month="March"/>
+<abstract>
+<t>The standardization of network configuration interfaces for use with the Network Configuration Protocol (NETCONF) requires a structured and secure operating environment that promotes human usability and multi-vendor interoperability.  There is a need for standard mechanisms to restrict NETCONF protocol access for particular users to a pre-configured subset of all available NETCONF protocol operations and content.  This document defines such an access control model. [STANDARDS-TRACK]</t></abstract></front>
+<seriesInfo name="RFC" value="6536"/>
+<format type="TXT" octets="90803" target="http://www.rfc-editor.org/rfc/rfc6536.txt"/>
+</reference>
+
+
+  <reference anchor='RFC6570'>
+      <front>
+	<title>URI Template</title>
+	<author initials='J.G.' surname='Gregorio' fullname='Joe Gregorio'>
+	  <organization>Google</organization>
+	</author>
+	<author initials='R.F.' surname='Fielding' fullname='Roy Fielding'>
+	  <organization>Adobe</organization>
+	</author>
+	<author initials='M.H.' surname='Hadley' fullname='Marc Hadley'>
+	  <organization>MITRE</organization>
+	</author>
+	<author initials='M.N.' surname='Nottingham' fullname='Mark Nottingham'>
+	  <organization>Rackspace</organization>
+	</author>
+	<author initials='D.O.' surname='Orchard' fullname='David Orchard'>
+	  <organization>Salesforce.com</organization>
+	</author>
+	<date year='2012' month='March'/>
+      </front>
+      <seriesInfo name='RFC' value='6570'/>
+  </reference>
+
+
+  <reference anchor='rest-dissertation'>
+      <front>
+	<title>Architectural Styles and
+the Design of Network-based Software Architectures</title>
+	<author initials='R.F.' surname='Fielding' fullname='Roy Fielding'>
+	  <organization>University of California, Irvine</organization>
+	</author>
+	<date year='2000'/>
+      </front>
+  </reference>
+
+
+  <reference anchor="I-D.lhotka-netmod-json">
+    <front>
+      <title>Modeling JSON Text with YANG</title>
+      <author initials="L." surname="Lhotka" fullname="L. Lhotka">
+	<organization>CZ.NIC</organization>
+      </author>
+      <date year="2013" month="September"/>
+    </front>
+    <seriesInfo name="Internet-Draft"
+                value="draft-lhotka-netmod-yang-json-02"/>
+    <format type='TXT'
+    target='http://www.ietf.org/id/draft-lhotka-netmod-yang-json-02.txt'/>
+  </reference>
+
+<reference anchor='RFC6415'>
+<front>
+<title>Web Host Metadata</title>
+<author initials='E.' surname='Hammer-Lahav' fullname='Eran Hammer-Lahav'><organization /></author>
+<author initials='B.C.' surname='Cook' fullname='Blaine Cook'><organization /></author>
+<date year='2011' month='October' />
+</front>
+<seriesInfo name='RFC' value='6415' />
+<format type='TXT' octets='32018' target='http://www.rfc-editor.org/rfc/rfc6415.txt' />
+</reference>
+
+
+<reference anchor='RFC6991'>
+
+<front>
+<title>Common YANG Data Types</title>
+<author initials='J.' surname='Schoenwaelder' fullname='J. Schoenwaelder'>
+<organization /></author>
+<date year='2013' month='July' />
+<abstract>
+<t>This document introduces a collection of common data types to be used with the YANG data modeling language.  This document obsoletes RFC 6021.</t></abstract></front>
+
+<seriesInfo name='RFC' value='6991' />
+<format type='TXT' octets='60242' target='http://www.rfc-editor.org/rfc/rfc6991.txt' />
+</reference>
+
+<reference anchor='wd-eventsource'>
+
+<front>
+<title>Server-Sent Events</title>
+<author initials='I.H.' surname='Hickson' fullname='Ian Hickson'>
+<organization>Google Inc.</organization></author>
+<date year='2012' month='December' />
+<abstract>
+<t>This specification defines an API for opening an HTTP connection for receiving push notifications from a server in the form of DOM events. The API is designed such that it can be extended to work with other push notification schemes such as Push SMS.</t></abstract></front>
+
+<format type='HTML' octets='73384' target='http://www.w3.org/TR/eventsource/' />
+</reference>
+
+<reference anchor='W3C.REC-xml-20081126'
+           target='http://www.w3.org/TR/2008/REC-xml-20081126'>
+<front>
+<title>Extensible Markup Language (XML) 1.0 (Fifth Edition)</title>
+
+<author initials='F.' surname='Yergeau' fullname='François Yergeau'>
+    <organization />
+</author>
+
+<author initials='E.' surname='Maler' fullname='Eve Maler'>
+    <organization />
+</author>
+
+<author initials='J.' surname='Paoli' fullname='Jean Paoli'>
+    <organization />
+</author>
+
+<author initials='C.' surname='Sperberg-McQueen' fullname='C. M. Sperberg-McQueen'>
+    <organization />
+</author>
+
+<author initials='T.' surname='Bray' fullname='Tim Bray'>
+    <organization />
+</author>
+
+<date month='November' day='26' year='2008' />
+</front>
+
+<seriesInfo name='World Wide Web Consortium Recommendation' value='REC-xml-20081126' />
+<format type='HTML' target='http://www.w3.org/TR/2008/REC-xml-20081126' />
+</reference>
+
+<reference anchor="JSON">
+      <front>
+        <title>The JSON Data Interchange Format</title>
+        <author initials="T." surname="Bray"
+                fullname="T. Bray" role="editor">
+          <organization />
+        </author>
+        <date month="December" day="19" year="2013" />
+      </front>
+      <seriesInfo name="Internet-Draft"
+                  value="draft-ietf-json-rfc4627bis-10" />
+      <format
+          type="HTML"
+          target="http://tools.ietf.org/html/draft-ietf-json-rfc4627bis-10"/>
+</reference>
+
+
+<reference anchor="get-off-my-lawn">
+      <front>
+        <title>URI Design and Ownership</title>
+        <author initials="M." surname="Nottingham"
+                fullname="Mark Nottingham">
+          <organization />
+        </author>
+        <date month="May" day="21" year="2014" />
+      </front>
+      <seriesInfo name="Best Current Practice"
+                  value="draft-ietf-appsawg-uri-get-off-my-lawn-05" />
+      <format
+          type="TXT"
+          target="http://tools.ietf.org/id/draft-ietf-appsawg-uri-get-off-my-lawn-05.txt"/>
+</reference>
+
+
+</references>
+
+<references title="Informative References">
+<reference anchor="XPath" target="http://www.w3.org/TR/1999/REC-xpath-19991116">
+      <front>
+        <title>XML Path Language (XPath) Version 1.0</title>
+        <author initials="J." surname="Clark" fullname="James Clark">
+          <organization/>
+        </author>
+        <author initials="S." surname="DeRose" fullname="Steven DeRose">
+          <organization/>
+        </author>
+        <date month="November" day="16" year="1999"/>
+      </front>
+      <seriesInfo name="World Wide Web Consortium Recommendation" value="REC-xpath-19991116"/>
+      <format type="HTML" target="http://www.w3.org/TR/1999/REC-xpath-19991116"/>
+</reference>
+</references>

@@ -1,0 +1,2941 @@
+# -*- outline -*-
+
+This document describes an HTTP-based protocol that provides
+a programmatic interface for accessing data defined in YANG,
+using the datastores defined in NETCONF.
+
+* Introduction
+
+There is a need for standard mechanisms to allow WEB applications
+to access the configuration data, operational data,
+data-model specific protocol operations, and notification events
+within a networking device, in a modular and extensible manner.
+
+This document describes an HTTP ^RFC2616^ based protocol called
+RESTCONF, for accessing data defined in YANG ^RFC6020^, using
+datastores defined in NETCONF ^RFC6241^.
+
+The NETCONF protocol defines configuration datastores and
+a set of Create, Retrieve, Update, Delete (CRUD) operations
+that can be used to access these datastores.  The YANG language
+defines the syntax and semantics of datastore content,
+operational data, protocol operations, and notification events.
+RESTCONF uses HTTP operations to provide CRUD operations on a
+NETCONF datastore containing YANG-defined data.  Since NETCONF
+protocol operations are not relevant, the user should
+not need any prior knowledge of NETCONF in order to use RESTCONF.
+
+Configuration data and state data are exposed as resources that
+can be retrieved with the GET method.
+Resources representing configuration data
+can be modified with the DELETE, PATCH, POST, and PUT methods.
+Data is encoded with either XML ^W3C.REC-xml-20081126^
+or JSON ^JSON^.
+
+Data-model specific protocol operations defined with
+the YANG "rpc" statement can be invoked with the POST method.
+Data-model specific notification events defined with
+the YANG "notification" statement can be accessed.
+
+** Secure Transport
+
+RESTCONF relies on TLS ^RFC2246^ to provide privacy and data
+integrity for its HTTP operations.  More specifically,
+RESTCONF requires HTTP over TLS (HTTPS) ^RFC2818^.  To ensure
+security, RESTCONF clients MUST verify the RESTCONF server's
+X.509 certificate using the path validation algorithm defined in
+section 6 of ^RFC5280^.  Devices that do not support TLS will
+be unable to implement RESTCONF.
+
+** Simple Subset of NETCONF Functionality
+
+The framework and meta-model used for an HTTP-based API does not need to
+mirror those used by the NETCONF protocol, but it needs to
+be compatible with NETCONF.  A simplified framework and protocol
+is needed that utilizes the three NETCONF datastores (candidate,
+running, startup), but hides the complexity of multiple datastores
+from the client.
+
+A simplified transaction model is needed that allows basic
+CRUD operations on a hierarchy of conceptual resources.
+This represents a limited subset of the transaction capabilities
+of the NETCONF protocol.
+
+Applications that require more complex transaction capabilities
+might consider NETCONF instead of RESTCONF.  The following
+transaction features are not directly provided in RESTCONF:
+
+- datastore locking (full or partial)
+- candidate datastore
+- startup datastore
+- validate operation
+- confirmed-commit procedure
+
+RESTCONF is not intended to replace NETCONF, but rather provide
+an additional simplified interface that follows REST principles and
+is compatible with a resource-oriented device abstraction.
+
+The following figure shows the system components:
+
+      +-----------+           +-----------------+
+      |  WEB app  | <-------> |                 |
+      +-----------+   HTTP    | network device  |
+                              |                 |
+      +-----------+           |   +-----------+ |
+      |  NMS app  | <-------> |   | datastore | |
+      +-----------+  NETCONF  |   +-----------+ |
+                              +-----------------+
+
+** Data Model Driven API
+
+RESTCONF combines the simplicity of the HTTP protocol with the
+predictability and automation potential of a schema-driven API.
+Using YANG, a client can predict all resource endpoints, much
+like using URI Templates ^RFC6570^, but in a more holistic
+manner.   This strategy obviates the need for responses provided
+by the server to contain HATEOAS links, originally described in
+Roy Fielding's doctoral dissertation ^rest-dissertation^.
+
+A REST client using HATEOAS principles would not use
+any data modeling language to define the application-specific content
+of the API.  The client would discover each new child
+resource as it traverses the URIs returned as Location IDs
+to discover the server capabilities.  This approach has 3 significant
+weaknesses with regards to control of complex networking devices:
+
+- inefficient performance: configuration APIs will be quite
+complex and may require thousands of protocol messages to
+discover all the schema information.  Typically the
+data type information has to be passed in the protocol messages,
+which is also wasteful overhead.
+
+- no data model richness: without a data model, the schema-level
+semantics and validation constraints are not available to the
+application.
+
+- no tool automation: API automation tools need some sort of
+content schema to function.  Such tools can automate
+various programming and documentation tasks related
+to specific data models.
+
+Data model modules such as YANG modules serve as an "API contract"
+that will be honored by the server.  An application designer
+can code to the data model, knowing in advance important details
+about the exact protocol operations and datastore content
+a conforming server implementation will support.
+
+RESTCONF provides the YANG module capability information
+supported by the server, in case the client wants to use it.
+The URIs for custom protocol operations and datastore content
+are predictable, based on the YANG module definitions.
+
+Operational experience with CLI and SNMP indicates that
+operators learn the 'location' of specific service
+or device related data and do not expect such information
+to be arbitrary and discovered each time the
+client opens a management session to a server.
+
+The RESTCONF protocol operates on a conceptual datastore defined with
+the YANG data modeling language.  The server lists each YANG
+module it supports under "{+restconf}/modules"
+in the top-level API resource type, using a structure based on
+the YANG module capability URI format defined in ^RFC6020^.
+
+The conceptual datastore contents, data-model-specific
+operations and notification events are identified by this set of
+YANG module resources.  All RESTCONF content identified
+as either a data resource, operation resource, or event stream resource
+is defined with the YANG language.
+
+The classification of data as configuration or
+non-configuration is derived from the YANG "config" statement.
+Data ordering behavior is derived from the YANG "ordered-by"
+statement.
+
+The RESTCONF datastore editing model is simple and direct,
+similar to the behavior of the ":writable-running"
+capability in NETCONF. Each RESTCONF edit of a datastore
+resource is activated upon successful completion of the transaction.
+
+** Terminology
+
+The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in BCP
+14, ^RFC2119^.
+
+*** NETCONF
+
+The following terms are defined in ^RFC6241^:
+
+- candidate configuration datastore
+- client
+- configuration data
+- datastore
+- configuration datastore
+- protocol operation
+- running configuration datastore
+- server
+- startup configuration datastore
+- state data
+- user
+
+*** HTTP
+
+The following terms are defined in ^RFC2616^:
+
+- entity tag
+- fragment
+- header line
+- message body
+- method
+- path
+- query
+- request
+- request URI
+- response body
+- resource
+
+*** YANG
+
+The following terms are defined in ^RFC6020^:
+
+- container
+- data node
+- key leaf
+- leaf
+- leaf-list
+- list
+- presence container (or P-container)
+- RPC operation (now called protocol operation)
+- non-presence container (or NP-container)
+- ordered-by system
+- ordered-by user
+
+*** Terms
+
+The following terms are used within this document:
+
+- API resource: a resource with the media type
+"application/yang.api+xml" or "application/yang.api+json".
+API resources can only be edited by the server.
+
+- data resource: a resource with the media type
+"application/yang.data+xml" or "application/yang.data+json".
+Data resources can be edited by clients or the server.
+All YANG data node types can be data resources.
+YANG terminal nodes cannot contain child resources.
+
+- datastore resource: a resource with the media type
+"application/yang.datastore+xml" or
+"application/yang.datastore+json". Represents a configuration
+datastore.
+
+- edit operation: a RESTCONF operation on a data resource
+using the POST, PUT, PATCH, or DELETE method.
+
+- event stream resource: a resource with the media type
+"application/yang.stream+xml" or
+"application/yang.stream+json". This resource represents
+an SSE (Server-Sent Events) event stream. The content consists of text
+using the media type "text/event-stream", as defined by the HTML5
+specification. Each event represents
+one <notification> message generated by the server.
+It contains a conceptual system or data-model specific event
+that is delivered within a notification event stream.
+
+- operation: the conceptual RESTCONF operation for a message,
+derived from the HTTP method, request URI, headers, and message body.
+
+- operation resource: a resource with the media type
+"application/yang.operation+xml" or
+"application/yang.operation+json".
+
+- patch: a generic PATCH request on the target datastore
+or data resource.
+The media type of the message body content will identify
+the patch type in use.
+
+- plain patch: a PATCH request where the media type
+is "application/yang.data+xml" or "application/yang.data+json".
+
+- query parameter: a parameter (and its value if any),
+encoded within the query component of the request URI.
+
+- retrieval request: a request using the GET or HEAD methods.
+
+- target resource: the resource that is associated with
+a particular message, identified by the "path" component
+of the request URI.
+
+- unified datastore: A conceptual representation of the device
+running configuration. The server will hide all NETCONF datastore
+details for edit operations, such as the ":candidate" and ":startup"
+capabilities.
+
+- schema resource: a resource with the media type
+"application/yang". The YANG representation of the schema
+can be retrieved by the client with the GET method.
+
+- YANG terminal node: a YANG node representing a leaf,
+leaf-list, or anyxml definition.
+
+*** Tree Diagrams
+
+A simplified graphical representation of the data model is used in
+this document.  The meaning of the symbols in these
+diagrams is as follows:
+
+- Brackets "[" and "]" enclose list keys.
+- Abbreviations before data node names: "rw" means configuration
+ data (read-write) and "ro" state data (read-only).
+- Symbols after data node names: "?" means an optional node, "!" means
+ a presence container, and "*" denotes a list and leaf-list.
+- Parentheses enclose choice and case nodes, and case nodes are also
+marked with a colon (":").
+- Ellipsis ("...") stands for contents of subtrees that are not shown.
+
+### END OF INTRODUCTION
+
+* Resources @resources@
+
+The RESTCONF protocol operates on a hierarchy of resources,
+starting with the top-level API resource itself. Each resource
+represents a manageable component within the device.
+
+A resource can be considered a collection of conceptual data and the
+set of allowed methods on that data.  It can contain nested child
+resources.  The child resource types and methods allowed on them are
+data-model specific.
+
+A resource has its own media type identifier, represented
+by the "Content-Type" header in the HTTP response message.
+A resource can contain zero or more nested resources.
+A resource can be created and deleted independently of its
+parent resource, as long as the parent resource exists.
+
+All RESTCONF resources are defined in this document except
+datastore contents, protocol operations, and notification events.
+The syntax and semantics for these resource types are
+defined in YANG modules.
+
+The RESTCONF resources are accessed via a set of
+URIs defined in this document.
+The set of YANG modules supported by the server
+will determine the data model specific operations,
+top-level data node resources, and notification event messages
+supported by the server.
+
+The resources used in the RESTCONF protocol are identified
+by the "path" component in the request URI.  Each operation
+is performed on a target resource.
+
+** RESTCONF Resource Types
+
+The RESTCONF protocol defines a set of application specific media
+types to identify each of the available resource types.  The following
+resource types are defined in RESTCONF:
+
+!! table RESTCONF Media Types
+!! head ! Resource    ! Media Type
+!! row  ! API         ! application/yang.api
+!! row  ! Datastore   ! application/yang.datastore
+!! row  ! Data        ! application/yang.data
+!! row  ! Errors      ! application/yang.errors
+!! row  ! Operation   ! application/yang.operation
+!! row  ! Schema      ! application/yang
+!! row  ! Stream      ! application/yang.stream
+
+** Resource Discovery @resource-discovery@
+
+A client SHOULD start by retrieving the top-level API resource,
+using the entry point URI defined in ^path-resolution^.
+
+The RESTCONF protocol does not include a
+resource discovery mechanism.  Instead, the definitions
+within the YANG modules advertised by the server
+are used to construct a predictable operation or data
+resource identifier.
+
+The "depth" query parameter can be used to control how many
+descendant levels should be included when retrieving
+child resources. This parameter can be used with the GET method
+to discover child resources within a particular resource.
+
+** API Resource @api-resource@
+
+The API resource contains the state and access points for
+the RESTCONF features.
+It is the top-level resource and has the media type
+"application/yang.api+xml" or "application/yang.api+json".
+
+YANG Tree Diagram for "application/yang.api" Resource Type:
+
+   +--rw restconf
+      +--rw data
+      +--rw modules
+      |  +--rw module* [name revision]
+      |     +--rw name         yang:yang-identifier
+      |     +--rw revision     union
+      |     +--rw schema?      empty
+      |     +--rw namespace    inet:uri
+      |     +--rw feature*     yang:yang-identifier
+      |     +--rw deviation*   yang:yang-identifier
+      |     +--rw submodule* [name revision]
+      |        +--rw name        yang:yang-identifier
+      |        +--rw revision    union
+      |        +--rw schema?     empty
+      +--rw operations
+      +--rw streams
+         +--rw stream* [name]
+            +--rw name                        string
+            +--rw description?                string
+            +--rw replay-support?             boolean
+            +--rw replay-log-creation-time?   yang:date-and-time
+            +--rw events?                     empty
+
+The "restconf" container definition in the "ietf-restconf" module
+defined in ^module^ is used to specify the structure and syntax
+of the conceptual child resources within the API resource.
+
+This resource has the following child resources:
+
+!! table RESTCONF Resources
+!! head ! Child Resource ! Description
+!! row  ! data           ! Contains all data resources
+!! row  ! modules        ! YANG module information
+!! row  ! operations     ! Data-model specific operations
+!! row  ! streams        ! Notification event streams
+
+*** {+restconf}/data
+
+This mandatory resource represents the combined configuration
+and operational data resources that can be accessed by a client.
+It cannot be created or deleted by the client.
+The datastore resource type is defined in ^datastore-resource^.
+
+Example:
+
+This example request by the client
+would retrieve only the non-configuration data nodes
+that exist within the "library" resource, using the "content"
+query parameter.
+
+   GET /restconf/data/example-jukebox:jukebox/library
+      ?content=nonconfig  HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+The server might respond:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:30 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Content-Type: application/yang.data+json
+
+   {
+     "example-jukebox:library" : {
+        "artist-count" : 42,
+        "album-count" : 59,
+        "song-count" : 374
+     }
+   }
+
+*** {+restconf}/modules
+
+This mandatory resource contains the identifiers
+for the YANG data model modules supported by the server.
+
+The server MUST maintain a last-modified timestamp for this
+resource, and return the "Last-Modified" header when this
+resource is retrieved with the GET or HEAD methods.
+
+The server SHOULD maintain an entity-tag for this
+resource, and return the "ETag" header when this
+resource is retrieved with the GET or HEAD methods.
+
+**** {+restconf}/modules/module
+
+This mandatory resource contains one list entry
+for each YANG data model module supported by the server.
+There MUST be an instance of this resource for every
+YANG module that is accessible via an operation resource
+or a data resource.
+
+The contents of the "module" resource are defined in
+the "module" YANG list statement in ^module^.
+
+The server MAY maintain a last-modified timestamp for
+each instance of this resource, and return the
+"Last-Modified" header when this resource is retrieved
+with the GET or HEAD methods.  If not supported
+then the timestamp for the parent "modules" resource
+MAY be used instead.
+
+The server MAY maintain an entity-tag for each instance
+of this resource, and return the "ETag" header when this
+resource is retrieved with the GET or HEAD methods.
+If not supported then the timestamp for the
+parent "modules" resource MAY be used instead.
+
+*** {+restconf}/operations
+
+This optional resource is a container that provides access to the
+data-model specific protocol operations supported by the server.
+The server MAY omit this resource if no data-model specific
+operations are advertised.
+
+Any data-model specific operations defined in the YANG
+modules advertised by the server MAY be available
+as child nodes of this resource.
+
+Operation resources are defined in ^operation-resource^.
+
+*** {+restconf}/streams
+
+This optional resource is a container that provides access to the
+notification event streams supported by the server.
+The server MAY omit this resource if no
+notification event streams are supported.
+The media type for this resource is "application/yang.api".
+
+The server will populate this container with a stream list entry for
+each stream type it supports.  Each stream contains a leaf
+called "events" which represents an event stream resource.
+The media type for this resource is "application/yang.stream".
+
+Stream resources are defined in ^stream-resource^.
+Notifications are defined in ^notifications^.
+
+** Datastore Resource @datastore-resource@
+
+The "{+restconf}/data" subtree represents the datastore resource type,
+which is a collection of configuration and operational data nodes.
+
+A "unified datastore" interface is used to simplify resource
+editing for the client. The RESTCONF unified datastore is a
+conceptual interface to the native configuration datastores
+that are present on the device.
+
+The underlying NETCONF datastores (i.e., candidate, running, startup)
+can be used to implement the unified datastore, but the server design
+is not limited to the exact datastore procedures defined
+in NETCONF.
+
+The "candidate" and "startup" datastores are not visible
+in the RESTCONF protocol.  Transaction management and
+configuration persistence are handled by the server
+and not controlled by the client.
+
+A datastore resource can only be written directly with
+the PATCH method. Only the configuration data resources
+within the datastore resource can be edited directly with
+all methods.
+
+Each RESTCONF edit of a datastore resource is
+saved to non-volatile storage in an
+implementation-specific matter by the server.
+There is no guarantee that configuration changes
+are saved immediately, or that the saved configuration
+is always a mirror of the running configuration.
+
+*** Edit Collision Detection @edit-collision@
+
+Two "edit collision detection" mechanisms are provided
+in RESTCONF, for datastore and data resources.
+
+**** Timestamp
+
+The last change time is maintained and
+the "Last-Modified" and "Date" headers are returned in the
+response for a retrieval request.
+The "If-Unmodified-Since" header can be used
+in edit operation requests to cause the server
+to reject the request if the resource has been modified
+since the specified timestamp.
+
+The server MUST maintain a last-modified timestamp for this
+resource, and return the "Last-Modified" header when this
+resource is retrieved with the GET or HEAD methods.
+Only changes to configuration data resources within
+the datastore affect this timestamp.
+
+**** Entity tag
+
+A unique opaque string is maintained and
+the "ETag" header is returned in the
+response for a retrieval request.
+The "If-Match" header can be used
+in edit operation requests to cause the server
+to reject the request if the resource entity tag
+does not match the specified value.
+
+The server MUST maintain a resource entity tag for this
+resource, and return the "ETag" header when this
+resource is retrieved with the GET or HEAD methods.
+The resource entity tag MUST be changed to a new
+previously unused value if changes to any configuration
+data resources within the datastore are made.
+
+** Data Resource  @data-resource@
+
+A data resource represents a YANG data node that is a descendant
+node of a datastore resource.
+
+For configuration data resources,
+the server MAY maintain a last-modified timestamp for the
+resource, and return the "Last-Modified" header when it
+is retrieved with the GET or HEAD methods.
+If maintained, the resource timestamp MUST be set to the current
+time whenever the resource
+or any configuration resource within the resource is altered.
+
+For configuration data resources,
+the server MAY maintain a resource entity tag for the
+resource, and return the "ETag" header when it
+is retrieved as the target resource with the GET or HEAD methods.
+If maintained, the resource entity tag MUST be updated
+whenever the resource
+or any configuration resource within the resource is altered.
+
+A data resource can be retrieved with the GET method.
+Data resources are accessed via the "{+restconf}/data" entry point.
+This sub-tree is used to retrieve and edit data resources.
+
+A configuration data resource can be altered by the client
+with some or all of the edit operations, depending on the
+target resource and the specific operation. Refer to ^operations^
+for more details on edit operations.
+
+The resource definition version for a data resource
+is identified by the revision date of the YANG module
+containing the YANG definition for the data resource,
+specified in the "{+restconf}/modules" sub-tree.
+
+*** Encoding YANG Instance Identifiers in the Request URI @uri-encoding@
+
+In YANG, data nodes are named with an absolute
+XPath expression, defined in ^XPath^ , starting
+from the document root to the target resource.
+In RESTCONF, URL encoded Location header expressions are used instead.
+
+The YANG "instance-identifier" (i-i) data type is represented
+in RESTCONF with the path expression format defined
+in this section.
+
+!! table RESTCONF instance-identifier Type Conversion
+!! head ! Name ! Comments
+!! row  ! point ! Insertion point is always a full i-i
+!! row  ! path ! Request URI path is a full or partial i-i
+
+The "path" component of the request URI contains the
+absolute path expression that identifies the
+target resource.
+
+#The "select" query parameter is
+#used to optionally identify the requested data nodes
+#within the target resource to be retrieved in a GET method.
+
+A predictable location for a data resource
+is important, since applications will code to the YANG
+data model module, which uses static naming and defines an
+absolute path location for all data nodes.
+
+A RESTCONF data resource identifier is not an XPath expression.
+It is encoded from left to right, starting with the top-level
+data node, according to the "api-path" rule in ^path-abnf^.
+The node name of each ancestor of the target resource node
+is encoded in order, ending with the node name for the
+target resource.
+
+#If the "select" is present, it is encoded,
+#starting with a child node of the target resource,
+#according to the "api-select" rule defined in ^path-abnf^.
+
+If a data node in the path expression is a YANG list node,
+then the key values for the list (if any) MUST be encoded
+according to the following rules.
+
+- The key leaf values for a data resource representing a YANG
+list MUST be encoded using one path segment ^RFC3986^.
+
+- If there is only one key leaf value, the path segment is constructed
+by having the list name followed by an "=" followed by the single key
+leaf value.
+
+- If there are multiple key leaf values, the value of each leaf
+identified in the "key" statement is encoded 
+in the order specified in the YANG "key" statement, with a
+comma separating them.
+
+- All the components in the "key" statement MUST be encoded.
+Partial instance identifiers are not supported.
+
+- Quoted strings are supported in the key leaf values. Quoted
+strings MUST be used to express empty strings.
+(example: list=foo,'',baz).
+
+- The "list-instance" ABNF rule defined in ^path-abnf^
+represents the syntax of a list instance identifier.
+
+- Resource URI values returned in Location headers
+for data resources MUST identify the module name, even
+if there are no conflicting local names when the resource
+is created. This ensures the correct resource will be identified
+even if the server loads a new module that the old client
+does not know about.
+
+Examples:
+
+   container top {
+        list list1 {
+        key "key1 key2 key3";
+        ...
+        list list2 {
+            key "key4 key5";
+            ...
+            leaf X { type string; }
+        }
+    }
+
+
+For the above YANG definition, URI with key leaf values will be
+encoded as follows (line wrapped for display purposes only):
+
+    /restconf/data/top/list1=key1val,key2val,key3val3/
+       list2=key4val,key5val/X
+
+**** ABNF For Data Resource Identifiers @path-abnf@
+
+The "api-path" ABNF syntax is used to construct RESTCONF
+path identifiers:
+
+    api-path = "/"  |
+               ("/" api-identifier
+                 0*("/" (api-identifier | list-instance )))
+
+    api-identifier = [module-name ":"] identifier
+
+    module-name = identifier
+
+    list-instance = api-identifier "=" key-value ["," key-value]*
+
+    key-value = string
+
+    string = <a quoted or unquoted or empty string>
+
+    ;; An identifier MUST NOT start with
+    ;; (('X'|'x') ('M'|'m') ('L'|'l'))
+    identifier  = (ALPHA / "_")
+                  *(ALPHA / DIGIT / "_" / "-" / ".")
+
+
+*** Defaults Handling
+
+NETCONF has a rather complex model for handling default values for
+leafs.  RESTCONF attempts to avoid this complexity by
+restricting the operations that can be applied to
+a resource.  Applications that require full control of defaults
+might consider NETCONF instead of RESTCONF.
+
+If the target of a GET method is a data node
+that represents a leaf that has a default value,
+and the leaf has not been given a value yet, the server MUST
+return the default value that is in use by the server.
+
+If the target of a GET method is a data node
+that represents a container or list that has any child resources
+with default values, for the child resources that have not been given
+value yet, the server MAY
+return the default values that are in use by the server.
+
+** Operation Resource @operation-resource@
+
+An operation resource represents an protocol operation
+defined with the YANG "rpc" statement.
+
+All operation resources share the same module namespace
+as any top-level data resources, so the name of an operation
+resource cannot conflict with the name of a top-level
+data resource defined within the same module.
+
+If 2 different YANG modules define the same "rpc" identifier,
+then the module name MUST be used in the request URI.
+For example, if "module-A" and "module-B" both defined
+a "reset" operation, then invoking the operation from "module-A"
+would be requested as follows:
+
+   POST /restconf/operations/module-A:reset HTTP/1.1
+   Server example.com
+
+Any usage of an operation resource from the same module,
+with the same name, refers to the same "rpc" statement
+definition.  This behavior can be used to design protocol operations
+that perform the same general function on different
+resource types.
+
+If the "rpc" statement has an "input" section, then a message body
+MAY be sent by the client in the request, otherwise the request
+message MUST NOT include a message body.
+If the "rpc" statement has an "output" section, then a message body
+MAY be sent by the server in the response. Otherwise the
+server MUST NOT include a message body in the response message,
+and MUST send a "204 No Content" Status-Line instead.
+
+*** Encoding Operation Input Parameters
+
+If the "rpc" statement has an "input" section, then
+the "input" node is provided in the message body,
+corresponding to the YANG data definition statements
+within the "input" section.
+
+Example:
+
+The following YANG definition is used for the examples in this
+section.
+
+    rpc reboot {
+      input {
+        leaf delay {
+          units seconds;
+          type uint32;
+          default 0;
+        }
+        leaf message { type string; }
+        leaf language { type string; }
+      }
+    }
+
+The client might send the following POST request message:
+
+   POST /restconf/operations/example-ops:reboot HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.operation+json
+
+   {
+     "example-ops:input" : {
+       "delay" : 600,
+       "message" : "Going down for system maintenance",
+       "language" : "en-US"
+     }
+   }
+
+The server might respond:
+
+   HTTP/1.1 204 No Content
+   Date: Mon, 25 Apr 2012 11:01:00 GMT
+   Server: example-server
+
+*** Encoding Operation Output Parameters
+
+If the "rpc" statement has an "output" section, then
+the "output" node is provided in the message body,
+corresponding to the YANG data definition statements
+within the "output" section.
+
+Example:
+
+The following YANG definition is used for the examples in this
+section.
+
+
+    rpc get-reboot-info {
+      output {
+        leaf reboot-time {
+          units seconds;
+          type uint32;
+        }
+        leaf message { type string; }
+        leaf language { type string; }
+      }
+    }
+
+
+The client might send the following POST request message:
+
+   POST /restconf/operations/example-ops:get-reboot-info HTTP/1.1
+   Host: example.com
+   Accept: application/yang.operation+json,
+           application/yang.errors+json
+
+
+The server might respond:
+
+
+   HTTP/1.1 200 OK
+   Date: Mon, 25 Apr 2012 11:10:30 GMT
+   Server: example-server
+   Content-Type: application/yang.operation+json
+
+   {
+     "example-ops:output" : {
+       "reboot-time" : 30,
+       "message" : "Going down for system maintenance",
+       "language" : "en-US"
+     }
+   }
+
+** Schema Resource @schema-resource@
+
+If the server supports the "schema" leaf within the API then
+the client can retrieve the YANG schema text for the associated
+YANG module or submodule, using the GET method.
+
+
+The client might send the following GET request message:
+
+   GET /restconf/modules/module=example-jukebox,2014-07-03/schema
+      HTTP/1.1
+   Host: example.com
+   Accept: application/yang,
+           application/yang.errors+json
+
+
+The server might respond:
+
+
+   HTTP/1.1 200 OK
+   Date: Mon, 25 Apr 2012 11:10:30 GMT
+   Server: example-server
+   Content-Type: application/yang
+
+   module example-jukebox {
+
+      namespace "http://example.com/ns/example-jukebox";
+      prefix "jbox";
+
+      // rest of YANG module content deleted...
+   }
+
+** Stream Resource @stream-resource@
+
+A "stream" resource represents a source for system generated
+event notifications.  Each stream is created and modified
+by the server only.  A client can retrieve a stream resource
+or initiate a long-poll server sent event stream,
+using the procedure specified in ^receive-notifs^.
+
+A notification stream functions according to the NETCONF
+Notifications specification ^RFC5277^.  The "ietf-restconf"
+YANG module contains the "stream" list ("{+restconf}/streams/stream")
+which specifies the syntax and semantics of a stream resource.
+
+** Errors Resource @errors-resource@
+
+An "errors" resource is a collection of error information that
+is sent as the message body in a server response message,
+if an error occurs while processing a request message.
+
+The "ietf-restconf" YANG module contains the "errors" grouping
+which specifies the syntax and semantics of an errors resource.
+RESTCONF error handling behavior is defined in ^error-reporting^.
+
+* Operations @operations@
+
+The RESTCONF protocol uses HTTP methods to identify
+the CRUD operation requested for a particular resource.
+
+The following table shows how the RESTCONF operations relate to
+NETCONF protocol operations:
+
+!! table CRUD Methods in RESTCONF @table-crud-operations@
+!! head ! RESTCONF ! NETCONF
+!! row  ! OPTIONS  ! none
+!! row  ! HEAD     ! none
+!! row  ! GET      ! <get-config>, <get>
+!! row  ! POST     ! <edit-config> (operation="create")
+!! row  ! PUT      ! <edit-config> (operation="replace")
+!! row  ! PATCH    ! <edit-config> (operation="merge")
+!! row  ! DELETE   ! <edit-config> (operation="delete")
+
+The NETCONF "remove" operation attribute is not supported
+by the HTTP DELETE method. The resource must exist or
+the DELETE method will fail. The PATCH method is equivalent to
+a "merge" operation for a plain patch.
+
+Access control mechanisms may be used to limit what operations
+can be used.  In particular, RESTCONF is compatible with the
+NETCONF Access Control Model (NACM) ^RFC6536^, as there is a
+specific mapping between RESTCONF and NETCONF operations,
+defined in ^table-crud-operations^.  The resource path needs
+to be converted internally by the server to the corresponding
+YANG instance-identifier.  Using this information,
+the server can apply the NACM access control rules to RESTCONF
+messages.
+
+The server MUST NOT allow any operation to any resources that
+the client is not authorized to access.
+
+Implementation of all methods (except PATCH) are defined in ^RFC2616^.
+This section defines the RESTCONF protocol usage for
+each HTTP method.
+
+** OPTIONS @options@
+
+The OPTIONS method is sent by the client to
+discover which methods are supported by the server
+for a specific resource.
+If supported, it SHOULD be implemented for all media types.
+
+The server SHOULD implement this method, however the same information
+could be extracted from the YANG modules and the RESTCONF
+protocol specification.
+
+If the PATCH method is supported, then the "Accept-Patch" header
+MUST be supported, as defined in ^RFC5789^.
+
+** HEAD @head@
+
+The HEAD method is sent by the client to
+retrieve just the headers that would be returned
+for the comparable GET method, without the response body.
+It is supported for all resource types, except operation resources.
+
+The request MUST contain a request URI
+that contains at least the entry point component.
+The same query parameters supported by the GET method
+are supported by the HEAD method.
+
+The access control behavior is enforced
+as if the method was GET instead of HEAD.
+The server MUST respond the same as if the method
+was GET instead of HEAD, except that no
+response body is included.
+
+** GET @get@
+
+The GET method is sent by the client to
+retrieve data and meta-data for a resource.
+It is supported for all resource types, except operation resources.
+The request MUST contain a request URI
+that contains at least the entry point component.
+
+The server MUST NOT return any data resources for which the user
+does not have read privileges.
+If the user is not authorized to read
+the target resource, an error response containing
+a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+the client.
+
+If the user is authorized to read some but not all of
+the target resource, the unauthorized content is omitted
+from the response message body, and the authorized content
+is returned to the client.
+
+Example:
+
+The client might request the response headers for a
+JSON representation of the "library" resource:
+
+
+   GET /restconf/data/example-jukebox:jukebox/
+     library/artist=Foo%20Fighters/album  HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+The server might respond:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:02:40 GMT
+   Server: example-server
+   Content-Type: application/yang.data+json
+   Cache-Control: no-cache
+   Pragma: no-cache
+   ETag: a74eefc993a2b
+   Last-Modified: Mon, 23 Apr 2012 11:02:14 GMT
+
+   {
+     "album" : [
+       {
+         "name" : "Wasting Light",
+         "genre" : "example-jukebox:alternative",
+         "year" : 2011
+       }
+     ]
+   }
+
+** POST @post@
+
+The POST method is sent by the client to create a data resource
+or invoke an operation resource.
+The server uses the target resource media type
+to determine how to process the request.
+
+!! table Resource Types that Support POST
+!! head ! Type ! Description
+!! row  ! Datastore ! Create a top-level configuration data resource
+!! row  ! Data ! Create a configuration data child resource
+!! row  ! Operation ! Invoke a protocol operation
+
+*** Create Resource Mode
+
+If the target resource type is a datastore or data resource,
+then the POST is treated as a request to create a resource or
+child resource.  The message body is expected to contain the
+content of a child resource to create within the parent (target resource).
+
+The "insert" and "point" query parameters are supported
+by the POST method for datastore and data resource types,
+as specified in the YANG definition in ^module^.
+
+If the POST method succeeds,
+a "201 Created" Status-Line is returned and there is
+no response message body.  A "Location" header identifying
+the child resource that was created MUST be present
+in the response in this case.
+
+If the user is not authorized to create the target resource,
+an error response containing
+a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+the client.  All other error responses are handled according to
+the procedures defined in ^error-reporting^.
+
+Example:
+
+To create a new "jukebox" resource, the client might send:
+
+   POST /restconf/data HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.data+json
+
+   { "example-jukebox:jukebox" : [null] }
+
+
+If the resource is created, the server might respond as follows:
+
+   HTTP/1.1 201 Created
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Location: http://example.com/restconf/data/example-jukebox:jukebox
+   Last-Modified: Mon, 23 Apr 2012 17:01:00 GMT
+   ETag: b3a3e673be2
+
+Refer to ^ex-create^ for more resource creation examples.
+
+*** Invoke Operation Mode
+
+If the target resource type is an operation resource,
+then the POST method is treated as a request to invoke that operation.
+The message body (if any) is processed as the operation input
+parameters.  Refer to ^operation-resource^ for details
+on operation resources.
+
+If the POST request succeeds, a "200 OK" Status-Line
+is returned if there is a response message body, and
+a "204 No Content" Status-Line is returned if there is
+no response message body.
+
+If the user is not authorized to invoke the target operation,
+an error response containing
+a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+the client.  All other error responses are handled according to
+the procedures defined in ^error-reporting^.
+
+Example:
+
+In this example, the client is invoking the "play" operation
+defined in the "example-jukebox" YANG module.
+
+A client might send a "play" request as follows:
+
+   POST /restconf/operations/example-jukebox:play   HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.operation+json
+
+   {
+     "example-jukebox:input" : {
+       "playlist" : "Foo-One",
+       "song-number" : 2
+     }
+   }
+
+The server might respond:
+
+   HTTP/1.1 204 No Content
+   Date: Mon, 23 Apr 2012 17:50:00 GMT
+   Server: example-server
+
+** PUT @put@
+
+The PUT method is sent by the client to create or replace
+the target resource.
+
+The only target resource media type that supports PUT is the data
+resource. The message body is expected to contain the
+content used to create or replace the target resource.
+
+The "insert" and "point" query parameters are supported
+by the PUT method for data resources,
+as specified in the YANG definition in ^module^.
+
+Consistent with ^RFC2616^, if the PUT request creates a new resource,
+a "201 Created" Status-Line is returned.   If an existing resource
+is modified, either "200 OK" or "204 No Content" are returned.
+
+If the user is not authorized to create or replace the target resource
+an error response containing
+a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+the client.  All other error responses are handled according to
+the procedures defined in ^error-reporting^.
+
+Example:
+
+An "album" child resource defined in the "example-jukebox" YANG module
+is replaced or created if it does not already exist.
+
+To replace the "album" resource contents,
+the client might send as follows.
+Note that the request URI header line is wrapped
+for display purposes only:
+
+   PUT /restconf/data/example-jukebox:jukebox/
+      library/artist=Foo%20Fighters/album=Wasting%20Light   HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.data+json
+
+   {
+     "example-jukebox:album" : {
+       "name" : "Wasting Light",
+       "genre" : "example-jukebox:alternative",
+       "year" : 2011
+     }
+   }
+
+If the resource is updated, the server might respond:
+
+   HTTP/1.1 204 No Content
+   Date: Mon, 23 Apr 2012 17:04:00 GMT
+   Server: example-server
+   Last-Modified: Mon, 23 Apr 2012 17:04:00 GMT
+   ETag: b27480aeda4c
+
+** PATCH @patch@
+
+RESTCONF uses the HTTP PATCH method defined
+in ^RFC5789^ to provide an extensible framework for
+resource patching mechanisms.  It is optional to implement
+by the server.  Each patch type needs a unique
+media type.  Zero or more PATCH media types MAY be supported
+by the server.
+
+A plain patch is used to create or update
+a child resource within the target resource.
+If the target resource instance does not exist, the server MUST
+NOT create it.
+
+If the PATCH request succeeds, a "200 OK" Status-Line
+is returned if there is a message body, and "204 No Content"
+is returned if no response message body is sent.
+
+If the user is not authorized to alter the target resource
+an error response containing
+a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+the client.  All other error responses are handled according to
+the procedures defined in ^error-reporting^.
+
+Example:
+
+To replace just the "year" field in the "album" resource
+(instead of replacing the entire resource with the PUT method),
+the client might send a plain patch as follows.
+Note that the request URI header line is wrapped
+for display purposes only:
+
+   PATCH /restconf/data/example-jukebox:jukebox/
+      library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.data+json
+
+   {
+     "example-jukebox:album" : {
+       "genre" : "example-jukebox:rock",
+       "year" : 2011
+     }
+   }
+
+If the field is updated, the server might respond:
+
+   HTTP/1.1 204 No Content
+   Date: Mon, 23 Apr 2012 17:49:30 GMT
+   Server: example-server
+   Last-Modified: Mon, 23 Apr 2012 17:49:30 GMT
+   ETag: b2788923da4c
+
+The XML encoding for the same request might be:
+
+   PATCH /restconf/data/example-jukebox:jukebox/
+      library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
+   Host: example.com
+   If-Match: b8389233a4c
+   Content-Type: application/yang.data+xml
+
+   <album xmlns="http://example.com/ns/example-jukebox">
+      <genre>example-jukebox:rock</genre>
+      <year>2011</year>
+   </album>
+
+** DELETE @delete@
+
+The DELETE method is used to delete the target resource.
+If the DELETE request succeeds, a "204 No Content" Status-Line
+is returned, and there is no response message body.
+
+If the user is not authorized to delete the target resource then
+an error response containing
+a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+the client.  All other error responses are handled according to
+the procedures defined in ^error-reporting^.
+
+Example:
+
+To delete a resource such as the "album" resource,
+the client might send:
+
+   DELETE /restconf/data/example-jukebox:jukebox/
+      library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
+   Host: example.com
+
+If the resource is deleted, the server might respond:
+
+   HTTP/1.1 204 No Content
+   Date: Mon, 23 Apr 2012 17:49:40 GMT
+   Server: example-server
+
+** Query Parameters @query-parameters@
+
+Each RESTCONF operation allows zero or more query
+parameters to be present in the request URI.
+The specific parameters that are allowed depends
+on the resource type, and sometimes the specific target
+resource used, in the request.
+
+!! table RESTCONF Query Parameters
+!! head ! Name ! Methods !  Description
+!! row  ! content ! GET ! Select config and/or non-config data resources
+!! row  ! depth ! GET ! Request limited sub-tree depth in the reply content
+!! row  ! filter ! GET ! Boolean notification filter for event-stream resources
+!! row  ! insert ! POST, PUT ! Insertion mode for user-ordered data resources
+!! row  ! point ! POST, PUT ! Insertion point for user-ordered data resources
+!! row  ! select ! GET ! Request a subset of the target resource contents
+!! row  ! start-time ! GET ! Replay buffer start time for event-stream resources
+!! row  ! stop-time ! GET ! Replay buffer stop time for event-stream resources
+
+Query parameters can be given in any order.
+Each parameter can appear at most once in a request URI.
+A default value may apply if the parameter is missing.
+
+The semantics and syntax for all query parameters are
+defined in the "query-parameters" YANG grouping in ^module^.
+The YANG encoding MUST be converted to URL-encoded string
+for use in the request URI.
+
+Refer to ^ex-query^ for examples of query parameter usage.
+
+* Messages @messages@
+
+The RESTCONF protocol uses HTTP entities for messages.
+A single HTTP message corresponds to a single protocol method.
+Most messages can perform a single task on a single resource,
+such as retrieving a resource or editing a resource.
+The exception is the PATCH method, which allows multiple datastore
+edits within a single message.
+
+** Request URI Structure
+
+Resources are represented with URIs following the structure
+for generic URIs in ^RFC3986^.
+
+A RESTCONF operation is derived from the HTTP method
+and the request URI, using the following conceptual fields:
+
+     <OP> /<restconf>/<path>?<query>#<fragment>
+
+      ^       ^        ^       ^         ^
+      |       |        |       |         |
+    method  entry  resource  query    fragment
+
+      M       M        O        O         I
+
+    M=mandatory, O=optional, I=ignored
+
+    <text> replaced by client with real values
+
+
+- method: the HTTP method identifying the RESTCONF operation
+requested by the client, to act upon the target resource
+specified in the request URI.  RESTCONF operation details are
+described in ^operations^.
+
+- entry: the root of the RESTCONF API configured on this HTTP
+server, discovered by getting the ".well-known/host-meta"
+resource, as described in ^path-resolution^.  All
+of the examples in this document assume "/restconf" as the
+discovered RESTCONF API root path.  The URI template ^RFC6570^
+syntax "{+restconf}" is used to refer to the entry point
+outside of an example.
+
+- resource: the path expression identifying the resource
+that is being accessed by the operation.
+If this field is not present, then the target resource
+is the API itself, represented by the media type "application/yang.api".
+
+- query: the set of parameters associated with the RESTCONF
+message. These have the familiar form of "name=value" pairs.
+There is a specific set of parameters defined,
+although the server MAY choose to support additional
+parameters not defined in this document.
+The contents of the any query parameter value MUST be encoded
+according to ^RFC2396^, section 3.4. Any reserved characters
+MUST be encoded with escape sequences, according to ^RFC2396^,
+section 2.4.
+
+- fragment: This field is not used by the RESTCONF protocol.
+
+When new resources are created by the client, a "Location" header
+is returned, which identifies the path of the newly created resource.
+The client MUST use this exact path identifier to access
+the resource once it has been created.
+
+The "target" of an operation is a resource.
+The "path" field in the request URI represents
+the target resource for the operation.
+
+** RESTCONF Path Resolution @path-resolution@
+
+In line the best practices defined by ^get-off-my-lawn^, RESTCONF
+enables deployments to specify where the RESTCONF API is located.
+When first connecting to a RESTCONF server, a RESTCONF client MUST
+determine the root of the RESTCONF API.  The client discovers this
+by getting the "/.well-known/host-meta" resource (^RFC6415^) and
+using the <Link> element containing the "restconf" attribute :
+
+   Request
+   -------
+   GET /.well-known/host-meta users HTTP/1.1
+   Host: example.com
+   Accept: application/xrd+xml
+
+   Response
+   --------
+   HTTP/1.1 200 OK
+   Content-Type: application/xrd+xml
+   Content-Length: nnn
+
+   <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
+       <Link rel='restconf' href='/restconf'/>
+   </XRD>
+
+
+Once discovering the RESTCONF API root, the client MUST prepend it to
+any subsequent request to a RESTCONF resource.  For instance, using
+the "/restconf" path discovered above, the client can now determine
+the operations supported by the the server:
+
+   Request
+   -------
+   GET /restconf/operations  HTTP/1.1
+   Host: example.com
+   Accept: application/yang.api+json,
+           application/yang.errors+json
+
+   Response
+   --------
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
+   Content-Type: application/yang.api+json
+
+   { "operations" : { "play" : [ null ] } }
+
+** Message Headers
+
+There are several HTTP header lines utilized in RESTCONF messages.
+Messages are not limited to the HTTP headers listed in this section.
+
+HTTP defines which header lines are required for particular
+circumstances. Refer to each operation definition section
+in ^operations^ for examples on how particular headers are used.
+
+There are some request headers that are used within RESTCONF,
+usually applied to data resources.
+The following tables summarize the headers most relevant
+in RESTCONF message requests:
+
+!! table RESTCONF Request Headers
+!! head ! Name ! Description
+!! row  ! Accept ! Response Content-Types that are acceptable
+!! row  ! Content-Type ! The media type of the request body
+!! row  ! Host ! The host address of the server
+!! row  ! If-Match ! Only perform the action if the entity matches ETag
+!! row  ! If-Modified-Since ! Only perform the action if modified since time
+!! row  ! If-Unmodified-Since ! Only perform the action if un-modified since time
+
+
+The following tables summarize the headers most relevant
+in RESTCONF message responses:
+
+!! table RESTCONF Response Headers
+!! head ! Name ! Description
+!! row  ! Allow ! Valid actions when 405 error returned
+!! row  ! Cache-Control ! The cache control parameters for the response
+!! row  ! Content-Type ! The media type of the response body
+!! row  ! Date ! The date and time the message was sent
+!! row  ! ETag ! An identifier for a specific version of a resource
+!! row  ! Last-Modified ! The last modified date and time of a resource
+!! row  ! Location ! The resource identifier for a newly created resource
+
+** Message Encoding
+
+RESTCONF messages are encoded in HTTP according to RFC 2616.
+The "utf-8" character set is used for all messages.
+RESTCONF message content is sent in the HTTP message body.
+
+Content is encoded in either JSON or XML format.
+
+XML encoding rules for data nodes are defined in ^RFC6020^.
+The same encoding rules are used for all XML content.
+
+JSON encoding rules are defined in ^I-D.lhotka-netmod-json^.
+This encoding is valid JSON, but also has
+special encoding rules to identify module namespaces
+and provide consistent type processing of YANG data.
+
+Request input content encoding format is identified with the Content-Type
+header.  This field MUST be present if a message body is sent
+by the client.
+
+Response output content encoding format is identified with the Accept
+header in the request, or if is not specified, the request
+input encoding format is used.
+If there was no request input, then the default output encoding is XML.
+File extensions encoded in the request are not used to identify
+format encoding.
+
+** RESTCONF Meta-Data
+
+The RESTCONF protocol needs to retrieve the same meta-data that is
+used in the NETCONF protocol.  Information about default leafs,
+last-modified timestamps, etc. are commonly used to annotate
+representations of the datastore contents.  This meta-data
+is not defined in the YANG schema because it applies to the
+datastore, and is common across all data nodes.
+
+This information is encoded as attributes in XML.
+JSON encoding of meta-data is defined in ^I-D.lhotka-netmod-json^.
+
+** Return Status
+
+Each message represents some sort of resource access.
+An HTTP "Status-Line" header line is returned for each request.
+If a 4xx or 5xx range status code is returned in the Status-Line,
+then the error information will be returned in the response,
+according to the format defined in ^errors^.
+
+** Message Caching
+
+Since the datastore contents change at unpredictable times,
+responses from a RESTCONF server generally SHOULD NOT be cached.
+
+The server SHOULD include a "Cache-Control" header in every response
+that specifies whether the response should be cached.  A "Pragma"
+header specifying "no-cache" MAY also be sent in case the
+"Cache-Control" header is not supported.
+
+Instead of using HTTP caching, the client SHOULD track the "ETag"
+and/or "Last-Modified" headers returned by the server for the
+datastore resource (or data resource if the server supports it).
+A retrieval request for a resource can include
+the "If-None-Match" and/or "If-Modified-Since" headers, which
+will cause the server to return a "304 Not Modified" Status-Line
+if the resource has not changed.
+The client MAY use the HEAD method to retrieve just
+the message headers, which SHOULD include the "ETag"
+and "Last-Modified" headers, if this meta-data is maintained
+for the target resource.
+
+* Notifications @notifications@
+
+The RESTCONF protocol supports YANG-defined event notifications.
+The solution preserves aspects of NETCONF Event Notifications ^RFC5277^
+while utilizing the Server-Sent Events ^wd-eventsource^ transport strategy.
+
+** Server Support
+
+A RESTCONF server is not required to support RESTCONF notifications.
+Clients may determine if a server supports RESTCONF notifications by
+using the HTTP operation OPTIONS, HEAD, or GET on the
+"{+restconf}/streams" resource described below.
+The server does not support RESTCONF notifications if an HTTP error
+code is returned (e.g., 404 Not Found).
+
+** Event Streams
+
+A RESTCONF server that supports notifications will populate a
+stream resource for each notification delivery service access point.
+A RESTCONF client can retrieve the list of supported event streams from
+a RESTCONF server using the GET operation on the "{+restconf}/streams"
+resource.
+
+The "{+restconf}/streams" container definition in the "ietf-restconf" module
+defined in ^module^ is used to specify the structure and syntax
+of the conceptual child resources within the "streams" resource.
+
+For example:
+
+The client might send the following request:
+
+
+   GET /restconf/streams HTTP/1.1
+   Host: example.com
+   Accept: application/yang.api+xml,
+           application/yang.errors+xml
+
+
+The server might send the following response:
+
+
+   HTTP/1.1 200 OK
+   Content-Type: application/yang.api+xml
+
+   <streams xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
+      <stream>
+         <name>NETCONF</name>
+         <description>default NETCONF event stream
+         </description>
+         <replay-support>true</replay-support>
+         <replay-log-creation-time>
+            2007-07-08T00:00:00Z
+         </replay-log-creation-time>
+         <events/>
+      </stream>
+      <stream>
+         <name>SNMP</name>
+         <description>SNMP notifications</description>
+         <replay-support>false</replay-support>
+         <events/>
+      </stream>
+      <stream>
+         <name>syslog-critical</name>
+         <description>Critical and higher severity
+         </description>
+         <replay-support>true</replay-support>
+         <replay-log-creation-time>
+            2007-07-01T00:00:00Z
+         </replay-log-creation-time>
+         <events/>
+      </stream>
+   </streams>
+
+** Subscribing to Receive Notifications @receive-notifs@
+
+RESTCONF clients can subscribe to receive notifications by sending an
+HTTP GET request for the "{+restconf}/streams/stream/<stream-name>" resource,
+with the "Accept" type "text/event-stream".
+The server will treat the connection as an event stream, using the
+Server Sent Events ^wd-eventsource^ transport strategy.
+
+The server MAY support query parameters for a GET method on this
+resource.  These parameters are specific to each notification stream.
+
+For example:
+
+   GET /restconf/streams/stream=NETCONF/events HTTP/1.1
+   Host: example.com
+   Accept: text/event-stream
+   Cache-Control: no-cache
+   Connection: keep-alive
+
+
+A RESTCONF client MAY request the server compress the events using
+the HTTP header field "Accept-Encoding".  For instance:
+
+
+   GET /restconf/streams/stream=NETCONF/events HTTP/1.1
+   Host: example.com
+   Accept: text/event-stream
+   Cache-Control: no-cache
+   Connection: keep-alive
+   Accept-Encoding: gzip, deflate
+
+
+*** NETCONF Event Stream
+
+The server SHOULD support the "NETCONF" notification stream
+defined in ^RFC5277^.  For this stream,
+RESTCONF notification subscription requests MAY specify parameters
+indicating the events it wishes to receive.
+
+!! table NETCONF Stream Query Parameters
+!! head ! Name ! Description
+!! row  ! start-time ! replay event start time
+!! row  ! stop-time ! replay event stop time
+!! row  ! filter ! boolean content filter
+
+The semantics and syntax for these query parameters are
+defined in the "query-parameters" YANG grouping in ^module^.
+The YANG encoding MUST be converted to URL-encoded string
+for use in the request URI.
+
+Refer to ^ex-filters^ for filter parameter examples.
+
+** Receiving Event Notifications
+
+RESTCONF notifications are encoded according to the
+definition of the event stream.  The NETCONF stream
+defined in ^RFC5277^ is encoded in XML format.
+
+The structure of the event data is based on the "notification"
+element definition in section 4 of ^RFC5277^. It MUST
+conform to the "notification" YANG container definition in ^module^.
+
+An example SSE notification encoded using XML:
+
+   data: <notification
+   data:    xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
+   data:    <event-time>2013-12-21T00:01:00Z</event-time>
+   data:    <event xmlns="http://example.com/event/1.0">
+   data:       <eventClass>fault</eventClass>
+   data:       <reportingEntity>
+   data:           <card>Ethernet0</card>
+   data:       </reportingEntity>
+   data:       <severity>major</severity>
+   data:     </event>
+   data: </notification>
+
+#An example SSE notification encoded using JSON:
+#
+#   data: {
+#   data:   "ietf-restconf:notification": {
+#   data:     "eventTime": "2013-12-21T00:01:00Z",
+#   data:     "example-mod:event": {
+#   data:       "eventClass": "fault",
+#   data:       "reportingEntity": { "card": "Ethernet0" },
+#   data:       "severity": "major"
+#   data:     }
+#   data:   }
+#   data: }
+#
+
+#Alternatively, since neither XML nor JSON are whitespace sensitive,
+#the above messages can be encoded onto a single line.  For example:
+
+Since XML is not whitespace sensitive,
+the above message can be encoded onto a single line.
+
+For example:  ('\' line wrapping added for formatting only)
+
+   data: <notification xmlns="urn:ietf:params:xml:ns:yang:ietf-rest\
+   conf"><event-time>2013-12-21T00:01:00Z</event-time><event xmlns="\
+   http://example.com/event/1.0"><eventClass>fault</eventClass><repo\
+   rtingEntity><card>Ethernet0</card></reportingEntity><severity>maj\
+   or</severity></event></notification>
+
+#JSON:  ('\' line wrapping added for formatting only)
+#
+#   data: { "ietf-restconf:notification": { "event-time": "2013-12-21\
+#   T00:01:00Z", "example-mod:event": { "eventClass": "fault", "repor\
+#   tingEntity": { "card": "Ethernet0" }, "severity": "major" } } }
+#
+
+The SSE specifications supports the following additional fields:
+event, id and retry.  A RESTCONF server MAY send the "retry" field
+and, if it does, RESTCONF clients SHOULD use it.
+A RESTCONF server SHOULD NOT send the "event" or "id" fields,
+as there are no meaningful values that could be used for them
+that would not be redundant to the contents of the notification itself.
+RESTCONF servers that do not send the "id" field also do not need
+to support the HTTP header "Last-Event-Id".  RESTCONF servers that
+do send the "id" field MUST still support the "startTime" query
+parameter as the preferred means for a client to specify where to
+restart the event stream.
+
+* Error Reporting @error-reporting@
+
+HTTP Status-Lines are used to report success or failure
+for RESTCONF operations.
+The <rpc-error> element returned in NETCONF error responses
+contains some useful information.  This error information
+is adapted for use in RESTCONF, and error information
+is returned for "4xx" class of status codes.
+
+The following table summarizes the return status codes
+used specifically by RESTCONF operations:
+
+!! table HTTP Status Codes used in RESTCONF
+!! head ! Status-Line ! Description
+!! row  ! 100 Continue ! POST accepted, 201 should follow
+!! row  ! 200 OK ! Success with response body
+!! row  ! 201 Created ! POST to create a resource success
+!! row  ! 202 Accepted ! POST to create a resource accepted
+!! row  ! 204 No Content ! Success without response body
+!! row  ! 304 Not Modified ! Conditional operation not done
+!! row  ! 400 Bad Request ! Invalid request message
+!! row  ! 403 Forbidden !  Access to resource denied
+!! row  ! 404 Not Found !  Resource target or resource node not found
+!! row  ! 405 Method Not Allowed !  Method not allowed for target resource
+!! row  ! 409 Conflict ! Resource or lock in use
+!! row  ! 412 Precondition Failed ! Conditional method is false
+!! row  ! 413 Request Entity Too Large ! too-big error
+!! row  ! 414 Request-URI Too Large ! too-big error
+!! row  ! 415 Unsupported Media Type ! non RESTCONF media type
+!! row  ! 500 Internal Server Error ! operation-failed
+!! row  ! 501 Not Implemented ! unknown-operation
+!! row  ! 503 Service Unavailable ! Recoverable server error
+
+Since an operation resource is defined with a YANG "rpc"
+statement, a mapping between the NETCONF <error-tag> value
+and the HTTP status code is needed.   The specific error
+condition and response code to use are data-model specific
+and might be contained in the YANG "description" statement
+for the "rpc" statement.
+
+!! table Mapping from error-tag to status code
+!! head ! <error-tag> ! status code
+!! row  ! in-use ! 409
+!! row  ! invalid-value ! 400
+!! row  ! too-big ! 413
+!! row  ! missing-attribute ! 400
+!! row  ! bad-attribute ! 400
+!! row  ! unknown-attribute ! 400
+!! row  ! bad-element ! 400
+!! row  ! unknown-element ! 400
+!! row  ! unknown-namespace ! 400
+!! row  ! access-denied ! 403
+!! row  ! lock-denied ! 409
+!! row  ! resource-denied ! 409
+!! row  ! rollback-failed ! 500
+!! row  ! data-exists ! 409
+!! row  ! data-missing ! 409
+!! row  ! operation-not-supported ! 501
+!! row  ! operation-failed ! 500
+!! row  ! partial-operation ! 500
+!! row  ! malformed-message ! 400
+
+** Error Response Message @errors@
+
+When an error occurs for a request message on a data resource
+or an operation resource, and a "4xx" class of status codes
+(except for status code "403 Forbidden"),
+then the server SHOULD send a response body containing
+the information described by the "errors" container definition
+within the YANG module ^module^.  The Content-Type of this
+response message MUST be application/yang.errors.
+
+YANG Tree Diagram for <errors> Data:
+
+   +--ro errors
+      +--ro error
+         +--ro error-type       enumeration
+         +--ro error-tag        string
+         +--ro error-app-tag?   string
+         +--ro (error-node)?
+         |  +--:(error-path)
+         |  |  +--ro error-path?      instance-identifier
+         |  +--:(error-urlpath)
+         |     +--ro error-urlpath?   data-resource-identifier
+         +--ro error-message?   string
+         +--ro error-info
+
+The semantics and syntax for RESTCONF error messages are
+defined in the "errors" YANG grouping in ^module^.
+
+Examples:
+
+The following example shows an error returned for
+an "lock-denied" error on a datastore resource.
+
+   POST /restconf/operations/example-ops:lock-datastore HTTP/1.1
+   Host: example.com
+
+The server might respond:
+
+   HTTP/1.1 409 Conflict
+   Date: Mon, 23 Apr 2012 17:11:00 GMT
+   Server: example-server
+   Content-Type: application/yang.errors+json
+
+   {
+     "ietf-restconf:errors": {
+       "error": {
+         "error-type": "protocol",
+         "error-tag": "lock-denied",
+         "error-message": "Lock failed, lock already held"
+       }
+     }
+   }
+
+The following example shows an error returned for
+a "data-exists" error on a data resource.
+The "jukebox" resource already exists so it cannot be created.
+
+The client might send:
+
+   POST /restconf/data/example-jukebox:jukebox HTTP/1.1
+   Host: example.com
+
+The server might respond:
+
+   HTTP/1.1 409 Conflict
+   Date: Mon, 23 Apr 2012 17:11:00 GMT
+   Server: example-server
+   Content-Type: application/yang.errors+json
+
+   {
+     "ietf-restconf:errors": {
+       "error": {
+         "error-type": "protocol",
+         "error-tag": "data-exists",
+         "error-urlpath": "http://example.com/restconf/data/
+              example-jukebox:jukebox",
+         "error-message":
+           "Data already exists, cannot create new resource"
+       }
+     }
+   }
+
+* RESTCONF module @module@
+
+The "ietf-restconf" module defines conceptual definitions
+within groupings, which are not meant to be implemented
+as datastore contents by a server.
+
+The "ietf-yang-types" and "ietf-inet-types" modules from ^RFC6991^
+are used by this module for some type definitions.
+
+RFC Ed.: update the date below with the date of RFC publication and
+remove this note.
+
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2014-07-03.yang"
+
+* IANA Considerations @iana@
+
+#** Well-Known URI
+#
+#This memo registers the 'restconf' well-known URI
+#in the Well-Known URIs registry as defined by ^RFC5785^.
+#
+#   URI suffix: restconf
+#
+#   Change controller: IETF
+#
+#   Specification document(s): RFC XXXX
+#
+#   Related information: None
+#
+
+** The "restconf" Relation Type
+
+This specification registers the "restconf" relation type in the Link
+Relation Type Registry defined by ^RFC5988^:
+
+   Relation Name:  restconf
+
+   Description:  Identifies the root of RESTCONF API as configured
+                 on this HTTP server.  The "restconf" relation
+                 defines the root of the API defined in RFCXXXX.
+                 Subsequent revisions of RESTCONF will use alternate
+                 relation values to support protocol versioning.
+
+   Reference:  RFC XXXX
+
+`
+** YANG Module Registry
+
+This document registers one URI in the IETF XML registry
+^RFC3688^. Following the format in RFC 3688, the following
+registration is requested to be made.
+
+     URI: urn:ietf:params:xml:ns:yang:ietf-restconf
+     Registrant Contact: The NETMOD WG of the IETF.
+     XML: N/A, the requested URI is an XML namespace.
+
+This document registers one YANG module in the YANG Module Names
+registry ^RFC6020^.
+
+  name:         ietf-restconf
+  namespace:    urn:ietf:params:xml:ns:yang:ietf-restconf
+  prefix:       rc
+  // RFC Ed.: replace XXXX with RFC number and remove this note
+  reference:    RFC XXXX
+
+** application/yang Media Sub Types
+
+The parent MIME media type for RESTCONF resources is application/yang,
+which is defined in ^RFC6020^.  This document defines the following
+sub-types for this media type.
+
+   - api
+   - data
+   - datastore
+   - errors
+   - operation
+   - stream
+
+   Type name: application
+
+   Subtype name: yang.xxx
+
+   Required parameters: TBD
+
+   Optional parameters: TBD
+
+   Encoding considerations: TBD
+
+   Security considerations: TBD
+
+   Interoperability considerations: TBD
+
+   // RFC Ed.: replace XXXX with RFC number and remove this note
+   Published specification: RFC XXXX
+
+* Security Considerations
+
+This section provides security considerations for the resources
+defined by the RESTCONF protocol.  Security considerations for
+HTTPS are defined in ^RFC2818^.  Security considerations for the
+content manipulated by RESTCONF can be found in the documents
+defining data models.
+
+This document does not specify an authentication scheme, but
+it does require that an authenticated NETCONF username be
+associated with each HTTP request.  The authentication scheme
+MAY be implemented in the underlying transport layer (e.g.,
+client certificates) or within the HTTP layer (e.g., Basic
+Auth, OAuth, etc.).  RESTCONF does not itself define an
+authentication mechanism, authentication MUST occur in a
+lower layer.  Implementors SHOULD provide a comprehensive
+authorization scheme with RESTCONF and ensure that the resulting
+NETCONF username is made available to the RESTCONF server.
+
+Authorization of individual user access to operations and data
+MAY be configured via NETCONF Access Control Model (NACM)
+^RFC6536^, as specified in ^operations^.  Other authorization
+models MAY be used, but are outside of the scope of this
+document.
+
+Configuration information is by its very nature sensitive.  Its
+transmission in the clear and without integrity checking leaves
+devices open to classic eavesdropping and false data injection
+attacks.  Configuration information often contains passwords, user
+names, service descriptions, and topological information, all of
+which are sensitive.  Because of this, this protocol SHOULD be
+implemented carefully with adequate attention to all manner of attack
+one might expect to experience with other management interfaces.
+
+Different environments may well allow different rights prior to and
+then after authentication.  When an operation is not properly authorized,
+the RESTCONF server MUST return HTTP error status code 401 Unauthorized.
+Note that authorization information can be exchanged in the form of
+configuration information, which is all the more reason to ensure the
+security of the connection.
+
+
+*! start-appendix
+
+* Change Log
+
+    -- RFC Ed.: remove this section before publication.
+
+** 00 - 01
+
+- fixed content=nonconfig example (non-config was incorrect)
+
+- closed open issue 'message-id'.  There is no need for a message-id
+field, and RFC 2392 does not apply.
+
+- closed open issue 'server support verification'. The headers used
+by RESTCONF are widely supported.
+
+- removed encoding rules from section on RESTCONF Meta-Data. This is now
+defined in ^I-D.lhotka-netmod-json^.
+
+- added media type application/yang.errors to map to errors YANG grouping.
+Updated error examples to use new media type.
+
+- closed open issue 'additional datastores'. Support may be added in the
+future to identify new datastores.
+
+- closed open issue 'PATCH media type discovery'. The section
+on PATCH has an added sentence on the Accept-Patch header.
+
+- closed open issue 'YANG to resource mapping'. Current mapping
+of all data nodes to resources will be used in order to allow
+mandatory DELETE support. The PATCH operation is optional,
+as well as the YANG Patch media type.
+
+- closed open issue '_self links for HATEOAS support'. It was decided
+that they are redundant because they can be derived from the YANG module
+for the specific data.
+
+- added explanatory text for the 'select' parameter.
+- added RESTCONF Path Resolution section for discovering the
+  root of the RESTCONF API using the /.well-known/host-meta.
+- added an "error" media type to for structured error messages
+- added Secure Transport section requiring TLS
+- added Security Considerations section
+- removed all references to "REST-like"
+
+** bierman:restconf-04 to ietf:restconf-00
+
+- updated open issues section
+
+* Open Issues
+
+    -- RFC Ed.: remove this section before publication.
+
+** select parameter
+
+- What syntax should be used for the "select" query parameter?
+The current choices are "XPath" and "path-expr".  Perhaps an additional
+parameter to identify the select string format is needed
+to allow extensibility?
+
+Status: solution proposal added by Martin.
+
+** netconf-state monitoring support
+
+- Should long-term RESTCONF operations (i.e. SSE long-poll)
+be considered sessions with regards to NETCONF monitoring "session" list?
+If so, what text is needed in RESTCONF draft to standardize
+the RESTCONF session entries?
+
+Status: closed-update-pending
+
+Resolution:
+
+A new data structure to monitor streams can be added
+to the netconf-state sub-tree.  The session-id in
+this new data structure is not restricted to the
+NETCONF-only rules for the sessions sub-tree.
+
+** secure transport
+
+- Details to support secure operation over TLS are needed
+
+Status: closed
+
+- Security considerations need to be written
+
+Status: closed
+
+- Can call-home for RESTCONF be supported
+
+Status: open
+
+** Encoding of key leafs in resource URIs
+
+- The use of a forward slash '/' as the delimiter between
+key values in a target resource URI is not not desirable.
+Only 1 segment per YANG data node layer should be used.
+
+Status: open
+
+Proposals:
+
+Example: list foo, int8 keys X and Y
+
+Old:
+
+  /restconf/data/foo/19/22/foo-leaf
+
+New:
+
+  /restconf/data/foo=19,22/foo-leaf
+
+Or:
+
+  /restconf/data/foo/19,22/foo-leaf
+
+** get-bulk query parameters
+
+- New query parameters (e.g., offset, limit) are needed
+to retrieve a limited number of list instances.
+
+Status: solution proposal pending
+
+Resolution: This bulk retrieval mechanism will be added.
+
+** defaults handling
+
+- The client does not really know what sort of defaults
+the server will return in GET replies.  Should the
+with-defaults query parameter be added to RESTCONF?
+If so, should it be mandatory-to-implement?
+
+Status: open
+
+** protocol capability URIs
+
+- The client does not know what vendor extensions (if any)
+are implemented by the server. Should the server provide
+a read-only container of capability URIs to identify protocol extensions?
+The NETMOD WG may also want to extend the protocol in the future
+without updating the core RESTCONF RFC.
+
+Status: open
+
+** target resource list keys required for GET
+
+- Should the client be able to GET all or a subset of all list instances
+by issuing a GET without any list keys for the target resource list?
+
+  GET /restconf/data/interfaces/interface
+
+- Should a "collection" resource be required in order for such a request
+to be considered valid by the server.
+
+Status: open
+
+* Example YANG Module
+
+The example YANG module used in this document represents
+a simple media jukebox interface.
+
+YANG Tree Diagram for "example-jukebox" Module
+
+   +--rw jukebox?
+      +--rw library
+      |  +--rw artist [name]
+      |  |  +--rw name     string
+      |  |  +--rw album [name]
+      |  |     +--rw name     string
+      |  |     +--rw genre?   identityref
+      |  |     +--rw year?    uint16
+      |  |     +--rw admin
+      |  |     |  +--rw label?              string
+      |  |     |  +--rw catalogue-number?   string
+      |  |     +--rw song [name]
+      |  |        +--rw name        string
+      |  |        +--rw location    string
+      |  |        +--rw format?     string
+      |  |        +--rw length?     uint32
+      |  +--ro artist-count?   uint32
+      |  +--ro album-count?    uint32
+      |  +--ro song-count?     uint32
+      +--rw playlist [name]
+      |  +--rw name           string
+      |  +--rw description?   string
+      |  +--rw song [index]
+      |     +--rw index    uint32
+      |     +--rw id       instance-identifier
+      +--rw player
+         +--rw gap?   decimal64
+
+  rpcs:
+
+   +---x play
+      +--ro input
+         +--ro playlist       string
+         +--ro song-number    uint32
+
+
+** example-jukebox YANG Module  @example-module@
+
+!! include-figure example-jukebox.yang
+
+* RESTCONF Message Examples @main-examples@
+
+The examples within this document use the normative
+YANG module defined in ^module^ and the non-normative
+example YANG module defined in ^example-module^.
+
+This section shows some typical RESTCONF message exchanges.
+
+** Resource Retrieval Examples
+
+*** Retrieve the Top-level API Resource
+
+The client may start by retrieving the top-level
+API resource, using the entry point URI "{+restconf}".
+
+   GET /restconf   HTTP/1.1
+   Host: example.com
+   Accept: application/yang.api+json,
+           application/yang.errors+json
+
+The server might respond as follows:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Content-Type: application/yang.api+json
+
+   {
+     "ietf-restconf:restconf": {
+       "data" : [ null ],
+       "modules": {
+         "module": [
+           {
+             "name" : "example-jukebox",
+             "revision" : "2014-07-03",
+             "namespace" : "http://example.com/ns/example-jukebox",
+             "schema" : [ null ]
+           }
+         ]
+       },
+       "operations" : {
+          "play" : [ null ]
+       },
+       "streams" : {
+         "stream" : [
+           {
+             "name" : "NETCONF",
+             "description" : "default NETCONF event stream",
+             "replay-support" : true,
+             "replay-log-creation-time:" : "2007-07-08T00:00:00Z",
+             "events" : [ null ]
+           }
+         ]
+       }
+     }
+   }
+
+
+To request that the response content to be encoded in XML,
+the "Accept" header can be used, as in this example request:
+
+   GET /restconf HTTP/1.1
+   Host: example.com
+   Accept: application/yang.api+xml,
+           application/yang.errors+xml
+
+The server will return the same response either way,
+which might be as follows :
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Content-Type: application/yang.api+xml
+
+   <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
+     <data/>
+     <modules>
+       <module>
+         <name>example-jukebox</name>
+         <revision>2014-07-03</revision>
+         <namespace>
+           http://example.com/ns/example-jukebox
+         </namespace>
+         <schema />
+       </module>
+     </modules>
+     <operations>
+       <play xmlns="http://example.com/ns/example-jukebox"/>
+     </operations>
+     <streams>
+       <stream>
+         <name>NETCONF</name>
+         <description>default NETCONF event stream
+         </description>
+         <replay-support>true</replay-support>
+         <replay-log-creation-time>
+            2007-07-08T00:00:00Z
+         </replay-log-creation-time>
+         <events/>
+       </stream>
+     </streams>
+   </restconf>
+
+
+*** Retrieve The Server Module Information
+
+In this example the client is retrieving the modules
+resource from the server in JSON format:
+
+   GET /restconf/modules  HTTP/1.1
+   Host: example.com
+   Accept: application/yang.api+json,
+           application/yang.errors+json
+
+
+The server might respond as follows.
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
+   Content-Type: application/yang.api+json
+
+   {
+     "ietf-restconf:modules": {
+       "module": [
+         {
+           "name" : "foo",
+           "revision" : "2012-01-02",
+           "schema" : [null],
+           "namespace" : "http://example.com/ns/foo",
+           "feature" : [ "feature1", "feature2" ]
+         },
+         {
+           "name" : "foo-types",
+           "revision" : "2012-01-05",
+           "schema" : [null],
+           "namespace" : "http://example.com/ns/foo-types"
+         },
+         {
+           "name" : "bar",
+           "revision" : "2012-11-05",
+           "schema" : [null],
+           "namespace" : "http://example.com/ns/bar",
+           "feature" : [ "bar-ext" ],
+           "submodule" : [
+             {
+               "name" : "bar-submod1",
+               "revision" : "2012-11-05",
+               "schema" : [null]
+             },
+             {
+               "name" : "bar-submod2",
+               "revision" : "2012-11-05",
+               "schema" : [null]
+             }
+           ]
+         }
+       ]
+     }
+   }
+
+** Edit Resource Examples
+
+*** Create New Data Resources @ex-create@
+
+To create a new "artist" resource within the "library"
+resource, the client might send the following request.
+
+   POST /restconf/data/example-jukebox:jukebox/library HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.data+json
+
+   { "example-jukebox:artist" : {
+       "name" : "Foo Fighters"
+     }
+   }
+
+
+If the resource is created, the server might respond as follows.
+Note that the "Location" header line is wrapped
+for display purposes only:
+
+   HTTP/1.1 201 Created
+   Date: Mon, 23 Apr 2012 17:02:00 GMT
+   Server: example-server
+   Location: http://example.com/restconf/data/
+        example-jukebox:jukebox/library/artist=Foo%20Fighters
+   Last-Modified: Mon, 23 Apr 2012 17:02:00 GMT
+   ETag: b3830f23a4c
+
+To create a new "album" resource for this artist within the "jukebox"
+resource, the client might send the following request.
+Note that the request URI header line is wrapped
+for display purposes only:
+
+   POST /restconf/data/example-jukebox:jukebox/
+      library/artist=Foo%20Fighters  HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.data+json
+
+   {
+     "example-jukebox:album" : {
+       "name" : "Wasting Light",
+       "genre" : "example-jukebox:alternative",
+       "year" : 2012    # note this is the wrong date
+     }
+   }
+
+If the resource is created, the server might respond
+as follows.  Note that the "Location" header line is wrapped
+for display purposes only:
+
+   HTTP/1.1 201 Created
+   Date: Mon, 23 Apr 2012 17:03:00 GMT
+   Server: example-server
+   Location: http://example.com/restconf/data/
+     example-jukebox:jukebox/library/artist=Foo%20Fighters/
+     album=Wasting%20Light
+   Last-Modified: Mon, 23 Apr 2012 17:03:00 GMT
+   ETag: b8389233a4c
+
+*** Detect Resource Entity Tag Change
+
+In this example, the server just supports the
+mandatory datastore last-changed timestamp.
+The client has previously retrieved the "Last-Modified"
+header and has some value cached to provide in
+the following request to patch an "album" list entry
+with key value "Wasting Light". Only the "year" field is being
+updated.
+
+   PATCH /restconf/data/example-jukebox:jukebox/
+     library/artist=Foo%20Fighters/album=Wasting%20Light/year
+     HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+   If-Unmodified-Since: Mon, 23 Apr 2012 17:01:00 GMT
+   Content-Type: application/yang.data+json
+
+   { "example-jukebox:year" : "2011" }
+
+In this example the datastore resource has changed
+since the time specified in the "If-Unmodified-Since"
+header.  The server might respond:
+
+   HTTP/1.1 412 Precondition Failed
+   Date: Mon, 23 Apr 2012 19:01:00 GMT
+   Server: example-server
+   Last-Modified: Mon, 23 Apr 2012 17:45:00 GMT
+   ETag: b34aed893a4c
+
+** Query String Parameter Examples @ex-query@
+
+*** "content" Parameter
+
+The "content" parameter is used to select the type of
+data child resources (configuration and/or not configuration)
+that are returned by the server for a GET method request.
+
+In this example, a simple YANG list that has configuration
+and non-configuration child resources.
+
+  container events
+    list event {
+      key name;
+      leaf name { type string; }
+      leaf description { type string; }
+      leaf event-count {
+        type uint32;
+        config false;
+      }
+    }
+  }
+
+Example 1: content=all
+
+To retrieve all the child resources, the "content" parameter
+is set to "all". The client might send:
+
+   GET /restconf/data/example-events:events?content=all
+       HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+The server might respond:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Content-Type: application/yang.data+json
+
+   {
+     "example-events:events" : {
+       "event" : [
+         {
+           "name" : "interface-up",
+           "description" : "Interface up notification count",
+           "event-count" : 42
+         },
+         {
+           "name" : "interface-down",
+           "description" : "Interface down notification count",
+           "event-count" : 4
+         }
+       ]
+     }
+   }
+
+Example 2: content=config
+
+To retrieve only the configuration child resources,
+the "content" parameter is set to "config" or omitted
+since this is the default value.  Note that the "ETag"
+and "Last-Modified" headers are only returned if
+the content parameter value is "config".
+
+   GET /restconf/data/example-events:events?content=config
+      HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+The server might respond:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Server: example-server
+   Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
+   ETag: eeeada438af
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Content-Type: application/yang.data+json
+
+   {
+     "example-events:events" : {
+       "event" : [
+         {
+           "name" : "interface-up",
+           "description" : "Interface up notification count"
+         },
+         {
+           "name" : "interface-down",
+           "description" : "Interface down notification count"
+         }
+       ]
+     }
+   }
+
+Example 3: content=nonconfig
+
+To retrieve only the non-configuration child resources,
+the "content" parameter is set to "nonconfig". Note
+that configuration ancestors (if any) and list key leafs
+(if any) are also returned.  The client might send:
+
+   GET /restconf/data/example-events:events?content=nonconfig
+      HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+The server might respond:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Content-Type: application/yang.data+json
+
+   {
+     "example-events:events" : {
+       "event" : [
+         {
+           "name" : "interface-up",
+           "event-count" : 42
+         },
+         {
+           "name" : "interface-down",
+           "event-count" : 4
+         }
+       ]
+     }
+   }
+
+
+*** "depth" Parameter
+
+The "depth" parameter is used to limit the number of levels
+of child resources that are returned by the server for
+a GET method request.
+
+This example shows how different values of the "depth"
+parameter would affect the reply content for
+retrieval of the top-level "jukebox" data resource.
+
+Example 1: depth=unbounded
+
+To retrieve all the child resources, the "depth" parameter
+is not present or set to the default value "unbounded".
+Note that some strings are wrapped for display purposes only.
+
+   GET /restconf/data/example-jukebox:jukebox?depth=unbounded
+      HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+The server might respond:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Content-Type: application/yang.data+json
+
+   {
+     "example-jukebox:jukebox" : {
+       "library" : {
+         "artist" : [
+           {
+             "name" : "Foo Fighters",
+             "album" : [
+               {
+                 "name" : "Wasting Light",
+                 "genre" : "example-jukebox:alternative",
+                 "year" : 2011,
+                 "song" : [
+                   {
+                     "name" : "Wasting Light",
+                     "location" :
+                       "/media/foo/a7/wasting-light.mp3",
+                     "format" : "MP3",
+                     "length" " 286
+                   },
+                   {
+                     "name" : "Rope",
+                     "location" : "/media/foo/a7/rope.mp3",
+                     "format" : "MP3",
+                     "length" " 259
+                   }
+                 ]
+               }
+             ]
+           }
+         ]
+       },
+       "playlist" : [
+         {
+           "name" : "Foo-One",
+           "description" : "example playlist 1",
+           "song" : [
+             {
+               "index" : 1,
+               "id" : "http://example.com/restconf/data/
+                     example-jukebox:jukebox/library/artist/
+                     Foo%20Fighters/album/Wasting%20Light/
+                     song/Rope"
+             },
+             {
+               "index" : 2,
+               "id" : "http://example.com/restconf/data/
+                     example-jukebox:jukebox/library/artist/
+                     Foo%20Fighters/album/Wasting%20Light/song/
+                     Bridge%20Burning"
+             }
+           ]
+         }
+       ],
+       "player" : {
+         "gap" : 0.5
+       }
+     }
+   }
+
+Example 2: depth=1
+
+To determine if 1 or more resource instances exist for
+a given target resource, the value "1" is used.
+
+   GET /restconf/data/example-jukebox:jukebox?depth=1 HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+The server might respond:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Content-Type: application/yang.data+json
+
+   {
+     "example-jukebox:jukebox" : [null]
+   }
+
+Example 3: depth=3
+
+To limit the depth level to the target resource plus 2 child resource layers
+the value "3" is used.
+
+   GET /restconf/data/example-jukebox:jukebox?depth=3 HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+The server might respond:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Content-Type: application/yang.data+json
+
+   {
+     "example-jukebox:jukebox" : {
+       "library" : {
+         "artist" : [ null ]
+       },
+       "playlist" : [
+         {
+           "name" : "Foo-One",
+           "description" : "example playlist 1",
+           "song" : [ null ]
+         }
+       ],
+       "player" : {
+         "gap" : 0.5
+       }
+     }
+   }
+
+*** "filter" Parameter @ex-filters@
+
+The following URIs show some examples of notification filter
+specifications (lines wrapped for display purposes only):
+
+   // filter = /event/eventClass='fault'
+   GET /restconf/streams/stream=NETCONF/events?
+      filter=%2Fevent%2FeventClass%3D'fault'
+
+   // filter = /event/severityCode<=4
+   GET /restconf/streams/stream=NETCONF/events?
+      filter=%2Fevent%2FseverityCode%3C%3D4
+
+   // filter = /linkUp|/linkDown
+   GET /restconf/streams/stream=SNMP/events?
+      filter=%2FlinkUp%7C%2FlinkDown
+
+   // filter = /*/reportingEntity/card!='Ethernet0'
+   GET /restconf/streams/stream=NETCONF/events?
+      filter=%2F*%2FreportingEntity%2Fcard%21%3D'Ethernet0'
+
+   // filter = /*/email-addr[contains(.,'company.com')]
+   GET /restconf/streams/stream=critical-syslog/events?
+      filter=%2F*%2Femail-addr[contains(.%2C'company.com')]
+
+   // Note: the module name is used as prefix.
+   // filter = (/example-mod:event1/name='joe' and
+   //           /example-mod:event1/status='online')
+   GET /restconf/streams/stream=NETCONF/events?
+     filter=(%2Fexample-mod%3Aevent1%2Fname%3D'joe'%20and
+             %20%2Fexample-mod%3Aevent1%2Fstatus%3D'online')
+
+*** "insert" Parameter
+
+In this example, a new first entry in the "Foo-One" playlist
+is being created.
+
+
+Request from client:
+
+   POST /restconf/data/example-jukebox:jukebox/
+     playlist=Foo-One?insert=first HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.data+json
+
+   {
+     "example-jukebox:song" : {
+        "index" : 1,
+        "id" : "/example-jukebox:jukebox/library/artist/
+            Foo%20Fighters/album/Wasting%20Light/song/Rope"
+      }
+   }
+
+Response from server:
+
+   HTTP/1.1 201 Created
+   Date: Mon, 23 Apr 2012 13:01:20 GMT
+   Server: example-server
+   Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
+   Location: http://example.com/restconf/data/
+      example-jukebox:jukebox/playlist=Foo-One/song=1
+   ETag: eeeada438af
+
+*** "point" Parameter
+
+Example:
+
+In this example, the client is inserting a new "song"
+resource within an "album" resource after another song.
+The request URI is split for display purposes only.
+
+Request from client:
+
+
+   POST /restconf/data/example-jukebox:jukebox/
+      library/artist/Foo%20Fighters/album/Wasting%20Light?
+      insert=after&point=%2Fexample-jukebox%3Ajukebox%2F
+      library%2Fartist%2FFoo%20Fighters%2Falbum%2F
+      Wasting%20Light%2Fsong%2FBridge%20Burning   HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.data+json
+
+   {
+     "example-jukebox:song" : {
+        "name" : "Rope",
+        "location" : "/media/foo/a7/rope.mp3",
+        "format" : "MP3",
+        "length" : 259
+     }
+   }
+
+
+Response from server:
+
+   HTTP/1.1 204 No Content
+   Date: Mon, 23 Apr 2012 13:01:20 GMT
+   Server: example-server
+   Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
+   ETag: abcada438af
+
+
+*** "select" Parameter
+
+In this example the client is retrieving the API resource, but
+selecting only the "name" and "revision" nodes
+from each module, in JSON format:
+
+   GET /restconf?select=modules/module(name;revision) HTTP/1.1
+   Host: example.com
+   Accept: application/yang.api+json,
+           application/yang.errors+json
+
+The server might respond as follows.
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Content-Type: application/yang.api+json
+
+   {
+     "ietf-restconf:restconf": {
+       "modules": {
+         "module": [
+           {
+             "name" : "example-jukebox",
+             "revision" : "2014-07-03"
+           }
+         ]
+       }
+     }
+   }
+
+
+*** "start-time" Parameter
+
+TBD
+
+*** "stop-time" Parameter
+
+TBD
+
+
+{{document:
+    name ;
+    ipr trust200902;
+    category std;
+    references restconf-back.xml;
+    title "RESTCONF Protocol";
+    abbreviation "RESTCONF";
+    contributor "author:Andy Bierman:YumaWorks:andy@yumaworks.com";
+    contributor "author:Martin Bjorklund:Tail-f Systems:mbj@tail-f.com";
+    contributor "author:Kent Watsen:Juniper Networks:kwatsen@juniper.net";
+    contributor "author:Rex Fernando:Cisco:rex@cisco.com";
+}}
