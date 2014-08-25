@@ -39,10 +39,10 @@ clean:
 	-rm -f $(draft).txt $(draft).html index.html
 	-rm -f $(next).txt $(next).html
 	-rm -f $(draft)-[0-9][0-9].xml
-ifeq (md,$(draft_type))
+ifeq (.md,$(draft_type))
 	-rm -f $(draft).xml
 endif
-ifeq (org,$(draft_type))
+ifeq (.org,$(draft_type))
 	-rm -f $(draft).xml
 endif
 
