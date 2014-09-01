@@ -28,9 +28,9 @@ next := $(draft)-$(next_ver)
 
 .PHONY: latest submit clean
 
-latest: $(draft).txt $(draft).html
-
 submit: $(next).txt
+
+latest: $(draft).txt $(draft).html
 
 idnits: $(next).txt
 	$(idnits) $<

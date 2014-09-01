@@ -1,4 +1,4 @@
-# -*- outline -*-
+# -*- org -*-
 
 This document describes an HTTP-based protocol that provides
 a programmatic interface for accessing data defined in YANG,
@@ -357,10 +357,10 @@ within the YANG modules advertised by the server
 are used to construct a predictable operation or data
 resource identifier.
 
-The "depth" query parameter can be used to control how many
-descendant levels should be included when retrieving
-child resources. This parameter can be used with the GET method
-to discover child resources within a particular resource.
+The "depth" query parameter (see ^depth^) can be used to control how
+many descendant levels should be included when retrieving child
+resources. This parameter can be used with the GET method to discover
+child resources within a particular resource.
 
 ** API Resource @api-resource@
 
@@ -419,7 +419,7 @@ Example:
 This example request by the client
 would retrieve only the non-configuration data nodes
 that exist within the "library" resource, using the "content"
-query parameter.
+query parameter (see ^content^).
 
    GET /restconf/data/example-jukebox:jukebox/library
       ?content=nonconfig  HTTP/1.1
@@ -635,10 +635,6 @@ The "path" component of the request URI contains the
 absolute path expression that identifies the
 target resource.
 
-#The "select" query parameter is
-#used to optionally identify the requested data nodes
-#within the target resource to be retrieved in a GET method.
-
 A predictable location for a data resource
 is important, since applications will code to the YANG
 data model module, which uses static naming and defines an
@@ -650,10 +646,6 @@ data node, according to the "api-path" rule in ^path-abnf^.
 The node name of each ancestor of the target resource node
 is encoded in order, ending with the node name for the
 target resource.
-
-#If the "select" is present, it is encoded,
-#starting with a child node of the target resource,
-#according to the "api-select" rule defined in ^path-abnf^.
 
 If a data node in the path expression is a YANG list node,
 then the key values for the list (if any) MUST be encoded
@@ -667,7 +659,7 @@ by having the list name followed by an "=" followed by the single key
 leaf value.
 
 - If there are multiple key leaf values, the value of each leaf
-identified in the "key" statement is encoded 
+identified in the "key" statement is encoded
 in the order specified in the YANG "key" statement, with a
 comma separating them.
 
@@ -1168,9 +1160,8 @@ The only target resource media type that supports PUT is the data
 resource. The message body is expected to contain the
 content used to create or replace the target resource.
 
-The "insert" and "point" query parameters are supported
-by the PUT method for data resources,
-as specified in the YANG definition in ^module^.
+The "insert" (^insert^) and "point" (^point^) query parameters are
+supported by the PUT method for data resources.
 
 Consistent with ^RFC2616^, if the PUT request creates a new resource,
 a "201 Created" Status-Line is returned.   If an existing resource
@@ -1328,12 +1319,203 @@ Query parameters can be given in any order.
 Each parameter can appear at most once in a request URI.
 A default value may apply if the parameter is missing.
 
-The semantics and syntax for all query parameters are
-defined in the "query-parameters" YANG grouping in ^module^.
-The YANG encoding MUST be converted to URL-encoded string
-for use in the request URI.
-
 Refer to ^ex-query^ for examples of query parameter usage.
+
+*** The "content" Query Parameter @content@
+
+The "content" parameter controls how descendant nodes of
+the requested data nodes will be processed in the reply.
+
+The allowed values are:
+
+| Value     | Description                                         |
+|-----------+-----------------------------------------------------|
+| config    | Return only configuration descendant data nodes     |
+| nonconfig | Return only non-configuration descendant data nodes |
+| all       | Return all descendant data nodes                    |
+
+This parameter is only allowed for GET methods on datastore and data
+resources.  A 400 Bad Request error is returned if used for other
+methods or resource types.
+
+The default value is determined by the "config" statement value of the
+requested data nodes.  If the "config" value is "false", then the
+default for the "content" parameter is "nonconfig".  If "config" is
+"true" then the default for the "content" parameter is "config".
+
+*** The "depth" Query Parameter @depth@
+
+The "depth" parameter is used to specify the number of nest levels
+returned in a response for a GET method.  The first nest-level
+consists of the requested data node itself.  Any child nodes which are
+contained within a parent node have a depth value that is 1 greater
+than its parent.
+
+The value of the "depth" parameter is either an integer between 1 and
+65535, or the string "unbounded".  "unbounded" is the default.
+
+This parameter is only allowed for GET methods on API, datastore, and
+data resources.  A 400 Bad Request error is returned if it used for
+other methods or resource types.
+
+By default, the server will include all sub-resources within a
+retrieved resource, which have the same resource type as the requested
+resource.  Only one level of sub-resources with a different media type
+than the target resource will be returned.
+
+*** The "select" Query Parameter @select@
+
+The "select" query parameter is used to optionally identify
+data nodes within the target resource to be retrieved in a
+GET method.  The client can use this parameter to retrieve
+a subset of all nodes in a resource.
+
+A value of the "select" query parameter matches the
+following rule:
+
+  select-expr = path '(' select-expr / '*' ')' /
+                path ';' select-expr /
+                path
+  path = api-identifier [ '/' path ]
+
+"api-identifier" is defined in ^path-abnf^.
+
+";" is used to select multiple nodes.  For example, to
+retreive only the "genre" and "year" of an album, use:
+"select=genre;year".
+
+Parentheses are used to specify sub-selectors of a node.
+For example, to retreive only the "label" and
+"catalogue-number" of an album, use:
+"select=admin(label;catalogue-number)".
+
+"/" is used in a path to retreive a child node of a node.
+For example, to retreive only the "label" of an album, use:
+"select=admin/label".
+
+This parameter is only allowed for GET methods on api,
+datastore, and data resources.  A 400 Bad Request error
+is returned if used for other methods or resource types.
+
+*** The "insert" Query Parameter @insert@
+
+The "insert" parameter is used to specify how a
+resource should be inserted within a user-ordered list.
+
+The allowed values are:
+
+| Value  | Description                                                                                         |
+|--------+-----------------------------------------------------------------------------------------------------|
+| first  | Insert the new data as the new first entry.                                                         |
+| last   | Insert the new data as the new last entry.                                                          |
+| before | Insert the new data before the insertion point, as specified by the value of the "point" parameter. |
+| after  | Insert the new data after the insertion point, as specified by the value of the "point" parameter.  |
+
+The default value is "last".
+
+This parameter is only supported for the POST and PUT
+methods. It is also only supported if the target
+resource is a data resource, and that data represents
+a YANG list or leaf-list that is ordered by the user.
+
+If the values "before" or "after" are used,
+then a "point" query parameter for the insertion
+parameter MUST also be present, or a 400 Bad Request
+error is returned.
+
+*** The "point" Query Parameter @point@
+
+The "point" parameter is used to specify the
+insertion point for a data resource that is being
+created or moved within a user ordered list or leaf-list.
+
+The value of the "point" parameter is of type
+"data-resource-identifier", defined in the "ietf-restconf" YANG module
+^module^.
+
+This parameter is only supported for the POST and PUT
+methods. It is also only supported if the target
+resource is a data resource, and that data represents
+a YANG list or leaf-list that is ordered by the user.
+
+If the "insert" query parameter is not present, or has
+a value other than "before" or "after", then a 400
+Bad Request error is returned.
+
+This parameter contains the instance identifier of the
+resource to be used as the insertion point for a
+POST or PUT method.
+
+*** The "filter" Query Parameter @filter@
+
+The "filter" parameter is used to indicate which subset of
+all possible events are of interest.  If not present, all
+events not precluded by other parameters will be sent.
+
+This parameter is only allowed for GET methods on a
+text/event-stream data resource.  A 400 Bad Request error
+is returned if used for other methods or resource types.
+
+The format of this parameter is an XPath 1.0 expression, and is
+evaluated in the following context:
+
+-  The set of namespace declarations is the set of
+   prefix and namespace pairs for all supported YANG
+   modules, where the prefix is the YANG module name, and
+   the namespace is as defined by the "namespace" statement
+   in the YANG module.
+-  The function library is the core function library defined
+   in XPath 1.0.
+-  The set of variable bindings is empty.
+-  The context node is the root node.
+
+The filter is used as defined in ^RFC5277^, section 3.6.
+If the boolean result of the expression is true when applied
+to the conceptual "notification" document root, then the
+notification event is delivered to the client.
+
+*** The "start-time" Query Parameter
+
+The "start-time" parameter is used to trigger
+the notification replay feature and indicate
+that the replay should start at the time specified.
+If the stream does not support replay, per the
+"replay-support" attribute returned by
+the /restconf/streams resource, then the server MUST
+return the HTTP error code 400 Bad Request.
+
+The value of the "start-time" parameter is of type
+"date-and-time", defined in the "ietf-yang" YANG module
+^RFC6991^.
+
+This parameter is only allowed for GET methods on a
+text/event-stream data resource.  A 400 Bad Request error
+is returned if used for other methods or resource types.
+
+If this parameter is not present, then a replay subscription
+is not begin requested.  It is not valid to specify start
+times that are later than the current time.  If the value
+specified is earlier than the log can support, the replay
+will begin with the earliest available notification.
+
+*** The "stop-time" Query Parameter
+
+The "stop-time" parameter is used with the
+replay feature to indicate the newest notifications of
+interest.  This parameter MUST be used with and have a
+value later than the "start-time" parameter.
+
+The value of the "stop-time" parameter is of type
+"date-and-time", defined in the "ietf-yang" YANG module
+^RFC6991^.
+
+This parameter is only allowed for GET methods on a
+text/event-stream data resource.  A 400 Bad Request error
+is returned if used for other methods or resource types.
+
+If this parameter is not present, the notifications will
+continue until the subscription is terminated.
+Values in the future are valid.
 
 * Messages @messages@
 
@@ -2497,7 +2679,7 @@ header.  The server might respond:
    Last-Modified: Mon, 23 Apr 2012 17:45:00 GMT
    ETag: b34aed893a4c
 
-** Query String Parameter Examples @ex-query@
+** Query Parameter Examples @ex-query@
 
 *** "content" Parameter
 
@@ -2633,7 +2815,6 @@ The server might respond:
        ]
      }
    }
-
 
 *** "depth" Parameter
 
@@ -2785,37 +2966,36 @@ The server might respond:
      }
    }
 
-*** "filter" Parameter @ex-filters@
+*** "select" Parameter
 
-The following URIs show some examples of notification filter
-specifications (lines wrapped for display purposes only):
+In this example the client is retrieving the API resource, but
+selecting only the "name" and "revision" nodes
+from each module, in JSON format:
 
-   // filter = /event/eventClass='fault'
-   GET /restconf/streams/stream=NETCONF/events?
-      filter=%2Fevent%2FeventClass%3D'fault'
+   GET /restconf?select=modules/module(name;revision) HTTP/1.1
+   Host: example.com
+   Accept: application/yang.api+json,
+           application/yang.errors+json
 
-   // filter = /event/severityCode<=4
-   GET /restconf/streams/stream=NETCONF/events?
-      filter=%2Fevent%2FseverityCode%3C%3D4
+The server might respond as follows.
 
-   // filter = /linkUp|/linkDown
-   GET /restconf/streams/stream=SNMP/events?
-      filter=%2FlinkUp%7C%2FlinkDown
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Content-Type: application/yang.api+json
 
-   // filter = /*/reportingEntity/card!='Ethernet0'
-   GET /restconf/streams/stream=NETCONF/events?
-      filter=%2F*%2FreportingEntity%2Fcard%21%3D'Ethernet0'
-
-   // filter = /*/email-addr[contains(.,'company.com')]
-   GET /restconf/streams/stream=critical-syslog/events?
-      filter=%2F*%2Femail-addr[contains(.%2C'company.com')]
-
-   // Note: the module name is used as prefix.
-   // filter = (/example-mod:event1/name='joe' and
-   //           /example-mod:event1/status='online')
-   GET /restconf/streams/stream=NETCONF/events?
-     filter=(%2Fexample-mod%3Aevent1%2Fname%3D'joe'%20and
-             %20%2Fexample-mod%3Aevent1%2Fstatus%3D'online')
+   {
+     "ietf-restconf:restconf": {
+       "modules": {
+         "module": [
+           {
+             "name" : "example-jukebox",
+             "revision" : "2014-07-03"
+           }
+         ]
+       }
+     }
+   }
 
 *** "insert" Parameter
 
@@ -2885,38 +3065,37 @@ Response from server:
    Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
    ETag: abcada438af
 
+*** "filter" Parameter @ex-filters@
 
-*** "select" Parameter
+The following URIs show some examples of notification filter
+specifications (lines wrapped for display purposes only):
 
-In this example the client is retrieving the API resource, but
-selecting only the "name" and "revision" nodes
-from each module, in JSON format:
+   // filter = /event/eventClass='fault'
+   GET /restconf/streams/stream=NETCONF/events?
+      filter=%2Fevent%2FeventClass%3D'fault'
 
-   GET /restconf?select=modules/module(name;revision) HTTP/1.1
-   Host: example.com
-   Accept: application/yang.api+json,
-           application/yang.errors+json
+   // filter = /event/severityCode<=4
+   GET /restconf/streams/stream=NETCONF/events?
+      filter=%2Fevent%2FseverityCode%3C%3D4
 
-The server might respond as follows.
+   // filter = /linkUp|/linkDown
+   GET /restconf/streams/stream=SNMP/events?
+      filter=%2FlinkUp%7C%2FlinkDown
 
-   HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
-   Server: example-server
-   Content-Type: application/yang.api+json
+   // filter = /*/reportingEntity/card!='Ethernet0'
+   GET /restconf/streams/stream=NETCONF/events?
+      filter=%2F*%2FreportingEntity%2Fcard%21%3D'Ethernet0'
 
-   {
-     "ietf-restconf:restconf": {
-       "modules": {
-         "module": [
-           {
-             "name" : "example-jukebox",
-             "revision" : "2014-07-03"
-           }
-         ]
-       }
-     }
-   }
+   // filter = /*/email-addr[contains(.,'company.com')]
+   GET /restconf/streams/stream=critical-syslog/events?
+      filter=%2F*%2Femail-addr[contains(.%2C'company.com')]
 
+   // Note: the module name is used as prefix.
+   // filter = (/example-mod:event1/name='joe' and
+   //           /example-mod:event1/status='online')
+   GET /restconf/streams/stream=NETCONF/events?
+     filter=(%2Fexample-mod%3Aevent1%2Fname%3D'joe'%20and
+             %20%2Fexample-mod%3Aevent1%2Fstatus%3D'online')
 
 *** "start-time" Parameter
 
