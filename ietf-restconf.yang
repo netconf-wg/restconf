@@ -25,10 +25,7 @@ module ietf-restconf {
                <mailto:mbj@tail-f.com>
 
      Editor:   Kent Watsen
-               <mailto:kwatsen@juniper.net>
-
-     Editor:   Rex Fernando
-               <mailto:rex@cisco.com>";
+               <mailto:kwatsen@juniper.net>";
 
   description
     "This module contains conceptual YANG specifications

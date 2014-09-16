@@ -2218,6 +2218,10 @@ Note that authorization information can be exchanged in the form of
 configuration information, which is all the more reason to ensure the
 security of the connection.
 
+* Acknowledgements
+
+The authors would like to thank for following for lively discussions
+on list and in the halls (ordered by last name): Rex Fernando
 
 *! start-appendix
 
@@ -3116,5 +3120,4 @@ TBD
     contributor "author:Andy Bierman:YumaWorks:andy@yumaworks.com";
     contributor "author:Martin Bjorklund:Tail-f Systems:mbj@tail-f.com";
     contributor "author:Kent Watsen:Juniper Networks:kwatsen@juniper.net";
-    contributor "author:Rex Fernando:Cisco:rex@cisco.com";
 }}
