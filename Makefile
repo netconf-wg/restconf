@@ -54,7 +54,7 @@ $(next).xml: $(draft).xml
 	$(kramdown-rfc2629) $< > $@
 
 %.xml: %.org
-	$(oxtradoc) -m outline-to-xml -n "$@" $< > $@
+	$(oxtradoc) -m outline-to-xml -n "$(basename $<)-latest" $< > $@
 
 %.txt: %.xml
 	$(xml2rfc) $< -o $@ --text
