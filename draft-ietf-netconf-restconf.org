@@ -234,9 +234,7 @@ datastore.
 - edit operation: a RESTCONF operation on a data resource
 using the POST, PUT, PATCH, or DELETE method.
 
-- event stream resource: a resource with the media type
-"application/yang.stream+xml" or
-"application/yang.stream+json". This resource represents
+- event stream resource: This resource represents
 an SSE (Server-Sent Events) event stream. The content consists of text
 using the media type "text/event-stream", as defined by the HTML5
 specification. Each event represents
@@ -344,7 +342,6 @@ resource types are defined in RESTCONF:
 !! row  ! Errors      ! application/yang.errors
 !! row  ! Operation   ! application/yang.operation
 !! row  ! Schema      ! application/yang
-!! row  ! Stream      ! application/yang.stream
 
 ** Resource Discovery @resource-discovery@
 
@@ -373,26 +370,7 @@ YANG Tree Diagram for "application/yang.api" Resource Type:
 
    +--rw restconf
       +--rw data
-      +--rw modules
-      |  +--rw module* [name revision]
-      |     +--rw name         yang:yang-identifier
-      |     +--rw revision     union
-      |     +--rw schema?      empty
-      |     +--rw namespace    inet:uri
-      |     +--rw feature*     yang:yang-identifier
-      |     +--rw deviation*   yang:yang-identifier
-      |     +--rw submodule* [name revision]
-      |        +--rw name        yang:yang-identifier
-      |        +--rw revision    union
-      |        +--rw schema?     empty
       +--rw operations
-      +--rw streams
-         +--rw stream* [name]
-            +--rw name                        string
-            +--rw description?                string
-            +--rw replay-support?             boolean
-            +--rw replay-log-creation-time?   yang:date-and-time
-            +--rw events?                     empty
 
 The "restconf" container definition in the "ietf-restconf" module
 defined in ^module^ is used to specify the structure and syntax
@@ -444,43 +422,6 @@ The server might respond:
      }
    }
 
-*** {+restconf}/modules
-
-This mandatory resource contains the identifiers
-for the YANG data model modules supported by the server.
-
-The server MUST maintain a last-modified timestamp for this
-resource, and return the "Last-Modified" header when this
-resource is retrieved with the GET or HEAD methods.
-
-The server SHOULD maintain an entity-tag for this
-resource, and return the "ETag" header when this
-resource is retrieved with the GET or HEAD methods.
-
-**** {+restconf}/modules/module
-
-This mandatory resource contains one list entry
-for each YANG data model module supported by the server.
-There MUST be an instance of this resource for every
-YANG module that is accessible via an operation resource
-or a data resource.
-
-The contents of the "module" resource are defined in
-the "module" YANG list statement in ^module^.
-
-The server MAY maintain a last-modified timestamp for
-each instance of this resource, and return the
-"Last-Modified" header when this resource is retrieved
-with the GET or HEAD methods.  If not supported
-then the timestamp for the parent "modules" resource
-MAY be used instead.
-
-The server MAY maintain an entity-tag for each instance
-of this resource, and return the "ETag" header when this
-resource is retrieved with the GET or HEAD methods.
-If not supported then the timestamp for the
-parent "modules" resource MAY be used instead.
-
 *** {+restconf}/operations
 
 This optional resource is a container that provides access to the
@@ -494,21 +435,6 @@ as child nodes of this resource.
 
 Operation resources are defined in ^operation-resource^.
 
-*** {+restconf}/streams
-
-This optional resource is a container that provides access to the
-notification event streams supported by the server.
-The server MAY omit this resource if no
-notification event streams are supported.
-The media type for this resource is "application/yang.api".
-
-The server will populate this container with a stream list entry for
-each stream type it supports.  Each stream contains a leaf
-called "events" which represents an event stream resource.
-The media type for this resource is "application/yang.stream".
-
-Stream resources are defined in ^stream-resource^.
-Notifications are defined in ^notifications^.
 
 ** Datastore Resource @datastore-resource@
 
@@ -875,14 +801,14 @@ The server might respond:
 If the server supports the "schema" leaf within the API then
 the client can retrieve the YANG schema text for the associated
 YANG module or submodule, using the GET method.
-
+First the client needs to retrieve the URL for retrieving the schema.
 
 The client might send the following GET request message:
 
    GET /restconf/modules/module=example-jukebox,2014-07-03/schema
       HTTP/1.1
    Host: example.com
-   Accept: application/yang,
+   Accept: application/yang.data+json,
            application/yang.errors+json
 
 
@@ -892,7 +818,25 @@ The server might respond:
    HTTP/1.1 200 OK
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
-   Content-Type: application/yang
+   Content-Type: application/yang.data+json
+
+   {
+     "schema":
+      "http://example.com/mymodules/example-jukebox/2014-07-03"
+   }
+
+Next the client needs to retrieve the actual YANG schema.
+
+The client might send the following GET request message:
+
+   GET http://example.com/mymodules/example-jukebox/2014-07-03
+      HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+
+The server might respond:
 
    module example-jukebox {
 
@@ -901,6 +845,7 @@ The server might respond:
 
       // rest of YANG module content deleted...
    }
+
 
 ** Stream Resource @stream-resource@
 
@@ -1321,6 +1266,32 @@ A default value may apply if the parameter is missing.
 
 Refer to ^ex-query^ for examples of query parameter usage.
 
+*** Query Parameter URIs
+
+A new capability template called "queryparm" is defined to 
+identify the specific revisions of each query parameter
+supported by the server.
+
+Each :queryparm capability URI has the following format:
+
+    urn:ietf:params:restconf:capability:<name>:<version>
+
+The "<name>" field is replaced with the name of the query parameter.
+Vendors SHOULD use a prefix for query parameter names in order
+to avoid collisions with other parameters.
+The "<version>" field is replaced with the version number of the query.
+
+!! table RESTCONF Query Parameter URIs
+!! head ! Name ! URI
+!! row  ! content ! urn:ietf:params:restconf:capability:content:1.0
+!! row  ! depth ! urn:ietf:params:restconf:capability:depth:1.0
+!! row  ! filter ! urn:ietf:params:restconf:capability:filter:1.0
+!! row  ! insert ! urn:ietf:params:restconf:capability:insert:1.0
+!! row  ! point ! urn:ietf:params:restconf:capability:point:1.0
+!! row  ! select ! urn:ietf:params:restconf:capability:select:1.0
+!! row  ! start-time ! urn:ietf:params:restconf:capability:start-time:1.0
+!! row  ! stop-time ! urn:ietf:params:restconf:capability:stop-time:1.0
+
 *** The "content" Query Parameter @content@
 
 The "content" parameter controls how descendant nodes of
@@ -1343,6 +1314,10 @@ requested data nodes.  If the "config" value is "false", then the
 default for the "content" parameter is "nonconfig".  If "config" is
 "true" then the default for the "content" parameter is "config".
 
+If this query parameter is supported by the server, then the
+"content" query parameter URI MUST be listed in the "capability" leaf-list
+in ^mon-mod^.
+
 *** The "depth" Query Parameter @depth@
 
 The "depth" parameter is used to specify the number of nest levels
@@ -1362,6 +1337,10 @@ By default, the server will include all sub-resources within a
 retrieved resource, which have the same resource type as the requested
 resource.  Only one level of sub-resources with a different media type
 than the target resource will be returned.
+
+If this query parameter is supported by the server, then the
+"depth" query parameter URI MUST be listed in the "capability" leaf-list
+in ^mon-mod^.
 
 *** The "select" Query Parameter @select@
 
@@ -1397,6 +1376,10 @@ This parameter is only allowed for GET methods on api,
 datastore, and data resources.  A 400 Bad Request error
 is returned if used for other methods or resource types.
 
+If this query parameter is supported by the server, then the
+"select" query parameter URI MUST be listed in the "capability" leaf-list
+in ^mon-mod^.
+
 *** The "insert" Query Parameter @insert@
 
 The "insert" parameter is used to specify how a
@@ -1423,6 +1406,11 @@ then a "point" query parameter for the insertion
 parameter MUST also be present, or a 400 Bad Request
 error is returned.
 
+If this query parameter is supported by the server, then the
+"insert" query parameter URI MUST be listed in the "capability" leaf-list
+in ^mon-mod^. The "point" query parameter MUST also be supported
+by the server.
+
 *** The "point" Query Parameter @point@
 
 The "point" parameter is used to specify the
@@ -1445,6 +1433,11 @@ Bad Request error is returned.
 This parameter contains the instance identifier of the
 resource to be used as the insertion point for a
 POST or PUT method.
+
+If this query parameter is supported by the server, then the
+"point" query parameter URI MUST be listed in the "capability" leaf-list
+in ^mon-mod^. The "insert" query parameter MUST also be supported
+by the server.
 
 *** The "filter" Query Parameter @filter@
 
@@ -1474,6 +1467,10 @@ If the boolean result of the expression is true when applied
 to the conceptual "notification" document root, then the
 notification event is delivered to the client.
 
+If this query parameter is supported by the server, then the
+"filter" query parameter URI MUST be listed in the "capability" leaf-list
+in ^mon-mod^.
+
 *** The "start-time" Query Parameter
 
 The "start-time" parameter is used to trigger
@@ -1493,10 +1490,15 @@ text/event-stream data resource.  A 400 Bad Request error
 is returned if used for other methods or resource types.
 
 If this parameter is not present, then a replay subscription
-is not begin requested.  It is not valid to specify start
+is not being requested.  It is not valid to specify start
 times that are later than the current time.  If the value
 specified is earlier than the log can support, the replay
 will begin with the earliest available notification.
+
+If this query parameter is supported by the server, then the
+"start-time" query parameter URI MUST be listed in the "capability" leaf-list
+in ^mon-mod^. The "stop-time" query parameter MUST also be supported
+by the server.
 
 *** The "stop-time" Query Parameter
 
@@ -1516,6 +1518,11 @@ is returned if used for other methods or resource types.
 If this parameter is not present, the notifications will
 continue until the subscription is terminated.
 Values in the future are valid.
+
+If this query parameter is supported by the server, then the
+"stop-time" query parameter URI MUST be listed in the "capability" leaf-list
+in ^mon-mod^. The "start-time" query parameter MUST also be supported
+by the server.
 
 * Messages @messages@
 
@@ -1567,8 +1574,14 @@ is the API itself, represented by the media type "application/yang.api".
 
 - query: the set of parameters associated with the RESTCONF
 message. These have the familiar form of "name=value" pairs.
+All query parameters are optional to implement by the server
+and optional to use by the client. Each query parameter is
+identified by a URI. The server MUST list the
+query parameter URIs it supports in the "capabilities"
+list defined in ^mon-mod^.
+
 There is a specific set of parameters defined,
-although the server MAY choose to support additional
+although the server MAY choose to support query
 parameters not defined in this document.
 The contents of the any query parameter value MUST be encoded
 according to ^RFC2396^, section 3.4. Any reserved characters
@@ -1762,11 +1775,12 @@ code is returned (e.g., 404 Not Found).
 A RESTCONF server that supports notifications will populate a
 stream resource for each notification delivery service access point.
 A RESTCONF client can retrieve the list of supported event streams from
-a RESTCONF server using the GET operation on the "{+restconf}/streams"
-resource.
+a RESTCONF server using the GET operation on the 
+"restconf-state/streams" data resource defined in ^mon-mod^.
 
-The "{+restconf}/streams" container definition in the "ietf-restconf" module
-defined in ^module^ is used to specify the structure and syntax
+The "restconf-state/streams" container definition in
+the "ietf-restconf-monitoring" module
+(defined in ^mon-mod^) is used to specify the structure and syntax
 of the conceptual child resources within the "streams" resource.
 
 For example:
@@ -1774,9 +1788,9 @@ For example:
 The client might send the following request:
 
 
-   GET /restconf/streams HTTP/1.1
+   GET /restconf/data/restconf-state/streams HTTP/1.1
    Host: example.com
-   Accept: application/yang.api+xml,
+   Accept: application/yang.data+xml,
            application/yang.errors+xml
 
 
@@ -1786,7 +1800,8 @@ The server might send the following response:
    HTTP/1.1 200 OK
    Content-Type: application/yang.api+xml
 
-   <streams xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
+   <streams
+     xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
       <stream>
          <name>NETCONF</name>
          <description>default NETCONF event stream
@@ -1795,13 +1810,13 @@ The server might send the following response:
          <replay-log-creation-time>
             2007-07-08T00:00:00Z
          </replay-log-creation-time>
-         <events/>
+         <events>http://example.com/streams/NETCONF</events>
       </stream>
       <stream>
          <name>SNMP</name>
          <description>SNMP notifications</description>
          <replay-support>false</replay-support>
-         <events/>
+         <events>http://example.com/streams/SNMP</events>
       </stream>
       <stream>
          <name>syslog-critical</name>
@@ -1811,15 +1826,23 @@ The server might send the following response:
          <replay-log-creation-time>
             2007-07-01T00:00:00Z
          </replay-log-creation-time>
-         <events/>
+         <events>http://example.com/streams/syslog-critical</events>
       </stream>
    </streams>
 
 ** Subscribing to Receive Notifications @receive-notifs@
 
-RESTCONF clients can subscribe to receive notifications by sending an
-HTTP GET request for the "{+restconf}/streams/stream/<stream-name>" resource,
-with the "Accept" type "text/event-stream".
+RESTCONF clients can determine the URL for the subscription resource
+(to receive notifications) by sending an
+HTTP GET request for the 
+"{+restconf}/streams/stream/<stream-name>/events" data resource.
+
+The value returned by the server can be used for the actual
+notification subscription.
+
+The client will send an HTTP GET request for the URL returned
+by the server with the "Accept" type "text/event-stream".
+
 The server will treat the connection as an event stream, using the
 Server Sent Events ^wd-eventsource^ transport strategy.
 
@@ -1828,18 +1851,40 @@ resource.  These parameters are specific to each notification stream.
 
 For example:
 
-   GET /restconf/streams/stream=NETCONF/events HTTP/1.1
+The client might send the following request:
+
+
+   GET /restconf/data/restconf-state/streams/stream=NETCONF/events
+      HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+xml,
+           application/yang.errors+xml
+
+
+The server might send the following response:
+
+   HTTP/1.1 200 OK
+   Content-Type: application/yang.api+xml
+
+   <ietf-restconf-monitoring:events
+     xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
+     http://example.com/streams/NETCONF
+   </events>
+
+
+The RESTCONF client can then use this URL value to start
+monitoring the event stream:
+
+   GET /streams/NETCONF HTTP/1.1
    Host: example.com
    Accept: text/event-stream
    Cache-Control: no-cache
    Connection: keep-alive
 
-
 A RESTCONF client MAY request the server compress the events using
 the HTTP header field "Accept-Encoding".  For instance:
 
-
-   GET /restconf/streams/stream=NETCONF/events HTTP/1.1
+   GET /streams/NETCONF HTTP/1.1
    Host: example.com
    Accept: text/event-stream
    Cache-Control: no-cache
@@ -1852,7 +1897,9 @@ the HTTP header field "Accept-Encoding".  For instance:
 The server SHOULD support the "NETCONF" notification stream
 defined in ^RFC5277^.  For this stream,
 RESTCONF notification subscription requests MAY specify parameters
-indicating the events it wishes to receive.
+indicating the events it wishes to receive. These query parameters
+are optional to implement, and only available if the server supports
+them.
 
 !! table NETCONF Stream Query Parameters
 !! head ! Name ! Description
@@ -2082,11 +2129,126 @@ The server might respond:
      }
    }
 
+
+
+
 * RESTCONF module @module@
 
 The "ietf-restconf" module defines conceptual definitions
 within groupings, which are not meant to be implemented
 as datastore contents by a server.
+
+The "ietf-yang-types" module from ^RFC6991^
+is used by this module for some type definitions.
+
+RFC Ed.: update the date below with the date of RFC publication and
+remove this note.
+
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2014-09-26.yang"
+
+
+* RESTCONF Monitoring
+
+The "ietf-restconf-monitoring" module provides information about
+the YANG modules and notification event streams available from the
+server.  It is a "plain" YANG module, however implementation is
+mandatory for RESTCONF servers.
+
+YANG Tree Diagram for "ietf-restconf-monitoring" module:
+
+   +--ro restconf-state
+      +--ro capabilities
+      |  +--ro capability*   inet:uri
+      +--ro modules
+      |  +--ro module* [name revision]
+      |     +--ro name         yang:yang-identifier
+      |     +--ro revision     union
+      |     +--ro schema?      inet:uri
+      |     +--ro namespace    inet:uri
+      |     +--ro feature*     yang:yang-identifier
+      |     +--ro deviation*   yang:yang-identifier
+      |     +--ro submodule* [name revision]
+      |        +--ro name        yang:yang-identifier
+      |        +--ro revision    union
+      |        +--ro schema?     inet:uri
+      +--ro streams
+         +--ro stream* [name]
+            +--ro name                        string
+            +--ro description?                string
+            +--ro replay-support?             boolean
+            +--ro replay-log-creation-time?   yang:date-and-time
+            +--ro events                      inet:uri
+
+
+** restconf-state/capabilities
+
+This mandatory container holds the RESTCONF
+protocol capability URIs supported by the server.
+
+The server MUST maintain a last-modified timestamp for this
+container, and return the "Last-Modified" header when this
+data node is retrieved with the GET or HEAD methods.
+
+The server SHOULD maintain an entity-tag for this
+container, and return the "ETag" header when this
+data node is retrieved with the GET or HEAD methods.
+
+** restconf-state/modules
+
+This mandatory container holds the identifiers
+for the YANG data model modules supported by the server.
+
+The server MUST maintain a last-modified timestamp for this
+container, and return the "Last-Modified" header when this
+data node is retrieved with the GET or HEAD methods.
+
+The server SHOULD maintain an entity-tag for this
+container, and return the "ETag" header when this
+data node is retrieved with the GET or HEAD methods.
+
+*** restconf-state/modules/module
+
+This mandatory list contains one entry
+for each YANG data model module supported by the server.
+There MUST be an instance of this list for every
+YANG module that is accessible via an operation resource
+or a data resource.
+
+The contents of the "module" list are defined in
+the "module" YANG list statement in ^module^.
+
+The server MAY maintain a last-modified timestamp for
+each instance of this list entry, and return the
+"Last-Modified" header when this data node is retrieved
+with the GET or HEAD methods.  If not supported
+then the timestamp for the parent "modules" container
+MAY be used instead.
+
+The server MAY maintain an entity-tag for each instance
+of this list entry, and return the "ETag" header when this
+data node is retrieved with the GET or HEAD methods.
+If not supported then the timestamp for the
+parent "modules" container MAY be used instead.
+
+** restconf-state/streams
+
+This optional container provides access to the
+notification event streams supported by the server.
+The server MAY omit this container if no
+notification event streams are supported.
+
+The server will populate this container with a stream list entry for
+each stream type it supports.  Each stream contains a leaf
+called "events" which contains a URI that
+represents an event stream resource.
+
+Stream resources are defined in ^stream-resource^.
+Notifications are defined in ^notifications^.
+
+** RESTCONF Monitoring Module @mon-mod@
+
+The "ietf-restconf-monitoring" module defines monitoring
+information for the RESTCONF protocol.
 
 The "ietf-yang-types" and "ietf-inet-types" modules from ^RFC6991^
 are used by this module for some type definitions.
@@ -2094,7 +2256,9 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2014-07-03.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2014-09-26.yang"
+
+
 
 * IANA Considerations @iana@
 
@@ -2130,7 +2294,7 @@ Relation Type Registry defined by ^RFC5988^:
 `
 ** YANG Module Registry
 
-This document registers one URI in the IETF XML registry
+This document registers two URIs in the IETF XML registry
 ^RFC3688^. Following the format in RFC 3688, the following
 registration is requested to be made.
 
@@ -2138,12 +2302,22 @@ registration is requested to be made.
      Registrant Contact: The NETMOD WG of the IETF.
      XML: N/A, the requested URI is an XML namespace.
 
-This document registers one YANG module in the YANG Module Names
+     URI: urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring
+     Registrant Contact: The NETMOD WG of the IETF.
+     XML: N/A, the requested URI is an XML namespace.
+
+This document registers two YANG modules in the YANG Module Names
 registry ^RFC6020^.
 
   name:         ietf-restconf
   namespace:    urn:ietf:params:xml:ns:yang:ietf-restconf
   prefix:       rc
+  // RFC Ed.: replace XXXX with RFC number and remove this note
+  reference:    RFC XXXX
+
+  name:         ietf-restconf-monitoring
+  namespace:    urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring
+  prefix:       rcmon
   // RFC Ed.: replace XXXX with RFC number and remove this note
   reference:    RFC XXXX
 
@@ -2228,6 +2402,26 @@ on list and in the halls (ordered by last name): Rex Fernando
 * Change Log
 
     -- RFC Ed.: remove this section before publication.
+
+** 01 - 02
+
+- moved query parameter definitions from the YANG module
+back to the plain text sections
+
+- made all query parameters optional to implement
+
+- defined query parameter capability URI
+
+- moved 'modules' and 'streams' to new YANG module (ietf-restconf-monitoring)
+
+- changed 'schema' leaf to type inet:uri that returns the location
+of the YANG schema (instead of returning the schema directly)
+
+- changed 'events' leaf to type inet:uri that returns the location
+of the event stream resource (instead of returning events directly)
+
+- changed examples for yang.api resource since the monitoring information
+is no longer in this resource
 
 ** 00 - 01
 
@@ -2456,29 +2650,8 @@ The server might respond as follows:
    {
      "ietf-restconf:restconf": {
        "data" : [ null ],
-       "modules": {
-         "module": [
-           {
-             "name" : "example-jukebox",
-             "revision" : "2014-07-03",
-             "namespace" : "http://example.com/ns/example-jukebox",
-             "schema" : [ null ]
-           }
-         ]
-       },
        "operations" : {
           "play" : [ null ]
-       },
-       "streams" : {
-         "stream" : [
-           {
-             "name" : "NETCONF",
-             "description" : "default NETCONF event stream",
-             "replay-support" : true,
-             "replay-log-creation-time:" : "2007-07-08T00:00:00Z",
-             "events" : [ null ]
-           }
-         ]
        }
      }
    }
@@ -2504,42 +2677,20 @@ which might be as follows :
 
    <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <data/>
-     <modules>
-       <module>
-         <name>example-jukebox</name>
-         <revision>2014-07-03</revision>
-         <namespace>
-           http://example.com/ns/example-jukebox
-         </namespace>
-         <schema />
-       </module>
-     </modules>
      <operations>
        <play xmlns="http://example.com/ns/example-jukebox"/>
      </operations>
-     <streams>
-       <stream>
-         <name>NETCONF</name>
-         <description>default NETCONF event stream
-         </description>
-         <replay-support>true</replay-support>
-         <replay-log-creation-time>
-            2007-07-08T00:00:00Z
-         </replay-log-creation-time>
-         <events/>
-       </stream>
-     </streams>
    </restconf>
 
 
 *** Retrieve The Server Module Information
 
-In this example the client is retrieving the modules
-resource from the server in JSON format:
+In this example the client is retrieving the modules information
+from the server in JSON format:
 
-   GET /restconf/modules  HTTP/1.1
+   GET /restconf/data/restconf-state/modules  HTTP/1.1
    Host: example.com
-   Accept: application/yang.api+json,
+   Accept: application/yang.data+json,
            application/yang.errors+json
 
 
@@ -2551,10 +2702,10 @@ The server might respond as follows.
    Cache-Control: no-cache
    Pragma: no-cache
    Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
-   Content-Type: application/yang.api+json
+   Content-Type: application/yang.data+json
 
    {
-     "ietf-restconf:modules": {
+     "ietf-restconf-monitoring:modules": {
        "module": [
          {
            "name" : "foo",

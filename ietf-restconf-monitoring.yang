@@ -1,0 +1,225 @@
+module ietf-restconf-monitoring {
+  namespace "urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring";
+  prefix "rcmon";
+
+  import ietf-yang-types { prefix yang; }
+  import ietf-inet-types { prefix inet; }
+
+  organization
+    "IETF NETCONF (Network Configuration) Working Group";
+
+  contact
+    "WG Web:   <http://tools.ietf.org/wg/netconf/>
+     WG List:  <mailto:netconf@ietf.org>
+
+     WG Chair: Bert Wijnen
+               <mailto:bertietf@bwijnen.net>
+
+     WG Chair: Mehmet Ersue
+               <mailto:mehmet.ersue@nsn.com>
+
+     Editor:   Andy Bierman
+               <mailto:andy@yumaworks.com>
+
+     Editor:   Martin Bjorklund
+               <mailto:mbj@tail-f.com>
+
+     Editor:   Kent Watsen
+               <mailto:kwatsen@juniper.net>";
+
+  description
+    "This module contains monitoring information for the
+     RESTCONF protocol.
+
+     Copyright (c) 2014 IETF Trust and the persons identified as
+     authors of the code.  All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject
+     to the license terms contained in, the Simplified BSD License
+     set forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (http://trustee.ietf.org/license-info).
+
+     This version of this YANG module is part of RFC XXXX; see
+     the RFC itself for full legal notices.";
+
+  // RFC Ed.: replace XXXX with actual RFC number and remove this
+  // note.
+
+  // RFC Ed.: remove this note
+  // Note: extracted from draft-ietf-netconf-restconf-02.txt
+
+  // RFC Ed.: update the date below with the date of RFC publication
+  // and remove this note.
+  revision 2014-09-26 {
+    description
+      "Initial revision.";
+    reference
+      "RFC XXXX: RESTCONF Protocol.";
+  }
+
+  typedef revision-identifier {
+    type string {
+      pattern '\d{4}-\d{2}-\d{2}';
+    }
+    description
+      "Represents a specific date in YYYY-MM-DD format.
+       TBD: make pattern more precise to exclude leading zeros.";
+  }
+
+  container restconf-state {
+    config false;
+    description
+      "Contains RESTCONF protocol monitoring information.";
+
+    container capabilities {
+      description
+        "Contains a list of protocol capability URIs";
+
+      leaf-list capability {
+        type inet:uri;
+        description "A RESTCONF protocol capability URI.";
+      }
+    } 
+
+    grouping module {
+      description
+        "The module data structure is represented as a grouping
+         so it can be reused in configuration or another monitoring
+         data structure.";
+
+      grouping common-leafs {
+        description
+          "Common parameters for YANG modules and submodules.";
+
+        leaf name {
+          type yang:yang-identifier;
+          description "The YANG module or submodule name.";
+        }
+        leaf revision {
+          type union {
+            type revision-identifier;
+            type string { length 0; }
+          }
+          description
+            "The YANG module or submodule revision date.
+             An empty string is used if no revision statement
+             is present in the YANG module or submodule.";
+        }
+
+        leaf schema {
+          type inet:uri;
+          description
+            "Contains a URL that represents the YANG schema
+             resource for this module or submodule.
+
+             This leaf will only be present if there is a URL
+             avalable for retrieve the schema for this entry.";
+        }
+      }
+
+      list module {
+        key "name revision";
+        description
+          "Each entry represents one module currently
+           supported by the server.";
+
+        uses common-leafs;
+
+        leaf namespace {
+          type inet:uri;
+          mandatory true;
+          description
+            "The XML namespace identifier for this module.";
+        }
+        leaf-list feature {
+          type yang:yang-identifier;
+          description
+            "List of YANG feature names from this module that are
+             supported by the server.";
+        }
+        leaf-list deviation {
+          type yang:yang-identifier;
+          description
+            "List of YANG deviation module names used by this
+             server to modify the conformance of the module
+             associated with this entry.";
+        }
+
+        list submodule {
+          key "name revision";
+          description
+            "Each entry represents one submodule within the
+             parent module.";
+
+          uses common-leafs;
+        }
+      }
+    }
+
+    container modules {
+      description
+        "Contains a list of module description entries.
+         These modules are currently loaded into the server.";
+
+      uses module;
+    }
+
+    container streams {
+      description
+        "Container representing the notification event streams
+         supported by the server.";
+       reference
+         "RFC 5277, Section 3.4, <streams> element.";
+
+      list stream {
+        key name;
+        description
+          "Each entry describes an event stream supported by
+           the server.";
+
+        leaf name {
+          type string;
+          description "The stream name";
+          reference "RFC 5277, Section 3.4, <name> element.";
+        }
+
+        leaf description {
+          type string;
+          description "Description of stream content";
+          reference
+            "RFC 5277, Section 3.4, <description> element.";
+        }
+
+        leaf replay-support {
+          type boolean;
+          description
+            "Indicates if replay buffer supported for this stream";
+          reference
+            "RFC 5277, Section 3.4, <replaySupport> element.";
+        }
+
+        leaf replay-log-creation-time {
+          type yang:date-and-time;
+          description
+            "Indicates the time the replay log for this stream
+             was created.";
+          reference
+            "RFC 5277, Section 3.4, <replayLogCreationTime>
+             element.";
+        }
+
+        leaf events {
+          type inet:uri;
+          mandatory true;
+          description
+            "Contains a URL that represents the entry point
+             for establishing notification delivery via server
+             sent events.";
+        }
+      }
+    }
+  }
+
+}
