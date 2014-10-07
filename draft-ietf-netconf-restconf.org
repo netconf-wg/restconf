@@ -805,12 +805,11 @@ First the client needs to retrieve the URL for retrieving the schema.
 
 The client might send the following GET request message:
 
-   GET /restconf/modules/module=example-jukebox,2014-07-03/schema
-      HTTP/1.1
+   GET /restconf/data/modules/module=
+      example-jukebox,2014-07-03/schema HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json,
            application/yang.errors+json
-
 
 The server might respond:
 
@@ -2130,13 +2129,13 @@ The server might respond:
    }
 
 
-
-
 * RESTCONF module @module@
 
 The "ietf-restconf" module defines conceptual definitions
 within groupings, which are not meant to be implemented
-as datastore contents by a server.
+as datastore contents by a server. The "restconf" container
+is not intended to be implemented as a top-level data node
+(under the "/restconf/data" entry point).
 
 The "ietf-yang-types" module from ^RFC6991^
 is used by this module for some type definitions.
@@ -2144,33 +2143,22 @@ is used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2014-09-26.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2014-10-07.yang"
 
 
 * RESTCONF Monitoring
 
 The "ietf-restconf-monitoring" module provides information about
-the YANG modules and notification event streams available from the
-server.  It is a "plain" YANG module, however implementation is
-mandatory for RESTCONF servers.
+the RESTCONF protocol capabilities and notification event streams
+available from the server.  Implementation is
+mandatory for RESTCONF servers, if any protocol capabilities
+or notification event streams are supported.
 
 YANG Tree Diagram for "ietf-restconf-monitoring" module:
 
    +--ro restconf-state
       +--ro capabilities
       |  +--ro capability*   inet:uri
-      +--ro modules
-      |  +--ro module* [name revision]
-      |     +--ro name         yang:yang-identifier
-      |     +--ro revision     union
-      |     +--ro schema?      inet:uri
-      |     +--ro namespace    inet:uri
-      |     +--ro feature*     yang:yang-identifier
-      |     +--ro deviation*   yang:yang-identifier
-      |     +--ro submodule* [name revision]
-      |        +--ro name        yang:yang-identifier
-      |        +--ro revision    union
-      |        +--ro schema?     inet:uri
       +--ro streams
          +--ro stream* [name]
             +--ro name                        string
@@ -2192,43 +2180,6 @@ data node is retrieved with the GET or HEAD methods.
 The server SHOULD maintain an entity-tag for this
 container, and return the "ETag" header when this
 data node is retrieved with the GET or HEAD methods.
-
-** restconf-state/modules
-
-This mandatory container holds the identifiers
-for the YANG data model modules supported by the server.
-
-The server MUST maintain a last-modified timestamp for this
-container, and return the "Last-Modified" header when this
-data node is retrieved with the GET or HEAD methods.
-
-The server SHOULD maintain an entity-tag for this
-container, and return the "ETag" header when this
-data node is retrieved with the GET or HEAD methods.
-
-*** restconf-state/modules/module
-
-This mandatory list contains one entry
-for each YANG data model module supported by the server.
-There MUST be an instance of this list for every
-YANG module that is accessible via an operation resource
-or a data resource.
-
-The contents of the "module" list are defined in
-the "module" YANG list statement in ^module^.
-
-The server MAY maintain a last-modified timestamp for
-each instance of this list entry, and return the
-"Last-Modified" header when this data node is retrieved
-with the GET or HEAD methods.  If not supported
-then the timestamp for the parent "modules" container
-MAY be used instead.
-
-The server MAY maintain an entity-tag for each instance
-of this list entry, and return the "ETag" header when this
-data node is retrieved with the GET or HEAD methods.
-If not supported then the timestamp for the
-parent "modules" container MAY be used instead.
 
 ** restconf-state/streams
 
@@ -2256,8 +2207,82 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2014-09-26.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2014-10-07.yang"
 
+* YANG Module Library
+
+The "ietf-yang-library" module provides information about
+the YANG modules and submodules used by the RESTCONF server.
+Implementation is mandatory for RESTCONF servers.
+All YANG modules and submodules used by the server MUST
+be identified in the YANG module library.
+
+YANG Tree Diagram for "ietf-yang-library" module:
+
+  +--ro modules
+      +--ro module-set-id?   string
+      +--ro module* [name revision]
+         +--ro name           yang:yang-identifier
+         +--ro revision       union
+         +--ro schema?        inet:uri
+         +--ro namespace      inet:uri
+         +--ro feature*       yang:yang-identifier
+         +--ro deviation*     yang:yang-identifier
+         +--ro conformance    boolean
+         +--ro submodules
+            +--ro submodule* [name revision]
+               +--ro name        yang:yang-identifier
+               +--ro revision    union
+               +--ro schema?     inet:uri
+
+** modules
+
+This mandatory container holds the identifiers
+for the YANG data model modules supported by the server.
+
+The server MUST maintain a last-modified timestamp for this
+container, and return the "Last-Modified" header when this
+data node is retrieved with the GET or HEAD methods.
+
+The server SHOULD maintain an entity-tag for this
+container, and return the "ETag" header when this
+data node is retrieved with the GET or HEAD methods.
+
+*** modules/module
+
+This mandatory list contains one entry
+for each YANG data model module supported by the server.
+There MUST be an instance of this list for every
+YANG module that is used by the server.
+
+The contents of the "module" list are defined in
+the "module" YANG list statement in ^library-module^.
+
+The server MAY maintain a last-modified timestamp for
+each instance of this list entry, and return the
+"Last-Modified" header when this data node is retrieved
+with the GET or HEAD methods.  If not supported
+then the timestamp for the parent "modules" container
+MAY be used instead.
+
+The server MAY maintain an entity-tag for each instance
+of this list entry, and return the "ETag" header when this
+data node is retrieved with the GET or HEAD methods.
+If not supported then the timestamp for the
+parent "modules" container MAY be used instead.
+
+** YANG Library Module @library-module@
+
+The "ietf-yang-library" module defines monitoring
+information for the YANG modules used by a RESTCONF server.
+
+The "ietf-yang-types" and "ietf-inet-types" modules from ^RFC6991^
+are used by this module for some type definitions.
+
+RFC Ed.: update the date below with the date of RFC publication and
+remove this note.
+
+!! include-figure ietf-yang-library.yang extract-to="ietf-yang-library@2014-10-07.yang"
 
 
 * IANA Considerations @iana@
@@ -2294,7 +2319,7 @@ Relation Type Registry defined by ^RFC5988^:
 `
 ** YANG Module Registry
 
-This document registers two URIs in the IETF XML registry
+This document registers three URIs in the IETF XML registry
 ^RFC3688^. Following the format in RFC 3688, the following
 registration is requested to be made.
 
@@ -2306,7 +2331,11 @@ registration is requested to be made.
      Registrant Contact: The NETMOD WG of the IETF.
      XML: N/A, the requested URI is an XML namespace.
 
-This document registers two YANG modules in the YANG Module Names
+     URI: urn:ietf:params:xml:ns:yang:ietf-yang-library
+     Registrant Contact: The NETMOD WG of the IETF.
+     XML: N/A, the requested URI is an XML namespace.
+
+This document registers three YANG modules in the YANG Module Names
 registry ^RFC6020^.
 
   name:         ietf-restconf
@@ -2318,6 +2347,12 @@ registry ^RFC6020^.
   name:         ietf-restconf-monitoring
   namespace:    urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring
   prefix:       rcmon
+  // RFC Ed.: replace XXXX with RFC number and remove this note
+  reference:    RFC XXXX
+
+  name:         ietf-yang-library
+  namespace:    urn:ietf:params:xml:ns:yang:ietf-yang-library
+  prefix:       yanglib
   // RFC Ed.: replace XXXX with RFC number and remove this note
   reference:    RFC XXXX
 
@@ -2412,7 +2447,15 @@ back to the plain text sections
 
 - defined query parameter capability URI
 
-- moved 'modules' and 'streams' to new YANG module (ietf-restconf-monitoring)
+- moved 'streams' to new YANG module (ietf-restconf-monitoring)
+
+- added 'capabilities' container to new YANG module (ietf-restconf-monitoring)
+
+- moved 'modules' to new YANG module (ietf-yang-library)
+
+- added new leaf 'module-set-id' (ietf-yang-library)
+
+- added new leaf 'conformance' (ietf-yang-library)
 
 - changed 'schema' leaf to type inet:uri that returns the location
 of the YANG schema (instead of returning the schema directly)
@@ -2422,6 +2465,13 @@ of the event stream resource (instead of returning events directly)
 
 - changed examples for yang.api resource since the monitoring information
 is no longer in this resource
+
+- closed issue #1 'select parameter' since no objections to the proposed
+syntax
+
+- closed "encoding of list keys" issue since no objection to new encoding
+of list keys in a target resource URI.
+
 
 ** 00 - 01
 
@@ -2470,15 +2520,6 @@ for the specific data.
 
     -- RFC Ed.: remove this section before publication.
 
-** select parameter
-
-- What syntax should be used for the "select" query parameter?
-The current choices are "XPath" and "path-expr".  Perhaps an additional
-parameter to identify the select string format is needed
-to allow extensibility?
-
-Status: solution proposal added by Martin.
-
 ** netconf-state monitoring support
 
 - Should long-term RESTCONF operations (i.e. SSE long-poll)
@@ -2495,6 +2536,26 @@ to the netconf-state sub-tree.  The session-id in
 this new data structure is not restricted to the
 NETCONF-only rules for the sessions sub-tree.
 
+Update -02:
+
+There is a desire to identify all admin sessions, however a
+layered approach is needed which allows generic session
+reporting, plus protocol-specific extensions.
+Not all server implementations can detect HTTP sessions.
+It is possible that session information can be derived
+from the TLS transport layer.
+
+The streams data structure is moved from the ietf-restconf
+module to the ietf-restconf-monitoring module.
+
+Session monitoring for RESTCONF will not be added to the netconf-state
+data structure in RFC 6022.  There are too many objects
+(such as NETCONF-specific counters) that do not apply
+to RESTCONF.
+
+RESTCONF session monitoring will not be added to ietf-restconf-monitoring
+at this time.
+
 ** secure transport
 
 - Details to support secure operation over TLS are needed
@@ -2507,31 +2568,11 @@ Status: closed
 
 - Can call-home for RESTCONF be supported
 
-Status: open
+Update -02:
 
-** Encoding of key leafs in resource URIs
-
-- The use of a forward slash '/' as the delimiter between
-key values in a target resource URI is not not desirable.
-Only 1 segment per YANG data node layer should be used.
-
-Status: open
-
-Proposals:
-
-Example: list foo, int8 keys X and Y
-
-Old:
-
-  /restconf/data/foo/19/22/foo-leaf
-
-New:
-
-  /restconf/data/foo=19,22/foo-leaf
-
-Or:
-
-  /restconf/data/foo/19,22/foo-leaf
+Status: closed-pending; Callhome will not support RESTCONF at this time.
+The exact requirements for extracting user identity and session
+information from TLS is still TBD. (Issue #9 on the issue tracker)
 
 ** get-bulk query parameters
 
@@ -2542,6 +2583,11 @@ Status: solution proposal pending
 
 Resolution: This bulk retrieval mechanism will be added.
 
+Update-02:
+
+The work will not be part of RESTCONF. An additional RFC
+will be needed to enhance the basic retrieval features.
+
 ** defaults handling
 
 - The client does not really know what sort of defaults
@@ -2551,6 +2597,12 @@ If so, should it be mandatory-to-implement?
 
 Status: open
 
+Update-02:
+
+This work will not be part of RESTCONF. The "with-defaults"
+capability from RFC 6243 may be adapted as a query parameter.
+The server should advertisre its basic mode in the capabilities list.
+
 ** protocol capability URIs
 
 - The client does not know what vendor extensions (if any)
@@ -2559,7 +2611,13 @@ a read-only container of capability URIs to identify protocol extensions?
 The NETMOD WG may also want to extend the protocol in the future
 without updating the core RESTCONF RFC.
 
-Status: open
+Status: proposal added
+
+Update-02:
+
+
+The capabilities container has been added to the ietf-restconf-monitoring
+module
 
 ** target resource list keys required for GET
 
@@ -2688,7 +2746,7 @@ which might be as follows :
 In this example the client is retrieving the modules information
 from the server in JSON format:
 
-   GET /restconf/data/restconf-state/modules  HTTP/1.1
+   GET /restconf/data/modules  HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json,
            application/yang.errors+json
@@ -2705,43 +2763,90 @@ The server might respond as follows.
    Content-Type: application/yang.data+json
 
    {
-     "ietf-restconf-monitoring:modules": {
+     "ietf-yang-library:modules": {
        "module": [
          {
            "name" : "foo",
            "revision" : "2012-01-02",
-           "schema" : [null],
+           "schema" : "http://example.com/mymodules/foo/2012-01-02",
            "namespace" : "http://example.com/ns/foo",
-           "feature" : [ "feature1", "feature2" ]
+           "feature" : [ "feature1", "feature2" ],
+           "conformance" : true
          },
          {
            "name" : "foo-types",
            "revision" : "2012-01-05",
+           "schema" :
+             "http://example.com/mymodules/foo-types/2012-01-05",
            "schema" : [null],
-           "namespace" : "http://example.com/ns/foo-types"
+           "namespace" : "http://example.com/ns/foo-types",
+           "conformance" : false
          },
          {
            "name" : "bar",
            "revision" : "2012-11-05",
-           "schema" : [null],
+           "schema" : "http://example.com/mymodules/bar/2012-11-05",
            "namespace" : "http://example.com/ns/bar",
            "feature" : [ "bar-ext" ],
+           "conformance" : true,
            "submodule" : [
              {
                "name" : "bar-submod1",
                "revision" : "2012-11-05",
-               "schema" : [null]
+               "schema" :
+                "http://example.com/mymodules/bar-submod1/2012-11-05"
              },
              {
                "name" : "bar-submod2",
                "revision" : "2012-11-05",
-               "schema" : [null]
+               "schema" :
+                "http://example.com/mymodules/bar-submod2/2012-11-05"
              }
            ]
          }
        ]
      }
    }
+
+
+*** Retrieve The Server Capability Information
+
+In this example the client is retrieving the capability information
+from the server in JSON format, and the server supports all
+the RESTCONF query parameters, plus one vendor parameter:
+
+   GET /restconf/data/restconf-state/capabilities  HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+
+The server might respond as follows.
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:02:00 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
+   Content-Type: application/yang.data+json
+
+   {
+     "ietf-restconf-monitoring:capabilities": {
+       "capability": [
+         "urn:ietf:params:restconf:capability:content:1.0",
+         "urn:ietf:params:restconf:capability:depth:1.0",
+         "urn:ietf:params:restconf:capability:filter:1.0",
+         "urn:ietf:params:restconf:capability:insert:1.0",
+         "urn:ietf:params:restconf:capability:point:1.0",
+         "urn:ietf:params:restconf:capability:select:1.0",
+         "urn:ietf:params:restconf:capability:start-time:1.0",
+         "urn:ietf:params:restconf:capability:stop-time:1.0",
+         "http://example.com/capabilities/myparam"
+       ]
+     }
+   }
+
 
 ** Edit Resource Examples
 
@@ -3127,9 +3232,9 @@ In this example the client is retrieving the API resource, but
 selecting only the "name" and "revision" nodes
 from each module, in JSON format:
 
-   GET /restconf?select=modules/module(name;revision) HTTP/1.1
+   GET /restconf/data?select=modules/module(name;revision) HTTP/1.1
    Host: example.com
-   Accept: application/yang.api+json,
+   Accept: application/yang.data+json,
            application/yang.errors+json
 
 The server might respond as follows.
@@ -3137,18 +3242,24 @@ The server might respond as follows.
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
-   Content-Type: application/yang.api+json
+   Content-Type: application/yang.data+json
 
    {
-     "ietf-restconf:restconf": {
-       "modules": {
-         "module": [
-           {
-             "name" : "example-jukebox",
-             "revision" : "2014-07-03"
-           }
-         ]
-       }
+     "ietf-yang-library:modules": {
+       "module": [
+         {
+           "name" : "example-jukebox",
+           "revision" : "2014-07-03"
+         },
+         {
+           "name" : "ietf-restconf-monitoring",
+           "revision" : "2014-10-07"
+         },
+         {
+           "name" : "ietf-yang-library",
+           "revision" : "2014-10-07"
+         }
+       ]
      }
    }
 
@@ -3226,29 +3337,29 @@ The following URIs show some examples of notification filter
 specifications (lines wrapped for display purposes only):
 
    // filter = /event/eventClass='fault'
-   GET /restconf/streams/stream=NETCONF/events?
+   GET /mystreams/stream=NETCONF/events?
       filter=%2Fevent%2FeventClass%3D'fault'
 
    // filter = /event/severityCode<=4
-   GET /restconf/streams/stream=NETCONF/events?
+   GET /mystreams/stream=NETCONF/events?
       filter=%2Fevent%2FseverityCode%3C%3D4
 
    // filter = /linkUp|/linkDown
-   GET /restconf/streams/stream=SNMP/events?
+   GET /mystreams/stream=SNMP/events?
       filter=%2FlinkUp%7C%2FlinkDown
 
    // filter = /*/reportingEntity/card!='Ethernet0'
-   GET /restconf/streams/stream=NETCONF/events?
+   GET /mystreams/stream=NETCONF/events?
       filter=%2F*%2FreportingEntity%2Fcard%21%3D'Ethernet0'
 
    // filter = /*/email-addr[contains(.,'company.com')]
-   GET /restconf/streams/stream=critical-syslog/events?
+   GET /mystreams/stream=critical-syslog/events?
       filter=%2F*%2Femail-addr[contains(.%2C'company.com')]
 
    // Note: the module name is used as prefix.
    // filter = (/example-mod:event1/name='joe' and
    //           /example-mod:event1/status='online')
-   GET /restconf/streams/stream=NETCONF/events?
+   GET /mystreams/stream=NETCONF/events?
      filter=(%2Fexample-mod%3Aevent1%2Fname%3D'joe'%20and
              %20%2Fexample-mod%3Aevent1%2Fstatus%3D'online')
 
