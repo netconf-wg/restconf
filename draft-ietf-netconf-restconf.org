@@ -378,12 +378,10 @@ of the conceptual child resources within the API resource.
 
 This resource has the following child resources:
 
-!! table RESTCONF Resources
+!! table RESTCONF API Resource
 !! head ! Child Resource ! Description
 !! row  ! data           ! Contains all data resources
-!! row  ! modules        ! YANG module information
 !! row  ! operations     ! Data-model specific operations
-!! row  ! streams        ! Notification event streams
 
 *** {+restconf}/data
 
@@ -1266,20 +1264,22 @@ A default value may apply if the parameter is missing.
 
 Refer to ^ex-query^ for examples of query parameter usage.
 
+If vendors define additional query parameters, they SHOULD use a
+prefix (such ass the enterprise or organization name) for query
+parameter names in order to avoid collisions with other parameters.
+
 *** Query Parameter URIs
 
-A new capability template called "queryparm" is defined to 
-identify the specific revisions of each query parameter
-supported by the server.
+A new set of capabilities are defined to identify the specific
+revisions of each query parameter supported by the server.
 
-Each :queryparm capability URI has the following format:
+Each such capability URI has the following format:
 
     urn:ietf:params:restconf:capability:<name>:<version>
 
 The "<name>" field is replaced with the name of the query parameter.
-Vendors SHOULD use a prefix for query parameter names in order
-to avoid collisions with other parameters.
-The "<version>" field is replaced with the version number of the query.
+The "<version>" field is replaced with the version number of the query
+parameter.
 
 !! table RESTCONF Query Parameter URIs
 !! head ! Name ! URI
