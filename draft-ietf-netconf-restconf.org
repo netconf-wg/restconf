@@ -1264,21 +1264,13 @@ A default value may apply if the parameter is missing.
 Refer to ^ex-query^ for examples of query parameter usage.
 
 If vendors define additional query parameters, they SHOULD use a
-prefix (such ass the enterprise or organization name) for query
+prefix (such as the enterprise or organization name) for query
 parameter names in order to avoid collisions with other parameters.
 
 *** Query Parameter URIs
 
-A new set of capabilities are defined to identify the specific
-revisions of each query parameter supported by the server.
-
-Each such capability URI has the following format:
-
-    urn:ietf:params:restconf:capability:<name>:<version>
-
-The "<name>" field is replaced with the name of the query parameter.
-The "<version>" field is replaced with the version number of the query
-parameter.
+A new set of NETCONF Capability URNs are defined to identify the specific
+query parameters supported by the server.
 
 !! table RESTCONF Query Parameter URIs
 !! head ! Name ! URI
@@ -1286,10 +1278,8 @@ parameter.
 !! row  ! depth ! urn:ietf:params:restconf:capability:depth:1.0
 !! row  ! filter ! urn:ietf:params:restconf:capability:filter:1.0
 !! row  ! insert ! urn:ietf:params:restconf:capability:insert:1.0
-!! row  ! point ! urn:ietf:params:restconf:capability:point:1.0
 !! row  ! select ! urn:ietf:params:restconf:capability:select:1.0
-!! row  ! start-time ! urn:ietf:params:restconf:capability:start-time:1.0
-!! row  ! stop-time ! urn:ietf:params:restconf:capability:stop-time:1.0
+!! row  ! replay ! urn:ietf:params:restconf:capability:replay:1.0
 
 *** The "content" Query Parameter @content@
 
@@ -1433,10 +1423,10 @@ This parameter contains the instance identifier of the
 resource to be used as the insertion point for a
 POST or PUT method.
 
-If this query parameter is supported by the server, then the
-"point" query parameter URI MUST be listed in the "capability" leaf-list
-in ^mon-mod^. The "insert" query parameter MUST also be supported
-by the server.
+If the server includes the "insert" query parameter URI in
+the "capability" leaf-list in ^mon-mod^, then the "point"
+query parameter MUST be supported.
+
 
 *** The "filter" Query Parameter @filter@
 
@@ -1495,13 +1485,13 @@ specified is earlier than the log can support, the replay
 will begin with the earliest available notification.
 
 If this query parameter is supported by the server, then the
-"start-time" query parameter URI MUST be listed in the "capability" leaf-list
+"replay" query parameter URI MUST be listed in the "capability" leaf-list
 in ^mon-mod^. The "stop-time" query parameter MUST also be supported
 by the server.
 
 If the "replay-support" leaf is present in the "stream"
 entry (defined in ^mon-mod^) then the server MUST support
-the "start-time" query parameter for that stream.
+the "start-time" and "stop-time" query parameters for that stream.
 
 *** The "stop-time" Query Parameter
 
@@ -1523,13 +1513,13 @@ continue until the subscription is terminated.
 Values in the future are valid.
 
 If this query parameter is supported by the server, then the
-"stop-time" query parameter URI MUST be listed in the "capability" leaf-list
+"replay" query parameter URI MUST be listed in the "capability" leaf-list
 in ^mon-mod^. The "start-time" query parameter MUST also be supported
 by the server.
 
 If the "replay-support" leaf is present in the "stream"
 entry (defined in ^mon-mod^) then the server MUST support
-the "stop-time" query parameter for that stream.
+the "start-time" and "stop-time" query parameters for that stream.
 
 * Messages @messages@
 
@@ -2394,6 +2384,36 @@ sub-types for this media type.
    // RFC Ed.: replace XXXX with RFC number and remove this note
    Published specification: RFC XXXX
 
+** NETCONF Capability URNs
+
+This document registers several capability identifiers in
+"Network Configuration Protocol (NETCONF) Capability URNs"
+registry
+
+
+  Index
+     Capability Identifier
+  ------------------------
+
+  :content
+      urn:ietf:params:restconf:capability:content:1.0
+
+  :depth
+      urn:ietf:params:restconf:capability:depth:1.0
+
+  :filter
+      urn:ietf:params:restconf:capability:filter:1.0
+
+  :insert
+      urn:ietf:params:restconf:capability:insert:1.0
+
+  :select
+      urn:ietf:params:restconf:capability:select:1.0
+
+  :replay
+      urn:ietf:params:restconf:capability:replay:1.0
+
+
 * Security Considerations
 
 This section provides security considerations for the resources
@@ -2480,6 +2500,7 @@ syntax
 - closed "encoding of list keys" issue since no objection to new encoding
 of list keys in a target resource URI.
 
+- moved open issues list to the issue tracker on github
 
 ** 00 - 01
 
@@ -2528,116 +2549,9 @@ for the specific data.
 
     -- RFC Ed.: remove this section before publication.
 
-** netconf-state monitoring support
+The RESTCONF issues are tracked on github.com:
 
-- Should long-term RESTCONF operations (i.e. SSE long-poll)
-be considered sessions with regards to NETCONF monitoring "session" list?
-If so, what text is needed in RESTCONF draft to standardize
-the RESTCONF session entries?
-
-Status: closed-update-pending
-
-Resolution:
-
-A new data structure to monitor streams can be added
-to the netconf-state sub-tree.  The session-id in
-this new data structure is not restricted to the
-NETCONF-only rules for the sessions sub-tree.
-
-Update -02:
-
-There is a desire to identify all admin sessions, however a
-layered approach is needed which allows generic session
-reporting, plus protocol-specific extensions.
-Not all server implementations can detect HTTP sessions.
-It is possible that session information can be derived
-from the TLS transport layer.
-
-The streams data structure is moved from the ietf-restconf
-module to the ietf-restconf-monitoring module.
-
-Session monitoring for RESTCONF will not be added to the netconf-state
-data structure in RFC 6022.  There are too many objects
-(such as NETCONF-specific counters) that do not apply
-to RESTCONF.
-
-RESTCONF session monitoring will not be added to ietf-restconf-monitoring
-at this time.
-
-** secure transport
-
-- Details to support secure operation over TLS are needed
-
-Status: closed
-
-- Security considerations need to be written
-
-Status: closed
-
-- Can call-home for RESTCONF be supported
-
-Update -02:
-
-Status: closed-pending; Callhome will not support RESTCONF at this time.
-The exact requirements for extracting user identity and session
-information from TLS is still TBD. (Issue #9 on the issue tracker)
-
-** get-bulk query parameters
-
-- New query parameters (e.g., offset, limit) are needed
-to retrieve a limited number of list instances.
-
-Status: solution proposal pending
-
-Resolution: This bulk retrieval mechanism will be added.
-
-Update-02:
-
-The work will not be part of RESTCONF. An additional RFC
-will be needed to enhance the basic retrieval features.
-
-** defaults handling
-
-- The client does not really know what sort of defaults
-the server will return in GET replies.  Should the
-with-defaults query parameter be added to RESTCONF?
-If so, should it be mandatory-to-implement?
-
-Status: open
-
-Update-02:
-
-This work will not be part of RESTCONF. The "with-defaults"
-capability from RFC 6243 may be adapted as a query parameter.
-The server should advertise its basic mode in the capabilities list.
-
-** protocol capability URIs
-
-- The client does not know what vendor extensions (if any)
-are implemented by the server. Should the server provide
-a read-only container of capability URIs to identify protocol extensions?
-The NETMOD WG may also want to extend the protocol in the future
-without updating the core RESTCONF RFC.
-
-Status: proposal added
-
-Update-02:
-
-
-The capabilities container has been added to the ietf-restconf-monitoring
-module
-
-** target resource list keys required for GET
-
-- Should the client be able to GET all or a subset of all list instances
-by issuing a GET without any list keys for the target resource list?
-
-  GET /restconf/data/interfaces/interface
-
-- Should a "collection" resource be required in order for such a request
-to be considered valid by the server.
-
-Status: open
+   https://github.com/netconf-wg/restconf/issues
 
 * Example YANG Module
 
