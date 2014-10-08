@@ -1359,16 +1359,16 @@ following rule:
 "api-identifier" is defined in ^path-abnf^.
 
 ";" is used to select multiple nodes.  For example, to
-retreive only the "genre" and "year" of an album, use:
+retrieve only the "genre" and "year" of an album, use:
 "select=genre;year".
 
 Parentheses are used to specify sub-selectors of a node.
-For example, to retreive only the "label" and
+For example, to retrieve only the "label" and
 "catalogue-number" of an album, use:
 "select=admin(label;catalogue-number)".
 
-"/" is used in a path to retreive a child node of a node.
-For example, to retreive only the "label" of an album, use:
+"/" is used in a path to retrieve a child node of a node.
+For example, to retrieve only the "label" of an album, use:
 "select=admin/label".
 
 This parameter is only allowed for GET methods on api,
@@ -2609,7 +2609,7 @@ Update-02:
 
 This work will not be part of RESTCONF. The "with-defaults"
 capability from RFC 6243 may be adapted as a query parameter.
-The server should advertisre its basic mode in the capabilities list.
+The server should advertise its basic mode in the capabilities list.
 
 ** protocol capability URIs
 

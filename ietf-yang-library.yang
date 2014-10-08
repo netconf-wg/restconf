@@ -100,7 +100,7 @@ module ietf-yang-library {
            resource for this module or submodule.
 
            This leaf will only be present if there is a URL
-           avalable for retrieval of the schema for this entry.";
+           available for retrieval of the schema for this entry.";
       }
     }
 
