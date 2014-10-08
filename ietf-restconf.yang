@@ -66,6 +66,7 @@ module ietf-restconf {
       "RFC XXXX: RESTCONF Protocol.";
   }
 
+
   typedef data-resource-identifier {
     type string {
       length "1 .. max";
@@ -93,6 +94,7 @@ module ietf-restconf {
     reference
       "RFC XXXX: [sec. 5.3.1.1 ABNF For Data Resource Identifiers]";
   }
+
 
   grouping errors {
     description
@@ -187,41 +189,45 @@ module ietf-restconf {
     }
   } // grouping errors
 
-  container restconf {
-    description
-      "Conceptual container representing the
-       application/yang.api resource type.";
 
-    container data {
+  grouping restconf {
+    container restconf {
       description
-        "Container representing the application/yang.datastore
-         resource type. Represents the conceptual root of all
-         operational data and configuration data supported by
-         the server.  The child nodes of this container can be
-         any data resource (application/yang.data), which are
-         defined as top-level data nodes from the YANG modules
-         advertised by the server in the ietf-restconf-monitoring
-         module.";
-    }
+        "Conceptual container representing the
+         application/yang.api resource type.";
 
-    container operations {
-      description
-        "Container for all operation resources
-         (application/yang.operation),
+      container data {
+        description
+          "Container representing the application/yang.datastore
+           resource type. Represents the conceptual root of all
+           operational data and configuration data supported by
+           the server.  The child nodes of this container can be
+           any data resource (application/yang.data), which are
+           defined as top-level data nodes from the YANG modules
+           advertised by the server in the ietf-restconf-monitoring
+           module.";
+      }
 
-         Each resource is represented as an empty leaf with the
-         name of the RPC operation from the YANG rpc statement.
+      container operations {
+        description
+          "Container for all operation resources
+           (application/yang.operation),
 
-         E.g.;
+           Each resource is represented as an empty leaf with the
+           name of the RPC operation from the YANG rpc statement.
 
-            POST /restconf/operations/show-log-errors
+           E.g.;
 
-            leaf show-log-errors {
-              type empty;
-            }
-        ";
-    }
-  } // container restconf
+              POST /restconf/operations/show-log-errors
+
+              leaf show-log-errors {
+                type empty;
+              }
+          ";
+      }
+    } // container restconf
+  } // grouping restconf
+
 
   grouping notification {
     description

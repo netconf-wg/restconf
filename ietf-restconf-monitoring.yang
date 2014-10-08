@@ -103,12 +103,15 @@ module ietf-restconf-monitoring {
         leaf replay-support {
           type boolean;
           description
-            "Indicates if replay buffer supported for this stream";
+            "Indicates if replay buffer supported for this stream.
+             If 'true', then the server MUST support the 'start-time'
+             and 'stop-time' query parameters for this stream.";
           reference
             "RFC 5277, Section 3.4, <replaySupport> element.";
         }
 
         leaf replay-log-creation-time {
+          when "../replay-support";
           type yang:date-and-time;
           description
             "Indicates the time the replay log for this stream

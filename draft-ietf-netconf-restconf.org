@@ -372,7 +372,7 @@ YANG Tree Diagram for "application/yang.api" Resource Type:
       +--rw data
       +--rw operations
 
-The "restconf" container definition in the "ietf-restconf" module
+The "restconf" grouping definition in the "ietf-restconf" module
 defined in ^module^ is used to specify the structure and syntax
 of the conceptual child resources within the API resource.
 
@@ -1499,6 +1499,10 @@ If this query parameter is supported by the server, then the
 in ^mon-mod^. The "stop-time" query parameter MUST also be supported
 by the server.
 
+If the "replay-support" leaf is present in the "stream"
+entry (defined in ^mon-mod^) then the server MUST support
+the "start-time" query parameter for that stream.
+
 *** The "stop-time" Query Parameter
 
 The "stop-time" parameter is used with the
@@ -1522,6 +1526,10 @@ If this query parameter is supported by the server, then the
 "stop-time" query parameter URI MUST be listed in the "capability" leaf-list
 in ^mon-mod^. The "start-time" query parameter MUST also be supported
 by the server.
+
+If the "replay-support" leaf is present in the "stream"
+entry (defined in ^mon-mod^) then the server MUST support
+the "stop-time" query parameter for that stream.
 
 * Messages @messages@
 
@@ -2451,7 +2459,7 @@ back to the plain text sections
 
 - added 'capabilities' container to new YANG module (ietf-restconf-monitoring)
 
-- moved 'modules' to new YANG module (ietf-yang-library)
+- moved 'modules' container to new YANG module (ietf-yang-library)
 
 - added new leaf 'module-set-id' (ietf-yang-library)
 
