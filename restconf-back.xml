@@ -561,17 +561,17 @@ the Design of Network-based Software Architectures</title>
 <format type='TXT' octets='60242' target='http://www.rfc-editor.org/rfc/rfc6991.txt' />
 </reference>
 
-<reference anchor='wd-eventsource'>
-
-<front>
-<title>Server-Sent Events</title>
-<author initials='I.H.' surname='Hickson' fullname='Ian Hickson'>
-<organization>Google Inc.</organization></author>
-<date year='2012' month='December' />
-<abstract>
-<t>This specification defines an API for opening an HTTP connection for receiving push notifications from a server in the form of DOM events. The API is designed such that it can be extended to work with other push notification schemes such as Push SMS.</t></abstract></front>
-
-<format type='HTML' octets='73384' target='http://www.w3.org/TR/eventsource/' />
+<reference anchor="W3C.CR-eventsource-20121211"
+           target="http://www.w3.org/TR/2012/CR-eventsource-20121211">
+  <front>
+    <title>Server-Sent Events</title>
+    <author initials="I." surname="Hickson" fullname="Ian Hickson">
+      <organization/></author><date month="December" day="11" year="2012"/>
+  </front>
+  <seriesInfo name="World Wide Web Consortium CR"
+              value="CR-eventsource-20121211"/>
+  <format type="HTML"
+          target="http://www.w3.org/TR/2012/CR-eventsource-20121211"/>
 </reference>
 
 <reference anchor='W3C.REC-xml-20081126'

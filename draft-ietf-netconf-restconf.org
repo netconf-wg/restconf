@@ -1754,9 +1754,10 @@ for the target resource.
 
 * Notifications @notifications@
 
-The RESTCONF protocol supports YANG-defined event notifications.
-The solution preserves aspects of NETCONF Event Notifications ^RFC5277^
-while utilizing the Server-Sent Events ^wd-eventsource^ transport strategy.
+The RESTCONF protocol supports YANG-defined event notifications.  The
+solution preserves aspects of NETCONF Event Notifications ^RFC5277^
+while utilizing the Server-Sent Events ^W3C.CR-eventsource-20121211^
+transport strategy.
 
 ** Server Support
 
@@ -1841,7 +1842,7 @@ The client will send an HTTP GET request for the URL returned
 by the server with the "Accept" type "text/event-stream".
 
 The server will treat the connection as an event stream, using the
-Server Sent Events ^wd-eventsource^ transport strategy.
+Server Sent Events ^W3C.CR-eventsource-20121211^ transport strategy.
 
 The server MAY support query parameters for a GET method on this
 resource.  These parameters are specific to each notification stream.
