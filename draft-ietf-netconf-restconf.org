@@ -137,9 +137,8 @@ client opens a management session to a server.
 
 The RESTCONF protocol operates on a conceptual datastore defined with
 the YANG data modeling language.  The server lists each YANG
-module it supports under "{+restconf}/modules"
-in the top-level API resource type, using a structure based on
-the YANG module capability URI format defined in ^RFC6020^.
+module it supports under "/modules" defined in the "ietf-yang-library"
+YANG module.
 
 The conceptual datastore contents, data-model-specific
 operations and notification events are identified by this set of
@@ -277,6 +276,15 @@ can be retrieved by the client with the GET method.
 
 - YANG terminal node: a YANG node representing a leaf,
 leaf-list, or anyxml definition.
+
+*** URI Template
+
+Throughout this document, the URI template ^RFC6570^ syntax
+"{+restconf}" is used to refer to the RESTCONF API entry point outside
+of an example.  See @path-resolution@ for details.
+
+All of the examples in this document assume "/restconf" as the
+discovered RESTCONF API root path.
 
 *** Tree Diagrams
 
@@ -432,7 +440,6 @@ modules advertised by the server MAY be available
 as child nodes of this resource.
 
 Operation resources are defined in ^operation-resource^.
-
 
 ** Datastore Resource @datastore-resource@
 
@@ -616,7 +623,6 @@ Examples:
             leaf X { type string; }
         }
     }
-
 
 For the above YANG definition, URI with key leaf values will be
 encoded as follows (line wrapped for display purposes only):
@@ -811,7 +817,6 @@ The client might send the following GET request message:
 
 The server might respond:
 
-
    HTTP/1.1 200 OK
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
@@ -842,7 +847,6 @@ The server might respond:
 
       // rest of YANG module content deleted...
    }
-
 
 ** Stream Resource @stream-resource@
 
@@ -1427,7 +1431,6 @@ If the server includes the "insert" query parameter URI in
 the "capability" leaf-list in ^mon-mod^, then the "point"
 query parameter MUST be supported.
 
-
 *** The "filter" Query Parameter @filter@
 
 The "filter" parameter is used to indicate which subset of
@@ -1558,11 +1561,7 @@ described in ^operations^.
 
 - entry: the root of the RESTCONF API configured on this HTTP
 server, discovered by getting the ".well-known/host-meta"
-resource, as described in ^path-resolution^.  All
-of the examples in this document assume "/restconf" as the
-discovered RESTCONF API root path.  The URI template ^RFC6570^
-syntax "{+restconf}" is used to refer to the entry point
-outside of an example.
+resource, as described in ^path-resolution^.
 
 - resource: the path expression identifying the resource
 that is being accessed by the operation.
@@ -2127,7 +2126,6 @@ The server might respond:
      }
    }
 
-
 * RESTCONF module @module@
 
 The "ietf-restconf" module defines conceptual definitions
@@ -2143,7 +2141,6 @@ RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
 !! include-figure ietf-restconf.yang extract-to="ietf-restconf@2014-10-07.yang"
-
 
 * RESTCONF Monitoring
 
@@ -2283,7 +2280,6 @@ remove this note.
 
 !! include-figure ietf-yang-library.yang extract-to="ietf-yang-library@2014-10-07.yang"
 
-
 * IANA Considerations @iana@
 
 #** Well-Known URI
@@ -2413,7 +2409,6 @@ registry
 
   :replay
       urn:ietf:params:restconf:capability:replay:1.0
-
 
 * Security Considerations
 
@@ -3069,14 +3064,14 @@ The server might respond:
              {
                "index" : 1,
                "id" : "http://example.com/restconf/data/
-                     example-jukebox:jukebox/library/artist/
+                     example-jukebox:jukebox/library/artist=
                      Foo%20Fighters/album/Wasting%20Light/
                      song/Rope"
              },
              {
                "index" : 2,
                "id" : "http://example.com/restconf/data/
-                     example-jukebox:jukebox/library/artist/
+                     example-jukebox:jukebox/library/artist=
                      Foo%20Fighters/album/Wasting%20Light/song/
                      Bridge%20Burning"
              }
@@ -3191,7 +3186,6 @@ The server might respond as follows.
 In this example, a new first entry in the "Foo-One" playlist
 is being created.
 
-
 Request from client:
 
    POST /restconf/data/example-jukebox:jukebox/
@@ -3202,8 +3196,8 @@ Request from client:
    {
      "example-jukebox:song" : {
         "index" : 1,
-        "id" : "/example-jukebox:jukebox/library/artist/
-            Foo%20Fighters/album/Wasting%20Light/song/Rope"
+        "id" : "/example-jukebox:jukebox/library/
+            artist=Foo%20Fighters/album/Wasting%20Light/song/Rope"
       }
    }
 
@@ -3219,17 +3213,14 @@ Response from server:
 
 *** "point" Parameter
 
-Example:
-
 In this example, the client is inserting a new "song"
 resource within an "album" resource after another song.
 The request URI is split for display purposes only.
 
 Request from client:
 
-
    POST /restconf/data/example-jukebox:jukebox/
-      library/artist/Foo%20Fighters/album/Wasting%20Light?
+      library/artist=Foo%20Fighters/album/Wasting%20Light?
       insert=after&point=%2Fexample-jukebox%3Ajukebox%2F
       library%2Fartist%2FFoo%20Fighters%2Falbum%2F
       Wasting%20Light%2Fsong%2FBridge%20Burning   HTTP/1.1
@@ -3238,13 +3229,12 @@ Request from client:
 
    {
      "example-jukebox:song" : {
-        "name" : "Rope",
-        "location" : "/media/foo/a7/rope.mp3",
-        "format" : "MP3",
-        "length" : 259
+       "name" : "Rope",
+       "location" : "/media/foo/a7/rope.mp3",
+       "format" : "MP3",
+       "length" : 259
      }
    }
-
 
 Response from server:
 
