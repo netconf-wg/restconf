@@ -229,6 +229,18 @@ module ietf-restconf {
   } // grouping restconf
 
 
+  grouping collection {
+    description
+      "Conceptual container representing the
+       application/yang.collection resource type.";
+
+    container collection {
+      description
+        "Container representing the application/yang.collection
+         resource type.";
+    }
+  } // grouping collection
+
   grouping notification {
     description
       "Contains the notification message wrapper definition.";

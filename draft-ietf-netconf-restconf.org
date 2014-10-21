@@ -219,11 +219,15 @@ The following terms are used within this document:
 "application/yang.api+xml" or "application/yang.api+json".
 API resources can only be edited by the server.
 
+- collection resource: a resource with the media type
+"application/yang.collection+xml" or
+"application/yang.collection+json".  Contains a set of
+data resources.
+
 - data resource: a resource with the media type
 "application/yang.data+xml" or "application/yang.data+json".
-Data resources can be edited by clients or the server.
-All YANG data node types can be data resources.
-YANG terminal nodes cannot contain child resources.
+Containers, leafs, list entries and anyxml nodes can be data
+resources.
 
 - datastore resource: a resource with the media type
 "application/yang.datastore+xml" or
@@ -274,8 +278,9 @@ capabilities.
 "application/yang". The YANG representation of the schema
 can be retrieved by the client with the GET method.
 
-- YANG terminal node: a YANG node representing a leaf,
-leaf-list, or anyxml definition.
+# not used
+#- YANG terminal node: a YANG node representing a leaf,
+#leaf-list, or anyxml definition.
 
 *** URI Template
 
@@ -345,6 +350,7 @@ resource types are defined in RESTCONF:
 !! table RESTCONF Media Types
 !! head ! Resource    ! Media Type
 !! row  ! API         ! application/yang.api
+!! row  ! Collection  ! application/yang.collection
 !! row  ! Datastore   ! application/yang.datastore
 !! row  ! Data        ! application/yang.data
 !! row  ! Errors      ! application/yang.errors
@@ -514,7 +520,8 @@ data resources within the datastore are made.
 ** Data Resource  @data-resource@
 
 A data resource represents a YANG data node that is a descendant
-node of a datastore resource.
+node of a datastore resource.  Containers, leafs, list entries and
+anyxml nodes are data resources.
 
 For configuration data resources,
 the server MAY maintain a last-modified timestamp for the
@@ -654,7 +661,6 @@ path identifiers:
     identifier  = (ALPHA / "_")
                   *(ALPHA / DIGIT / "_" / "-" / ".")
 
-
 *** Defaults Handling
 
 NETCONF has a rather complex model for handling default values for
@@ -673,6 +679,18 @@ that represents a container or list that has any child resources
 with default values, for the child resources that have not been given
 value yet, the server MAY
 return the default values that are in use by the server.
+
+** Collection Resource @collection-resource@
+
+A collection resource contains a set of data resources.  It is used to
+represent a all instances or a subset of all instances in a YANG list
+or leaf-list.
+
+A collection resource can be retrieved with the GET method, optionally
+with the query parameters "limit" (^limit^) and "offset" (^offset^).
+
+The "ietf-restconf" YANG module contains the "collection" grouping
+which specifies the syntax of a collection resource.
 
 ** Operation Resource @operation-resource@
 
@@ -1256,6 +1274,8 @@ resource used, in the request.
 !! row  ! depth ! GET ! Request limited sub-tree depth in the reply content
 !! row  ! filter ! GET ! Boolean notification filter for event-stream resources
 !! row  ! insert ! POST, PUT ! Insertion mode for user-ordered data resources
+!! row  ! limit ! GET ! Number of entries to return for collection resources
+!! row  ! offset ! GET ! Starting point for collection resources
 !! row  ! point ! POST, PUT ! Insertion point for user-ordered data resources
 !! row  ! select ! GET ! Request a subset of the target resource contents
 !! row  ! start-time ! GET ! Replay buffer start time for event-stream resources
@@ -1282,6 +1302,8 @@ query parameters supported by the server.
 !! row  ! depth ! urn:ietf:params:restconf:capability:depth:1.0
 !! row  ! filter ! urn:ietf:params:restconf:capability:filter:1.0
 !! row  ! insert ! urn:ietf:params:restconf:capability:insert:1.0
+!! row  ! limit ! urn:ietf:params:restconf:capability:limit:1.0
+!! row  ! offset ! urn:ietf:params:restconf:capability:offset:1.0
 !! row  ! select ! urn:ietf:params:restconf:capability:select:1.0
 !! row  ! replay ! urn:ietf:params:restconf:capability:replay:1.0
 
@@ -1430,6 +1452,23 @@ POST or PUT method.
 If the server includes the "insert" query parameter URI in
 the "capability" leaf-list in ^mon-mod^, then the "point"
 query parameter MUST be supported.
+
+*** The "limit" Query Parameter @limit@
+
+The "limit" parameter is used to restrict the number of data resources
+to return in response to GET requests on collection resources.
+
+The value of the "limit" parameter is either an integer equal to or
+greater than 1 and, or the string "unbounded".  "unbounded" is the
+default.
+
+*** The "offset" Query Parameter @offset@
+
+The "offset" parameter is used to specify the first data resource to
+return in response to GET requests on collection resources.
+
+The value of the "offset" parameter is an integer equal to or
+greater than 1.  The default value is 1.
 
 *** The "filter" Query Parameter @filter@
 
@@ -2360,6 +2399,7 @@ sub-types for this media type.
    - api
    - data
    - datastore
+   - collection
    - errors
    - operation
    - stream
@@ -2764,7 +2804,6 @@ The server might respond as follows.
        ]
      }
    }
-
 
 ** Edit Resource Examples
 
@@ -3243,6 +3282,78 @@ Response from server:
    Server: example-server
    Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
    ETag: abcada438af
+
+*** "limit" Parameter
+
+In this example, the client requests the first two "album" resources
+for a given artist:
+
+Request from client:
+
+   GET /restconf/data/example-jukebox:jukebox/
+      library/artist=Foo%20Fighters/album/?limit=2   HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.collection+xml
+
+Response from server:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Content-Type: application/yang.collection+xml
+
+   <collection xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf"
+     <album xmlns="http://example.com/ns/example-jukebox">
+       <name>Foo Fighters</name>
+       <year>1995</year>
+       ...
+     </album>
+     <album xmlns="http://example.com/ns/example-jukebox">
+       <name>The Color and the Shape</name>
+       <year>1997</year>
+       ...
+     </album>
+   </collection>
+
+*** "offset" Parameter
+
+In this example, the client requests the next two albums, i.e., two
+albums starting from two.
+
+Request from client:
+
+   GET /restconf/data/example-jukebox:jukebox/
+      library/artist=Foo%20Fighters/album/?limit=2&offset=2   HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.collection+json
+
+Response from server:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:02:00 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Content-Type: application/yang.collection+json
+
+   {
+     "collection": {
+       "example-jukebox:album" : [
+         {
+           "year" : 1999,
+           "name" : "There is Nothing Left to Loose",
+           ...
+         },
+         {
+          "year" : 2002,
+          "name" : "One by One",
+          ...
+         }
+       ]
+     }
+   }
 
 *** "filter" Parameter @ex-filters@
 
