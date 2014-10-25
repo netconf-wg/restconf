@@ -521,18 +521,32 @@ the Design of Network-based Software Architectures</title>
   </reference>
 
 
-  <reference anchor="I-D.lhotka-netmod-json">
+  <reference anchor="I-D.ietf-netmod-json">
     <front>
       <title>Modeling JSON Text with YANG</title>
       <author initials="L." surname="Lhotka" fullname="L. Lhotka">
 	<organization>CZ.NIC</organization>
       </author>
-      <date year="2013" month="September"/>
+      <date year="2014" month="October"/>
     </front>
     <seriesInfo name="Internet-Draft"
-                value="draft-lhotka-netmod-yang-json-02"/>
+                value="draft-ietf-netmod-yang-json-01"/>
     <format type='TXT'
-    target='http://www.ietf.org/id/draft-lhotka-netmod-yang-json-02.txt'/>
+    target='http://www.ietf.org/id/draft-ietf-netmod-yang-json-01.txt'/>
+  </reference>
+
+  <reference anchor="I-D.lhotka-netmod-yang-metadata">
+    <front>
+      <title>Defining and Using Metadata with YANG</title>
+      <author initials="L." surname="Lhotka" fullname="L. Lhotka">
+	<organization>CZ.NIC</organization>
+      </author>
+      <date year="2014" month="September"/>
+    </front>
+    <seriesInfo name="Internet-Draft"
+                value="draft-lhotka-netmod-yang-metadata-00"/>
+    <format type='TXT'
+    target='http://www.ietf.org/id/draft-lhotka-netmod-yang-metadata-00.txt'/>
   </reference>
 
 <reference anchor='RFC6415'>
@@ -606,20 +620,17 @@ the Design of Network-based Software Architectures</title>
 <format type='HTML' target='http://www.w3.org/TR/2008/REC-xml-20081126' />
 </reference>
 
-<reference anchor="JSON">
+<reference anchor="RFC7158">
       <front>
         <title>The JSON Data Interchange Format</title>
         <author initials="T." surname="Bray"
                 fullname="T. Bray" role="editor">
           <organization />
         </author>
-        <date month="December" day="19" year="2013" />
+        <date month="March" year="2013" />
       </front>
-      <seriesInfo name="Internet-Draft"
-                  value="draft-ietf-json-rfc4627bis-10" />
-      <format
-          type="HTML"
-          target="http://tools.ietf.org/html/draft-ietf-json-rfc4627bis-10"/>
+      <seriesInfo name='RFC' value='7158' />
+     <format type='TXT' target='http://www.rfc-editor.org/rfc/rfc7158.txt' />
 </reference>
 
 

@@ -48,11 +48,11 @@ module ietf-restconf-monitoring {
   // note.
 
   // RFC Ed.: remove this note
-  // Note: extracted from draft-ietf-netconf-restconf-02.txt
+  // Note: extracted from draft-ietf-netconf-restconf-03.txt
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2014-10-07 {
+  revision 2014-10-25 {
     description
       "Initial revision.";
     reference
@@ -111,7 +111,10 @@ module ietf-restconf-monitoring {
         }
 
         leaf replay-log-creation-time {
-          when "../replay-support";
+          when "../replay-support" {
+            description
+              "Only present if notification replay is supported";
+          }
           type yang:date-and-time;
           description
             "Indicates the time the replay log for this stream
@@ -121,13 +124,36 @@ module ietf-restconf-monitoring {
              element.";
         }
 
-        leaf events {
-          type inet:uri;
-          mandatory true;
+        list encoding {
+          key type;
+          min-elements 1;
           description
-            "Contains a URL that represents the entry point
-             for establishing notification delivery via server
-             sent events.";
+            "The server will create an entry in this list for each
+             encoding format that is supported for this stream.
+             The media type 'application/yang.stream' is expected
+             for all event streams. This list identifies the
+             sub-types supported for this stream.";
+
+          leaf type {
+            type string;
+            description
+              "This is the secondary encoding format within the
+               'text/event-stream' encoding used by all streams.
+               The type 'xml' is supported for the media type
+               'application/yang.stream+xml'. The type 'json'
+               is supported for the media type
+               'application/yang.stream+json'.";
+
+          }
+
+          leaf events {
+            type inet:uri;
+            mandatory true;
+            description
+              "Contains a URL that represents the entry point
+               for establishing notification delivery via server
+               sent events.";
+          }
         }
       }
     }

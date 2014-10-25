@@ -55,11 +55,11 @@ module ietf-restconf {
   // note.
 
   // RFC Ed.: remove this note
-  // Note: extracted from draft-ietf-netconf-restconf-02.txt
+  // Note: extracted from draft-ietf-netconf-restconf-03.txt
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2014-10-07 {
+  revision 2014-10-25 {
     description
       "Initial revision.";
     reference
@@ -191,6 +191,10 @@ module ietf-restconf {
 
 
   grouping restconf {
+    description
+      "Conceptual container representing the
+       application/yang.api resource type.";
+
     container restconf {
       description
         "Conceptual container representing the
