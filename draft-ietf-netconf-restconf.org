@@ -2021,9 +2021,9 @@ For example:  ('\' line wrapping added for formatting only)
 
    data: <notification xmlns="urn:ietf:params:xml:ns:yang:ietf-rest\
    conf"><event-time>2013-12-21T00:01:00Z</event-time><event xmlns="\
-   http://example.com/event/1.0"><event-class>fault</event-class><repo\
-   rtingEntity><card>Ethernet0</card></reporting-entity><severity>maj\
-   or</severity></event></notification>
+   http://example.com/event/1.0"><event-class>fault</event-class><re\
+   portingEntity><card>Ethernet0</card></reporting-entity><severity>\
+   major</severity></event></notification>
 
    JSON:
 
