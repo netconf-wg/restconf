@@ -1926,7 +1926,7 @@ The server might send the following response:
    HTTP/1.1 200 OK
    Content-Type: application/yang.api+xml
 
-   <ietf-restconf-monitoring:events
+   <events
      xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
      http://example.com/streams/NETCONF
    </events>
@@ -1990,10 +1990,10 @@ An example SSE notification encoded using XML:
    data:    xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
    data:    <event-time>2013-12-21T00:01:00Z</event-time>
    data:    <event xmlns="http://example.com/event/1.0">
-   data:       <eventClass>fault</eventClass>
-   data:       <reportingEntity>
+   data:       <event-class>fault</event-class>
+   data:       <reporting-entity>
    data:           <card>Ethernet0</card>
-   data:       </reportingEntity>
+   data:       </reporting-entity>
    data:       <severity>major</severity>
    data:     </event>
    data: </notification>
@@ -2002,10 +2002,10 @@ An example SSE notification encoded using JSON:
 
    data: {
    data:   "ietf-restconf:notification": {
-   data:     "eventTime": "2013-12-21T00:01:00Z",
+   data:     "event-time": "2013-12-21T00:01:00Z",
    data:     "example-mod:event": {
-   data:       "eventClass": "fault",
-   data:       "reportingEntity": { "card": "Ethernet0" },
+   data:       "event-class": "fault",
+   data:       "reporting-entity": { "card": "Ethernet0" },
    data:       "severity": "major"
    data:     }
    data:   }
@@ -2021,14 +2021,14 @@ For example:  ('\' line wrapping added for formatting only)
 
    data: <notification xmlns="urn:ietf:params:xml:ns:yang:ietf-rest\
    conf"><event-time>2013-12-21T00:01:00Z</event-time><event xmlns="\
-   http://example.com/event/1.0"><eventClass>fault</eventClass><repo\
-   rtingEntity><card>Ethernet0</card></reportingEntity><severity>maj\
+   http://example.com/event/1.0"><event-class>fault</event-class><repo\
+   rtingEntity><card>Ethernet0</card></reporting-entity><severity>maj\
    or</severity></event></notification>
 
    JSON:
 
    data: {"ietf-restconf:notification":{"event-time":"2013-12-21\
-   T00:01:00Z","example-mod:event":{"eventClass": "fault","repor\
+   T00:01:00Z","example-mod:event":{"event-class": "fault","repor\
    tingEntity":{"card":"Ethernet0"},"severity":"major"}}}
 
 
@@ -3402,18 +3402,18 @@ Response from server:
 The following URIs show some examples of notification filter
 specifications (lines wrapped for display purposes only):
 
-   // filter = /event/eventClass='fault'
-   GET /mystreams/NETCONF?filter=%2Fevent%2FeventClass%3D'fault'
+   // filter = /event/event-class='fault'
+   GET /mystreams/NETCONF?filter=%2Fevent%2Fevent-class%3D'fault'
 
-   // filter = /event/severityCode<=4
-   GET /mystreams/NETCONF?filter=%2Fevent%2FseverityCode%3C%3D4
+   // filter = /event/severity<=4
+   GET /mystreams/NETCONF?filter=%2Fevent%2Fseverity%3C%3D4
 
    // filter = /linkUp|/linkDown
    GET /mystreams/SNMP?filter=%2FlinkUp%7C%2FlinkDown
 
-   // filter = /*/reportingEntity/card!='Ethernet0'
+   // filter = /*/reporting-entity/card!='Ethernet0'
    GET /mystreams/NETCONF?
-      filter=%2F*%2FreportingEntity%2Fcard%21%3D'Ethernet0'
+      filter=%2F*%2Freporting-entity%2Fcard%21%3D'Ethernet0'
 
    // filter = /*/email-addr[contains(.,'company.com')]
    GET /mystreams/critical-syslog?
