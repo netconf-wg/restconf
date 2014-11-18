@@ -291,7 +291,7 @@ such as the URL to retrieve the event stream data.
 
 Throughout this document, the URI template ^RFC6570^ syntax
 "{+restconf}" is used to refer to the RESTCONF API entry point outside
-of an example.  See @path-resolution@ for details.
+of an example.  See ^path-resolution^ for details.
 
 All of the examples in this document assume "/restconf" as the
 discovered RESTCONF API root path.
