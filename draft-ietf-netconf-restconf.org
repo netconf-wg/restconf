@@ -52,7 +52,7 @@ be unable to implement RESTCONF.
 The framework and meta-model used for an HTTP-based API does not need to
 mirror those used by the NETCONF protocol, but it needs to
 be compatible with NETCONF.  A simplified framework and protocol
-is needed that utilizes the three NETCONF datastores (candidate,
+is needed that co-exists with the three NETCONF datastores (candidate,
 running, startup), but hides the complexity of multiple datastores
 from the client.
 
@@ -668,11 +668,12 @@ path identifiers:
 
 *** Defaults Handling
 
-NETCONF has a rather complex model for handling default values for
-leafs.  RESTCONF attempts to avoid this complexity by
-restricting the operations that can be applied to
-a resource.  Applications that require full control of defaults
-might consider NETCONF instead of RESTCONF.
+RESTCONF requires that a server report its default handling mode.
+See ^defaults-uri^ for details.  The optional "with-defaults" query
+parameter is also available to report default leaf node values
+that are in effect within a data model. See ^with-defaults^
+for details on using the "with-defaults" query parameter to
+control retrieval of default values.
 
 If the target of a GET method is a data node
 that represents a leaf that has a default value,
@@ -1284,6 +1285,7 @@ resource used, in the request.
 !! row  ! select ! GET ! Request a subset of the target resource contents
 !! row  ! start-time ! GET ! Replay buffer start time for event-stream resources
 !! row  ! stop-time ! GET ! Replay buffer stop time for event-stream resources
+!! row  ! with-defaults ! GET ! Control retrieval of default values
 
 Query parameters can be given in any order.
 Each parameter can appear at most once in a request URI.
@@ -1298,18 +1300,57 @@ parameter names in order to avoid collisions with other parameters.
 *** Query Parameter URIs
 
 A new set of NETCONF Capability URNs are defined to identify the specific
-query parameters supported by the server.
+query parameters supported by the server. One protocol capability URI
+is also defined called 'defaults'.
 
 !! table RESTCONF Query Parameter URIs
 !! head ! Name ! URI
 !! row  ! content ! urn:ietf:params:restconf:capability:content:1.0
+!! row  ! defaults ! urn:ietf:params:restconf:capability:defaults:1.0
 !! row  ! depth ! urn:ietf:params:restconf:capability:depth:1.0
 !! row  ! filter ! urn:ietf:params:restconf:capability:filter:1.0
 !! row  ! insert ! urn:ietf:params:restconf:capability:insert:1.0
 !! row  ! page    ! urn:ietf:params:restconf:capability:page:1.0
 !! row  ! select ! urn:ietf:params:restconf:capability:select:1.0
 !! row  ! replay ! urn:ietf:params:restconf:capability:replay:1.0
+!! row  ! with-defaults ! urn:ietf:params:restconf:capability:restconf-with-defaults:1.0
 
+*** The "defaults" Protocol Capability URI @defaults-uri@
+
+This URI identifies the defaults handling mode that is used by the
+server for processing default leafs in the unified datastore.
+A parameter named "basic-mode" is required for this capability URI.
+The "basic-mode" definitions are specified in the "With-Defaults
+Capability for NETCONF" ^RFC6243^.
+
+This protocol capability URI MUST be supported by the server, and
+the MUST be listed in the "capability" leaf-list in ^mon-mod^.
+
+
+| Value     | Description                                         |
+|-----------+-----------------------------------------------------|
+| report-all     | No data nodes are considered default |
+| trim       | Values set to the YANG default-stmt value are default |
+| explicit     | Values set by the client are never considered default |
+
+
+If the "basic-mode" is set to "report-all" then the server MUST
+adhere to the defaults handling behavior defined in
+section 2.1 of ^RFC6243^.
+
+If the "basic-mode" is set to "trim" then the server MUST
+adhere to the defaults handling behavior defined in
+section 2.2 of ^RFC6243^.
+
+If the "basic-mode" is set to "explicit" then the server MUST
+adhere to the defaults handling behavior defined in
+section 2.3 of ^RFC6243^.
+
+Example: (split for display purposes only)
+
+   urn:ietf:params:restconf:capability:defaults:1.0?
+        basic-mode=explicit
+  
 *** The "content" Query Parameter @content@
 
 The "content" parameter controls how descendant nodes of
@@ -1575,6 +1616,49 @@ by the server.
 If the "replay-support" leaf is present in the "stream"
 entry (defined in ^mon-mod^) then the server MUST support
 the "start-time" and "stop-time" query parameters for that stream.
+
+*** The "with-defaults" Query Parameter @with-defaults@
+
+The "with-defaults" parameter is used to specify how
+information about default data nodes should be returned
+in response to GET requests on data or collection resources.
+
+If the server supports this capability, then it MUST implement
+the behavior in section 4.5.1 of ^RFC6243^, except applied to
+the RESTCONF GET operation, instead of the NETCONF operations.
+
+
+| Value     | Description                                         |
+|-----------+-----------------------------------------------------|
+| report-all     | All data nodes are reported |
+| trim       | Data nodes set to the YANG default are not reported|
+| explicit     | Data nodes set by the client are not reported |
+| report-all-tagged | All data nodes are reported and defaults are tagged |
+
+If the "with-defaults" parameter is set to "report-all" then the server MUST
+adhere to the defaults reporting behavior defined in
+section 3.1 of ^RFC6243^.
+
+If the "with-defaults" parameter is set to "trim" then the server MUST
+adhere to the defaults reporting behavior defined in
+section 3.2 of ^RFC6243^.
+
+If the "with-defaults" parameter is set to "explicit" then the server MUST
+adhere to the defaults reporting behavior defined in
+section 3.3 of ^RFC6243^.
+
+If the "with-defaults" parameter is set to "report-all-tagged"
+then the server MUST adhere to the defaults reporting behavior defined in
+section 3.4 of ^RFC6243^.
+
+If the "with-defaults" parameter is not present
+then the server MUST adhere to the defaults reporting behavior defined in
+its "basic-mode" parameter for the "defaults" protocol capability URI,
+defined in ^defaults-uri^.
+
+If the server includes the "restconf-with-defaults" query parameter URI in
+the "capability" leaf-list in ^mon-mod^, then the "with-defaults"
+query parameter MUST be supported.
 
 * Messages @messages@
 
@@ -2137,9 +2221,12 @@ defined in the "errors" YANG grouping in ^module^.
 Examples:
 
 The following example shows an error returned for
-an "lock-denied" error on a datastore resource.
+an "lock-denied" error that can occur if a NETCONF
+client has locked a datastore. The RESTCONF client
+is attempting to delete a data resource.
 
-   POST /restconf/operations/example-ops:lock-datastore HTTP/1.1
+   DELETE /restconf/data/example-jukebox:jukebox/
+      library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
 
 The server might respond:
@@ -2459,6 +2546,9 @@ registry
   :content
       urn:ietf:params:restconf:capability:content:1.0
 
+  :defaults
+      urn:ietf:params:restconf:capability:defaults:1.0
+
   :depth
       urn:ietf:params:restconf:capability:depth:1.0
 
@@ -2476,6 +2566,9 @@ registry
 
   :replay
       urn:ietf:params:restconf:capability:replay:1.0
+
+  :restconf-with-defaults
+      urn:ietf:params:restconf:capability:restconf-with-defaults:1.0
 
 * Security Considerations
 
@@ -2528,6 +2621,13 @@ on list and in the halls (ordered by last name): Rex Fernando
 * Change Log
 
     -- RFC Ed.: remove this section before publication.
+
+** 03 - 04
+
+- clarified datastore usage
+- changed lock-denied error example
+- added mandatory "defaults" protocol capability URI
+- added optional "with-defaults" query parameter URI
 
 ** 02 - 03
 
@@ -3436,6 +3536,10 @@ specifications (lines wrapped for display purposes only):
 
    // stop-time = 2014-10-25T12:31:00Z
    GET /mystreams/NETCONF?stop-time=2014-10-25T12%3A31%3A00Z
+
+*** "with-defaults" Parameter
+
+  TBD
 
 
 {{document:

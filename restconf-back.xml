@@ -470,6 +470,22 @@ specifications of each URI scheme.
   </reference>
 
 
+<reference anchor='RFC6243'>
+
+<front>
+<title>With-defaults Capability for NETCONF</title>
+<author initials='A.' surname='Bierman' fullname='A. Bierman'>
+<organization /></author>
+<author initials='B.' surname='Lengyel' fullname='B. Lengyel'>
+<organization /></author>
+<date year='2011' month='June' />
+<abstract>
+<t>The Network Configuration Protocol (NETCONF) defines ways to read and edit configuration data from a NETCONF server.  In some cases, part of this data may not be set by the NETCONF client, but rather a default value known to the server is used instead.  In many situations the NETCONF client has a priori knowledge about default data, so the NETCONF server does not need to save it in a NETCONF configuration datastore or send it to the client in a retrieval operation reply.  In other situations the NETCONF client will need this data from the server.  Not all server implementations treat this default data the same way.  This document defines a capability-based extension to the NETCONF protocol that allows the NETCONF client to identify how defaults are processed by the server, and also defines new mechanisms for client control of server processing of default data. [STANDARDS-TRACK]</t></abstract></front>
+
+<seriesInfo name='RFC' value='6243' />
+<format type='TXT' octets='51568' target='http://www.rfc-editor.org/rfc/rfc6243.txt' />
+</reference>
+
 <reference anchor="RFC6536">
 <front>
 <title>Network Configuration Protocol (NETCONF) Access Control Model</title>

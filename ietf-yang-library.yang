@@ -49,7 +49,7 @@ module ietf-yang-library {
   // note.
 
   // RFC Ed.: remove this note
-  // Note: extracted from draft-ietf-netconf-restconf-03.txt
+  // Note: extracted from draft-ietf-netconf-restconf-04.txt
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
