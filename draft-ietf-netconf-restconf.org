@@ -11,7 +11,7 @@ to access the configuration data, operational data,
 data-model specific protocol operations, and notification events
 within a networking device, in a modular and extensible manner.
 
-This document describes an HTTP ^RFC2616^ based protocol called
+This document describes an HTTP ^RFC7230^ based protocol called
 RESTCONF, for accessing data defined in YANG ^RFC6020^, using
 datastores defined in NETCONF ^RFC6241^.
 
@@ -51,7 +51,7 @@ be unable to implement RESTCONF.
 
 The framework and meta-model used for an HTTP-based API does not need to
 mirror those used by the NETCONF protocol, but it needs to
-be compatible with NETCONF.  A simplified framework and protocol
+be compatible with NETCONF.  Instead, a simplified framework and protocol
 is needed that co-exists with the three NETCONF datastores (candidate,
 running, startup), but hides the complexity of multiple datastores
 from the client.
@@ -60,6 +60,13 @@ A simplified transaction model is needed that allows basic
 CRUD operations on a hierarchy of conceptual resources.
 This represents a limited subset of the transaction capabilities
 of the NETCONF protocol.
+
+The HTTP POST, PUT, PATCH, and DELETE methods are used to
+edit data resources represented by YANG data models.
+These basic edit operations allow the running configuration
+to be altered in an all-or-none fashion.  This is similar
+to the "rollback-on-error" capability in NETCONF. Edits are
+usually applied to one data resource instance at a time.
 
 Applications that require more complex transaction capabilities
 might consider NETCONF instead of RESTCONF.  The following
@@ -181,19 +188,29 @@ The following terms are defined in ^RFC6241^:
 
 *** HTTP
 
-The following terms are defined in ^RFC2616^:
+The following terms are defined in ^RFC3986^:
 
-- entity tag
 - fragment
-- header line
-- message body
-- method
 - path
 - query
-- request
+
+The following terms are defined in ^RFC7230^:
+
+- header
+- message-body
+- Request-Line
 - request URI
-- response body
+
+The following terms are defined in ^RFC7231^:
+
+- method
+- request
 - resource
+
+The following terms are defined in ^RFC7232^:
+
+- entity tag
+
 
 *** YANG
 
@@ -247,7 +264,7 @@ that is delivered within a notification event stream.
 Also called a "stream resource".
 
 - operation: the conceptual RESTCONF operation for a message,
-derived from the HTTP method, request URI, headers, and message body.
+derived from the HTTP method, request URI, headers, and message-body.
 
 - operation resource: a resource with the media type
 "application/yang.operation+xml" or
@@ -255,7 +272,7 @@ derived from the HTTP method, request URI, headers, and message body.
 
 - patch: a generic PATCH request on the target datastore
 or data resource.
-The media type of the message body content will identify
+The media type of the message-body content will identify
 the patch type in use.
 
 - plain patch: a PATCH request where the media type
@@ -723,18 +740,18 @@ definition.  This behavior can be used to design protocol operations
 that perform the same general function on different
 resource types.
 
-If the "rpc" statement has an "input" section, then a message body
+If the "rpc" statement has an "input" section, then a message-body
 MAY be sent by the client in the request, otherwise the request
-message MUST NOT include a message body.
-If the "rpc" statement has an "output" section, then a message body
+message MUST NOT include a message-body.
+If the "rpc" statement has an "output" section, then a message-body
 MAY be sent by the server in the response. Otherwise the
-server MUST NOT include a message body in the response message,
+server MUST NOT include a message-body in the response message,
 and MUST send a "204 No Content" Status-Line instead.
 
 *** Encoding Operation Input Parameters
 
 If the "rpc" statement has an "input" section, then
-the "input" node is provided in the message body,
+the "input" node is provided in the message-body,
 corresponding to the YANG data definition statements
 within the "input" section.
 
@@ -778,7 +795,7 @@ The server might respond:
 *** Encoding Operation Output Parameters
 
 If the "rpc" statement has an "output" section, then
-the "output" node is provided in the message body,
+the "output" node is provided in the message-body,
 corresponding to the YANG data definition statements
 within the "output" section.
 
@@ -887,7 +904,7 @@ which specifies the syntax and semantics of a stream resource.
 ** Errors Resource @errors-resource@
 
 An "errors" resource is a collection of error information that
-is sent as the message body in a server response message,
+is sent as the message-body in a server response message,
 if an error occurs while processing a request message.
 
 The "ietf-restconf" YANG module contains the "errors" grouping
@@ -930,7 +947,7 @@ messages.
 The server MUST NOT allow any operation to any resources that
 the client is not authorized to access.
 
-Implementation of all methods (except PATCH) are defined in ^RFC2616^.
+Implementation of all methods (except PATCH) are defined in ^RFC7231^.
 This section defines the RESTCONF protocol usage for
 each HTTP method.
 
@@ -952,7 +969,7 @@ MUST be supported, as defined in ^RFC5789^.
 
 The HEAD method is sent by the client to
 retrieve just the headers that would be returned
-for the comparable GET method, without the response body.
+for the comparable GET method, without the response message-body.
 It is supported for all resource types, except operation resources.
 
 The request MUST contain a request URI
@@ -964,7 +981,7 @@ The access control behavior is enforced
 as if the method was GET instead of HEAD.
 The server MUST respond the same as if the method
 was GET instead of HEAD, except that no
-response body is included.
+response message-body is included.
 
 ** GET @get@
 
@@ -983,7 +1000,7 @@ the client.
 
 If the user is authorized to read some but not all of
 the target resource, the unauthorized content is omitted
-from the response message body, and the authorized content
+from the response message-body, and the authorized content
 is returned to the client.
 
 Example:
@@ -1036,7 +1053,7 @@ to determine how to process the request.
 
 If the target resource type is a datastore or data resource,
 then the POST is treated as a request to create a resource or
-child resource.  The message body is expected to contain the
+child resource.  The message-body is expected to contain the
 content of a child resource to create within the parent (target resource).
 
 The "insert" and "point" query parameters are supported
@@ -1045,7 +1062,7 @@ as specified in the YANG definition in ^module^.
 
 If the POST method succeeds,
 a "201 Created" Status-Line is returned and there is
-no response message body.  A "Location" header identifying
+no response message-body.  A "Location" header identifying
 the child resource that was created MUST be present
 in the response in this case.
 
@@ -1081,14 +1098,14 @@ Refer to ^ex-create^ for more resource creation examples.
 
 If the target resource type is an operation resource,
 then the POST method is treated as a request to invoke that operation.
-The message body (if any) is processed as the operation input
+The message-body (if any) is processed as the operation input
 parameters.  Refer to ^operation-resource^ for details
 on operation resources.
 
 If the POST request succeeds, a "200 OK" Status-Line
-is returned if there is a response message body, and
+is returned if there is a response message-body, and
 a "204 No Content" Status-Line is returned if there is
-no response message body.
+no response message-body.
 
 If the user is not authorized to invoke the target operation,
 an error response containing
@@ -1126,13 +1143,13 @@ The PUT method is sent by the client to create or replace
 the target resource.
 
 The only target resource media type that supports PUT is the data
-resource. The message body is expected to contain the
+resource. The message-body is expected to contain the
 content used to create or replace the target resource.
 
 The "insert" (^insert^) and "point" (^point^) query parameters are
 supported by the PUT method for data resources.
 
-Consistent with ^RFC2616^, if the PUT request creates a new resource,
+Consistent with ^RFC7231^, if the PUT request creates a new resource,
 a "201 Created" Status-Line is returned.   If an existing resource
 is modified, either "200 OK" or "204 No Content" are returned.
 
@@ -1149,7 +1166,7 @@ is replaced or created if it does not already exist.
 
 To replace the "album" resource contents,
 the client might send as follows.
-Note that the request URI header line is wrapped
+Note that the Request-Line is wrapped
 for display purposes only:
 
    PUT /restconf/data/example-jukebox:jukebox/
@@ -1188,8 +1205,8 @@ If the target resource instance does not exist, the server MUST
 NOT create it.
 
 If the PATCH request succeeds, a "200 OK" Status-Line
-is returned if there is a message body, and "204 No Content"
-is returned if no response message body is sent.
+is returned if there is a message-body, and "204 No Content"
+is returned if no response message-body is sent.
 
 If the user is not authorized to alter the target resource
 an error response containing
@@ -1202,7 +1219,7 @@ Example:
 To replace just the "year" field in the "album" resource
 (instead of replacing the entire resource with the PUT method),
 the client might send a plain patch as follows.
-Note that the request URI header line is wrapped
+Note that the Request-Line is wrapped
 for display purposes only:
 
    PATCH /restconf/data/example-jukebox:jukebox/
@@ -1242,7 +1259,7 @@ The XML encoding for the same request might be:
 
 The DELETE method is used to delete the target resource.
 If the DELETE request succeeds, a "204 No Content" Status-Line
-is returned, and there is no response message body.
+is returned, and there is no response message-body.
 
 If the user is not authorized to delete the target resource then
 an error response containing
@@ -1812,7 +1829,7 @@ in RESTCONF message responses:
 !! head ! Name ! Description
 !! row  ! Allow ! Valid actions when 405 error returned
 !! row  ! Cache-Control ! The cache control parameters for the response
-!! row  ! Content-Type ! The media type of the response body
+!! row  ! Content-Type ! The media type of the response message-body
 !! row  ! Date ! The date and time the message was sent
 !! row  ! ETag ! An identifier for a specific version of a resource
 !! row  ! Last-Modified ! The last modified date and time of a resource
@@ -1820,9 +1837,9 @@ in RESTCONF message responses:
 
 ** Message Encoding
 
-RESTCONF messages are encoded in HTTP according to RFC 2616.
+RESTCONF messages are encoded in HTTP according to ^RFC7230^.
 The "utf-8" character set is used for all messages.
-RESTCONF message content is sent in the HTTP message body.
+RESTCONF message content is sent in the HTTP message-body.
 
 Content is encoded in either JSON or XML format.
 A server MUST support XML encoding and MAY support JSON encoding.
@@ -1834,7 +1851,7 @@ special encoding rules to identify module namespaces
 and provide consistent type processing of YANG data.
 
 Request input content encoding format is identified with the Content-Type
-header.  This field MUST be present if a message body is sent
+header.  This field MUST be present if a message-body is sent
 by the client.
 
 Response output content encoding format is identified with the Accept
@@ -2143,10 +2160,10 @@ used specifically by RESTCONF operations:
 !! table HTTP Status Codes used in RESTCONF
 !! head ! Status-Line ! Description
 !! row  ! 100 Continue ! POST accepted, 201 should follow
-!! row  ! 200 OK ! Success with response body
+!! row  ! 200 OK ! Success with response message-body
 !! row  ! 201 Created ! POST to create a resource success
 !! row  ! 202 Accepted ! POST to create a resource accepted
-!! row  ! 204 No Content ! Success without response body
+!! row  ! 204 No Content ! Success without response message-body
 !! row  ! 304 Not Modified ! Conditional operation not done
 !! row  ! 400 Bad Request ! Invalid request message
 !! row  ! 403 Forbidden !  Access to resource denied
@@ -2195,7 +2212,7 @@ for the "rpc" statement.
 When an error occurs for a request message on a data resource
 or an operation resource, and a "4xx" class of status codes
 (except for status code "403 Forbidden"),
-then the server SHOULD send a response body containing
+then the server SHOULD send a response message-body containing
 the information described by the "errors" container definition
 within the YANG module ^module^.  The Content-Type of this
 response message MUST be application/yang.errors.
@@ -2353,7 +2370,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2014-10-25.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2014-12-09.yang"
 
 * YANG Module Library
 
@@ -3352,7 +3369,7 @@ The server might respond as follows.
          },
          {
            "name" : "ietf-restconf-monitoring",
-           "revision" : "2014-10-25"
+           "revision" : "2014-12-09"
          },
          {
            "name" : "ietf-yang-library",
