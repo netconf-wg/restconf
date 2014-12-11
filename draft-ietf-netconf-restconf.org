@@ -1294,12 +1294,12 @@ resource used, in the request.
 !! head ! Name ! Methods !  Description
 !! row  ! content ! GET ! Select config and/or non-config data resources
 !! row  ! depth ! GET ! Request limited sub-tree depth in the reply content
+!! row  ! fields ! GET ! Request a subset of the target resource contents
 !! row  ! filter ! GET ! Boolean notification filter for event-stream resources
 !! row  ! insert ! POST, PUT ! Insertion mode for user-ordered data resources
 !! row  ! limit ! GET ! Number of entries to return for collection resources
 !! row  ! offset ! GET ! Starting point for collection resources
 !! row  ! point ! POST, PUT ! Insertion point for user-ordered data resources
-!! row  ! select ! GET ! Request a subset of the target resource contents
 !! row  ! start-time ! GET ! Replay buffer start time for event-stream resources
 !! row  ! stop-time ! GET ! Replay buffer stop time for event-stream resources
 !! row  ! with-defaults ! GET ! Control retrieval of default values
@@ -1325,10 +1325,10 @@ is also defined called 'defaults'.
 !! row  ! content ! urn:ietf:params:restconf:capability:content:1.0
 !! row  ! defaults ! urn:ietf:params:restconf:capability:defaults:1.0
 !! row  ! depth ! urn:ietf:params:restconf:capability:depth:1.0
+!! row  ! fields ! urn:ietf:params:restconf:capability:fields:1.0
 !! row  ! filter ! urn:ietf:params:restconf:capability:filter:1.0
 !! row  ! insert ! urn:ietf:params:restconf:capability:insert:1.0
 !! row  ! page    ! urn:ietf:params:restconf:capability:page:1.0
-!! row  ! select ! urn:ietf:params:restconf:capability:select:1.0
 !! row  ! replay ! urn:ietf:params:restconf:capability:replay:1.0
 !! row  ! with-defaults ! urn:ietf:params:restconf:capability:restconf-with-defaults:1.0
 
@@ -1418,18 +1418,18 @@ If this query parameter is supported by the server, then the
 "depth" query parameter URI MUST be listed in the "capability" leaf-list
 in ^mon-mod^.
 
-*** The "select" Query Parameter @select@
+*** The "fields" Query Parameter @fields@
 
-The "select" query parameter is used to optionally identify
+The "fields" query parameter is used to optionally identify
 data nodes within the target resource to be retrieved in a
 GET method.  The client can use this parameter to retrieve
 a subset of all nodes in a resource.
 
-A value of the "select" query parameter matches the
+A value of the "fields" query parameter matches the
 following rule:
 
-  select-expr = path '(' select-expr / '*' ')' /
-                path ';' select-expr /
+  fields-expr = path '(' fields-expr / '*' ')' /
+                path ';' fields-expr /
                 path
   path = api-identifier [ '/' path ]
 
@@ -1437,23 +1437,23 @@ following rule:
 
 ";" is used to select multiple nodes.  For example, to
 retrieve only the "genre" and "year" of an album, use:
-"select=genre;year".
+"fields=genre;year".
 
 Parentheses are used to specify sub-selectors of a node.
 For example, to retrieve only the "label" and
 "catalogue-number" of an album, use:
-"select=admin(label;catalogue-number)".
+"fields=admin(label;catalogue-number)".
 
 "/" is used in a path to retrieve a child node of a node.
 For example, to retrieve only the "label" of an album, use:
-"select=admin/label".
+"fields=admin/label".
 
 This parameter is only allowed for GET methods on api,
 datastore, and data resources.  A 400 Bad Request error
 is returned if used for other methods or resource types.
 
 If this query parameter is supported by the server, then the
-"select" query parameter URI MUST be listed in the "capability" leaf-list
+"fields" query parameter URI MUST be listed in the "capability" leaf-list
 in ^mon-mod^.
 
 *** The "insert" Query Parameter @insert@
@@ -2569,6 +2569,9 @@ registry
   :depth
       urn:ietf:params:restconf:capability:depth:1.0
 
+  :fields
+      urn:ietf:params:restconf:capability:fields:1.0
+
   :filter
       urn:ietf:params:restconf:capability:filter:1.0
 
@@ -2577,9 +2580,6 @@ registry
 
   :page
       urn:ietf:params:restconf:capability:page:1.0
-
-  :select
-      urn:ietf:params:restconf:capability:select:1.0
 
   :replay
       urn:ietf:params:restconf:capability:replay:1.0
@@ -2645,6 +2645,7 @@ on list and in the halls (ordered by last name): Rex Fernando
 - changed lock-denied error example
 - added mandatory "defaults" protocol capability URI
 - added optional "with-defaults" query parameter URI
+- renamed "select" parameter to "fields"
 
 ** 02 - 03
 
@@ -2953,10 +2954,10 @@ The server might respond as follows.
        "capability": [
          "urn:ietf:params:restconf:capability:content:1.0",
          "urn:ietf:params:restconf:capability:depth:1.0",
+         "urn:ietf:params:restconf:capability:fields:1.0",
          "urn:ietf:params:restconf:capability:filter:1.0",
          "urn:ietf:params:restconf:capability:insert:1.0",
          "urn:ietf:params:restconf:capability:point:1.0",
-         "urn:ietf:params:restconf:capability:select:1.0",
          "urn:ietf:params:restconf:capability:start-time:1.0",
          "urn:ietf:params:restconf:capability:stop-time:1.0",
          "http://example.com/capabilities/myparam"
@@ -3342,13 +3343,13 @@ The server might respond:
      }
    }
 
-*** "select" Parameter
+*** "fields" Parameter
 
 In this example the client is retrieving the API resource, but
-selecting only the "name" and "revision" nodes
+retrieving only the "name" and "revision" nodes
 from each module, in JSON format:
 
-   GET /restconf/data?select=modules/module(name;revision) HTTP/1.1
+   GET /restconf/data?fields=modules/module(name;revision) HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json,
            application/yang.errors+json
