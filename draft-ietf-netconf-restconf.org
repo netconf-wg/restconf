@@ -37,16 +37,6 @@ the YANG "rpc" statement can be invoked with the POST method.
 Data-model specific notification events defined with
 the YANG "notification" statement can be accessed.
 
-** Secure Transport
-
-RESTCONF relies on TLS ^RFC2246^ to provide privacy and data
-integrity for its HTTP operations.  More specifically,
-RESTCONF requires HTTP over TLS (HTTPS) ^RFC2818^.  To ensure
-security, RESTCONF clients MUST verify the RESTCONF server's
-X.509 certificate using the path validation algorithm defined in
-section 6 of ^RFC5280^.  Devices that do not support TLS will
-be unable to implement RESTCONF.
-
 ** Simple Subset of NETCONF Functionality
 
 The framework and meta-model used for an HTTP-based API does not need to
@@ -308,7 +298,7 @@ such as the URL to retrieve the event stream data.
 
 Throughout this document, the URI template ^RFC6570^ syntax
 "{+restconf}" is used to refer to the RESTCONF API entry point outside
-of an example.  See ^path-resolution^ for details.
+of an example.  See ^root-resource-discovery^ for details.
 
 All of the examples in this document assume "/restconf" as the
 discovered RESTCONF API root path.
@@ -330,10 +320,45 @@ marked with a colon (":").
 
 ### END OF INTRODUCTION
 
+
+* Transport Protocol Requirements
+
+** Integrity and Confidentiality
+
+HTTP ^RFC7230^ is an application layer protocol that may be layered on any reliable transport-layer protocol.  RESTCONF is defined on top of HTTP, but due to the sensitive nature of the information conveyed, RESTCONF requires that the transport-layer protocol provides both data integrity and confidentiality, such as is provided by the TLS protocol ^RFC5246^.
+
+** HTTPS with X.509v3 Certificates
+
+Given the nearly ubiquitous support for HTTP over TLS ^RFC7230^, RESTCONF implementations MUST support the "https" URI scheme, which has the IANA assigned default port 443.  Consistent with the exclusive use of X.509v3 certificates for NETCONF over TLS ^draft-ietf-netconf-rfc5539bis-07^, use of certificates in RESTCONF is also limited to X.509v3 certificates.
+
+** Certificate Validation
+
+When presented an X.509 certificate, the RESTCONF peer MUST use X.509 certificate path validation ^RFC5280^ to verify the integrity of the certificate.  The presented X.509 certificate MAY also be considered valid if it matches a locally configured certificate fingerprint.  If X.509 certificate path validation fails and the presented X.509 certificate does not match a locally configured certificate fingerprint, the connection MUST be terminated as defined in ^RFC5246^.
+
+** Authenticated Server Identity
+
+The RESTCONF client MUST carefully examine the certificate presented by the RESTCONF server to determine if it meets the client's expectations.  If the RESTCONF client has external information as to the expected identity of the RESTCONF server, the hostname check MAY be omitted.  Otherwise, the RESTCONF client MUST check its understanding of the RESTCONF server hostname against the server's identity as presented in the server certificate message.  Matching is performed according to the rules and guidelines defined in ^RFC6125^.  If the match fails, the RESTCONF client MUST either ask for explicit user confirmation or terminate the connection with an indication that the RESTCONF server's identity is suspect.
+
+** Authenticated Client Identity
+
+The RESTCONF server MUST authenticate the client access to any protected resource using HTTP Authentication ^RFC7235^.  If the RESTCONF client is not authenticated to access a resource, the server MUST send a response with status code 401 (Unauthorized) and a WWW-Authenticate header field containing at least one challenge applicable to the target resource.  The RESTCONF server MAY advertise support for any number of authentication schemes but, in order to ensure interoperability, the RESTCONF server MUST advertise at least one of the following authentication schemes:
+
+- Basic                ^draft-ietf-httpauth-basicauth-update-03^
+- Digest               ^draft-ietf-httpauth-digest-09^
+- ClientCertificate    ^draft-thomson-httpbis-cant-01^
+
+These authentication schemes are selected due to their similarity to authentication schemes supported by NETCONF.  In particular, the Basic and Digest authentication schemes both directly provide an identity and verification of a shared secret, much like NETCONF over SSH, when using the SSH "password" authentication method ^RFC4252^.  Similarly, the ClientCertificate authentication scheme is much like NETCONF over TLS's use of X.509 client-certificates.  When using the ClientCertificate authentication scheme, the RESTCONF server MUST verify the identity of the RESTCONF client using the algorithm defined in section 7 of ^draft-ietf-netconf-rfc5539bis-07^.
+
+The RESTCONF client identity determined from any HTTP authentication scheme is hereafter known as the "RESTCONF username" and subject to the NETCONF Access Control Module (NACM) ^RFC6536^.
+
+
+### END OF TRANSPORT PROTOCOL REQUIREMENTS
+
+
 * Resources @resources@
 
 The RESTCONF protocol operates on a hierarchy of resources,
-starting with the top-level API resource itself. Each resource
+starting with the top-level API resource itself (^root-resource-discovery^). Each resource
 represents a manageable component within the device.
 
 A resource can be considered a collection of conceptual data and the
@@ -363,6 +388,65 @@ The resources used in the RESTCONF protocol are identified
 by the "path" component in the request URI.  Each operation
 is performed on a target resource.
 
+The RESTCONF protocol does not include a
+resource discovery mechanism.  Instead, the definitions
+within the YANG modules advertised by the server
+are used to construct a predictable operation or data
+resource identifier.
+
+
+
+** Root Resource Discovery @root-resource-discovery@
+
+In line the best practices defined by ^get-off-my-lawn^, RESTCONF
+enables deployments to specify where the RESTCONF API is located.
+When first connecting to a RESTCONF server, a RESTCONF client MUST
+determine the root of the RESTCONF API.  The client discovers this
+by getting the "/.well-known/host-meta" resource (^RFC6415^) and
+using the <Link> element containing the "restconf" attribute :
+
+   Request
+   -------
+   GET /.well-known/host-meta users HTTP/1.1
+   Host: example.com
+   Accept: application/xrd+xml
+
+   Response
+   --------
+   HTTP/1.1 200 OK
+   Content-Type: application/xrd+xml
+   Content-Length: nnn
+
+   <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
+       <Link rel='restconf' href='/restconf'/>
+   </XRD>
+
+
+Once discovering the RESTCONF API root, the client MUST prepend it to
+any subsequent request to a RESTCONF resource.  For instance, using
+the "/restconf" path discovered above, the client can now determine
+the operations supported by the the server:
+
+   Request
+   -------
+   GET /restconf/operations  HTTP/1.1
+   Host: example.com
+   Accept: application/yang.api+json,
+           application/yang.errors+json
+
+   Response
+   --------
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
+   Content-Type: application/yang.api+json
+
+   { "operations" : { "play" : [ null ] } }
+
+
 ** RESTCONF Resource Types
 
 The RESTCONF protocol defines a set of application specific media
@@ -378,22 +462,6 @@ resource types are defined in RESTCONF:
 !! row  ! Errors      ! application/yang.errors
 !! row  ! Operation   ! application/yang.operation
 !! row  ! Schema      ! application/yang
-
-** Resource Discovery @resource-discovery@
-
-A client SHOULD start by retrieving the top-level API resource,
-using the entry point URI defined in ^path-resolution^.
-
-The RESTCONF protocol does not include a
-resource discovery mechanism.  Instead, the definitions
-within the YANG modules advertised by the server
-are used to construct a predictable operation or data
-resource identifier.
-
-The "depth" query parameter (see ^depth^) can be used to control how
-many descendant levels should be included when retrieving child
-resources. This parameter can be used with the GET method to discover
-child resources within a particular resource.
 
 ** API Resource @api-resource@
 
@@ -1714,7 +1782,7 @@ described in ^operations^.
 
 - entry: the root of the RESTCONF API configured on this HTTP
 server, discovered by getting the ".well-known/host-meta"
-resource, as described in ^path-resolution^.
+resource, as described in ^root-resource-discovery^.
 
 - resource: the path expression identifying the resource
 that is being accessed by the operation.
@@ -1747,56 +1815,6 @@ the resource once it has been created.
 The "target" of an operation is a resource.
 The "path" field in the request URI represents
 the target resource for the operation.
-
-** RESTCONF Path Resolution @path-resolution@
-
-In line the best practices defined by ^get-off-my-lawn^, RESTCONF
-enables deployments to specify where the RESTCONF API is located.
-When first connecting to a RESTCONF server, a RESTCONF client MUST
-determine the root of the RESTCONF API.  The client discovers this
-by getting the "/.well-known/host-meta" resource (^RFC6415^) and
-using the <Link> element containing the "restconf" attribute :
-
-   Request
-   -------
-   GET /.well-known/host-meta users HTTP/1.1
-   Host: example.com
-   Accept: application/xrd+xml
-
-   Response
-   --------
-   HTTP/1.1 200 OK
-   Content-Type: application/xrd+xml
-   Content-Length: nnn
-
-   <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
-       <Link rel='restconf' href='/restconf'/>
-   </XRD>
-
-
-Once discovering the RESTCONF API root, the client MUST prepend it to
-any subsequent request to a RESTCONF resource.  For instance, using
-the "/restconf" path discovered above, the client can now determine
-the operations supported by the the server:
-
-   Request
-   -------
-   GET /restconf/operations  HTTP/1.1
-   Host: example.com
-   Accept: application/yang.api+json,
-           application/yang.errors+json
-
-   Response
-   --------
-   HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
-   Server: example-server
-   Cache-Control: no-cache
-   Pragma: no-cache
-   Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
-   Content-Type: application/yang.api+json
-
-   { "operations" : { "play" : [ null ] } }
 
 ** Message Headers
 
