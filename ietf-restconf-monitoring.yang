@@ -4,7 +4,6 @@ module ietf-restconf-monitoring {
 
   import ietf-yang-types { prefix yang; }
   import ietf-inet-types { prefix inet; }
-  import ietf-netconf-monitoring { prefix ncmon; }
 
   organization
     "IETF NETCONF (Network Configuration) Working Group";
@@ -56,14 +55,6 @@ module ietf-restconf-monitoring {
   revision 2014-12-09 {
     description
       "Initial revision.";
-    reference
-      "RFC XXXX: RESTCONF Protocol.";
-  }
-
-  identity restconf-tls {
-    base ncmon:transport;
-    description
-      "RESTCONF over TLS";
     reference
       "RFC XXXX: RESTCONF Protocol.";
   }
