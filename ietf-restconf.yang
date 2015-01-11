@@ -38,7 +38,7 @@ module ietf-restconf {
      The YANG grouping statements provide a normative syntax
      for XML and JSON message encoding purposes.
 
-     Copyright (c) 2014 IETF Trust and the persons identified as
+     Copyright (c) 2015 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -59,7 +59,7 @@ module ietf-restconf {
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2014-10-25 {
+  revision 2015-01-11 {
     description
       "Initial revision.";
     reference
@@ -232,18 +232,6 @@ module ietf-restconf {
     } // container restconf
   } // grouping restconf
 
-
-  grouping collection {
-    description
-      "Conceptual container representing the
-       application/yang.collection resource type.";
-
-    container collection {
-      description
-        "Container representing the application/yang.collection
-         resource type.";
-    }
-  } // grouping collection
 
   grouping notification {
     description

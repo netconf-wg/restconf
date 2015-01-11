@@ -16,7 +16,7 @@
     <format type="TXT" octets="4723" target="ftp://ftp.isi.edu/in-notes/rfc2119.txt"/>
   </reference>
 
-
+<!--  
   <reference anchor="RFC2246">
     <front>
       <title>The TLS Protocol, Version 1.0</title>
@@ -38,7 +38,7 @@
     <seriesInfo name="RFC" value="2246"/>
     <format type="HTTP" octets="205788" target="http://tools.ietf.org/html/rfc2246"/>
   </reference>
-
+ -->
 
 <reference anchor='RFC2396'>
 

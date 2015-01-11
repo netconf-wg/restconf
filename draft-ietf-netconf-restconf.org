@@ -226,11 +226,6 @@ The following terms are used within this document:
 "application/yang.api+xml" or "application/yang.api+json".
 API resources can only be edited by the server.
 
-- collection resource: a resource with the media type
-"application/yang.collection+xml" or
-"application/yang.collection+json".  Contains a set of
-data resources.
-
 - data resource: a resource with the media type
 "application/yang.data+xml" or "application/yang.data+json".
 Containers, leafs, list entries and anyxml nodes can be data
@@ -456,7 +451,6 @@ resource types are defined in RESTCONF:
 !! table RESTCONF Media Types
 !! head ! Resource    ! Media Type
 !! row  ! API         ! application/yang.api
-!! row  ! Collection  ! application/yang.collection
 !! row  ! Datastore   ! application/yang.datastore
 !! row  ! Data        ! application/yang.data
 !! row  ! Errors      ! application/yang.errors
@@ -770,18 +764,6 @@ that represents a container or list that has any child resources
 with default values, for the child resources that have not been given
 value yet, the server MAY
 return the default values that are in use by the server.
-
-** Collection Resource @collection-resource@
-
-A collection resource contains a set of data resources.  It is used to
-represent a all instances or a subset of all instances in a YANG list
-or leaf-list.
-
-A collection resource can be retrieved with the GET method, optionally
-with the query parameters "limit" (^limit^) and "offset" (^offset^).
-
-The "ietf-restconf" YANG module contains the "collection" grouping
-which specifies the syntax of a collection resource.
 
 ** Operation Resource @operation-resource@
 
@@ -1365,8 +1347,6 @@ resource used, in the request.
 !! row  ! fields ! GET ! Request a subset of the target resource contents
 !! row  ! filter ! GET ! Boolean notification filter for event-stream resources
 !! row  ! insert ! POST, PUT ! Insertion mode for user-ordered data resources
-!! row  ! limit ! GET ! Number of entries to return for collection resources
-!! row  ! offset ! GET ! Starting point for collection resources
 !! row  ! point ! POST, PUT ! Insertion point for user-ordered data resources
 !! row  ! start-time ! GET ! Replay buffer start time for event-stream resources
 !! row  ! stop-time ! GET ! Replay buffer stop time for event-stream resources
@@ -1390,13 +1370,11 @@ is also defined called 'defaults'.
 
 !! table RESTCONF Query Parameter URIs
 !! head ! Name ! URI
-!! row  ! content ! urn:ietf:params:restconf:capability:content:1.0
 !! row  ! defaults ! urn:ietf:params:restconf:capability:defaults:1.0
 !! row  ! depth ! urn:ietf:params:restconf:capability:depth:1.0
 !! row  ! fields ! urn:ietf:params:restconf:capability:fields:1.0
 !! row  ! filter ! urn:ietf:params:restconf:capability:filter:1.0
 !! row  ! insert ! urn:ietf:params:restconf:capability:insert:1.0
-!! row  ! page    ! urn:ietf:params:restconf:capability:page:1.0
 !! row  ! replay ! urn:ietf:params:restconf:capability:replay:1.0
 !! row  ! with-defaults ! urn:ietf:params:restconf:capability:restconf-with-defaults:1.0
 
@@ -1458,9 +1436,7 @@ requested data nodes.  If the "config" value is "false", then the
 default for the "content" parameter is "nonconfig".  If "config" is
 "true" then the default for the "content" parameter is "config".
 
-If this query parameter is supported by the server, then the
-"content" query parameter URI MUST be listed in the "capability" leaf-list
-in ^mon-mod^.
+This query parameter MUST be supported by the server.
 
 *** The "depth" Query Parameter @depth@
 
@@ -1582,33 +1558,6 @@ If the server includes the "insert" query parameter URI in
 the "capability" leaf-list in ^mon-mod^, then the "point"
 query parameter MUST be supported.
 
-*** The "limit" Query Parameter @limit@
-
-The "limit" parameter is used to restrict the number of data resources
-to return in response to GET requests on collection resources.
-
-The value of the "limit" parameter is either an integer greater than
-or equal to 1, or the string "unbounded".  The string "unbounded" is the
-default value.
-
-If the server includes the "page" query parameter URI in
-the "capability" leaf-list in ^mon-mod^, then the "limit"
-query parameter MUST be supported.
-
-*** The "offset" Query Parameter @offset@
-
-The "offset" parameter is used to specify the first data resource to
-return in response to GET requests on collection resources.
-Resources instances are numbered with consecutive integers
-from 1 to the number of resource instances.
-
-The value of the "offset" parameter is an integer greater than
-or equal to 1.  The default value is 1.
-
-If the server includes the "page" query parameter URI in
-the "capability" leaf-list in ^mon-mod^, then the "offset"
-query parameter MUST be supported.
-
 *** The "filter" Query Parameter @filter@
 
 The "filter" parameter is used to indicate which subset of
@@ -1706,7 +1655,7 @@ the "start-time" and "stop-time" query parameters for that stream.
 
 The "with-defaults" parameter is used to specify how
 information about default data nodes should be returned
-in response to GET requests on data or collection resources.
+in response to GET requests on data resources.
 
 If the server supports this capability, then it MUST implement
 the behavior in section 4.5.1 of ^RFC6243^, except applied to
@@ -2324,7 +2273,7 @@ is used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2014-10-25.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-01-11.yang"
 
 * RESTCONF Monitoring
 
@@ -2545,7 +2494,6 @@ sub-types for this media type.
    - api
    - data
    - datastore
-   - collection
    - errors
    - operation
    - stream
@@ -2578,9 +2526,6 @@ registry
      Capability Identifier
   ------------------------
 
-  :content
-      urn:ietf:params:restconf:capability:content:1.0
-
   :defaults
       urn:ietf:params:restconf:capability:defaults:1.0
 
@@ -2595,9 +2540,6 @@ registry
 
   :insert
       urn:ietf:params:restconf:capability:insert:1.0
-
-  :page
-      urn:ietf:params:restconf:capability:page:1.0
 
   :replay
       urn:ietf:params:restconf:capability:replay:1.0
@@ -2657,13 +2599,22 @@ on list and in the halls (ordered by last name): Rex Fernando
 
     -- RFC Ed.: remove this section before publication.
 
+The RESTCONF issue tracker can be found here:
+https://github.com/netconf-wg/restconf/issues
+
 ** 03 - 04
 
+- renamed 'select' to 'fields' (#1)
+- moved collection resource and page capability
+to draft-ietf-netconf-restconf-collection-00 (#3)
+- added mandatory "defaults" protocol capability URI (#4)
+- added optional "with-defaults" query parameter URI (#4)
+- clarified authentication procedure (#9)
+- remove 'content" query parameter URI and made this
+parameter mandatory (#16)
 - clarified datastore usage
 - changed lock-denied error example
-- added mandatory "defaults" protocol capability URI
-- added optional "with-defaults" query parameter URI
-- renamed "select" parameter to "fields"
+- added with-defaults query parameter example
 
 ** 02 - 03
 
@@ -3461,78 +3412,6 @@ Response from server:
    Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
    ETag: abcada438af
 
-*** "limit" Parameter
-
-In this example, the client requests the first two "album" resources
-for a given artist:
-
-Request from client:
-
-   GET /restconf/data/example-jukebox:jukebox/
-      library/artist=Foo%20Fighters/album/?limit=2   HTTP/1.1
-   Host: example.com
-   Content-Type: application/yang.collection+xml
-
-Response from server:
-
-   HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
-   Server: example-server
-   Cache-Control: no-cache
-   Pragma: no-cache
-   Content-Type: application/yang.collection+xml
-
-   <collection xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf"
-     <album xmlns="http://example.com/ns/example-jukebox">
-       <name>Foo Fighters</name>
-       <year>1995</year>
-       ...
-     </album>
-     <album xmlns="http://example.com/ns/example-jukebox">
-       <name>The Color and the Shape</name>
-       <year>1997</year>
-       ...
-     </album>
-   </collection>
-
-*** "offset" Parameter
-
-In this example, the client requests the next two albums, i.e., two
-albums starting from two.
-
-Request from client:
-
-   GET /restconf/data/example-jukebox:jukebox/
-      library/artist=Foo%20Fighters/album/?limit=2&offset=2  HTTP/1.1
-   Host: example.com
-   Content-Type: application/yang.collection+json
-
-Response from server:
-
-   HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:02:00 GMT
-   Server: example-server
-   Cache-Control: no-cache
-   Pragma: no-cache
-   Content-Type: application/yang.collection+json
-
-   {
-     "collection": {
-       "example-jukebox:album" : [
-         {
-           "year" : 1999,
-           "name" : "There is Nothing Left to Loose",
-           ...
-         },
-         {
-          "year" : 2002,
-          "name" : "One by One",
-          ...
-         }
-       ]
-     }
-   }
-
 *** "filter" Parameter @ex-filters@
 
 The following URIs show some examples of notification filter
@@ -3575,7 +3454,65 @@ specifications (lines wrapped for display purposes only):
 
 *** "with-defaults" Parameter
 
-  TBD
+Assume the same data model as defined in Appendix A.1 of ^RFC6243^.
+Assume the same data set as defined in Appendix A.2 of ^RFC6243^.
+If the server defaults-uri basic-mode is "trim", the the
+following request for interface "eth1" might be as follows:
+
+Without query parameter:
+
+   GET /restconf/data/interfaces/interface=eth1 HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+The server might respond as follows.
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Content-Type: application/yang.data+json
+
+   {
+     "example:interface": [
+       {
+         "name" : "eth1",
+         "status" : "up"
+       }
+     ]
+   }
+
+Note that the "mtu" leaf is missing because it is set to
+the default "1500", and the server defaults handling
+basic-mode is "trim".
+
+With query parameter:
+
+   GET /restconf/data/interfaces/interface=eth1
+      ?with-defaults=report-all HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json,
+           application/yang.errors+json
+
+The server might respond as follows.
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Content-Type: application/yang.data+json
+
+   {
+     "example:interface": [
+       {
+         "name" : "eth1",
+         "mtu" : 1500,
+         "status" : "up"
+       }
+     ]
+   }
+
+Note that the server returns the "mtu" leaf because the "report-all"
+mode was requested with the "with-defaults" query parameter.
 
 
 {{document:
