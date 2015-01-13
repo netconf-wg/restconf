@@ -553,20 +553,19 @@ the Design of Network-based Software Architectures</title>
   </reference>
 
 
-  <reference anchor="I-D.ietf-netmod-json">
+  <reference anchor="I-D.ietf-netmod-yang-json">
     <front>
-      <title>Modeling JSON Text with YANG</title>
+      <title>JSON Encoding of Data Modeled with YANG</title>
       <author initials="L." surname="Lhotka" fullname="L. Lhotka">
 	<organization>CZ.NIC</organization>
       </author>
-      <date year="2014" month="October"/>
+      <date year="2014" month="November"/>
     </front>
     <seriesInfo name="Internet-Draft"
-                value="draft-ietf-netmod-yang-json-01"/>
+                value="draft-ietf-netmod-yang-json-02"/>
     <format type='TXT'
-    target='http://www.ietf.org/id/draft-ietf-netmod-yang-json-01.txt'/>
+    target='http://www.ietf.org/id/draft-ietf-netmod-yang-json-02.txt'/>
   </reference>
-
 
 
   <reference anchor="I-D.lhotka-netmod-yang-metadata">

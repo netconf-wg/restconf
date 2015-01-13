@@ -470,7 +470,8 @@ YANG Tree Diagram for "application/yang.api" Resource Type:
       +--rw data
       +--rw operations
 
-The "restconf" grouping definition in the "ietf-restconf" module
+The "application/yang.api" restconf-resource extension
+in the "ietf-restconf" module
 defined in ^module^ is used to specify the structure and syntax
 of the conceptual child resources within the API resource.
 
@@ -730,7 +731,7 @@ path identifiers:
                ("/" api-identifier
                  0*("/" (api-identifier | list-instance )))
 
-    api-identifier = [module-name ":"] identifier
+    api-identifier = [module-name ":"] identifier   ;; note 1
 
     module-name = identifier
 
@@ -745,6 +746,8 @@ path identifiers:
     identifier  = (ALPHA / "_")
                   *(ALPHA / DIGIT / "_" / "-" / ".")
 
+Note 1: The syntax for "api-identifier" MUST conform to the
+JSON identifier encoding rules in section 4 of ^I-D.ietf-netmod-yang-json^.
 *** Defaults Handling
 
 RESTCONF requires that a server report its default handling mode.
@@ -957,8 +960,9 @@ An "errors" resource is a collection of error information that
 is sent as the message-body in a server response message,
 if an error occurs while processing a request message.
 
-The "ietf-restconf" YANG module contains the "errors" grouping
-which specifies the syntax and semantics of an errors resource.
+The "ietf-restconf" YANG module contains the "application/yang.errors"
+restconf-resource extension which specifies the syntax and
+semantics of an "errors" resource.
 RESTCONF error handling behavior is defined in ^error-reporting^.
 
 * Operations @operations@
@@ -1812,7 +1816,7 @@ Content is encoded in either JSON or XML format.
 A server MUST support XML encoding and MAY support JSON encoding.
 XML encoding rules for data nodes are defined in ^RFC6020^.
 The same encoding rules are used for all XML content.
-JSON encoding rules are defined in ^I-D.ietf-netmod-json^.
+JSON encoding rules are defined in ^I-D.ietf-netmod-yang-json^.
 This encoding is valid JSON, but also has
 special encoding rules to identify module namespaces
 and provide consistent type processing of YANG data.
@@ -2049,8 +2053,14 @@ definition of the event stream.  The NETCONF stream
 defined in ^RFC5277^ is encoded in XML format.
 
 The structure of the event data is based on the "notification"
-element definition in section 4 of ^RFC5277^. It MUST
-conform to the "notification" YANG container definition in ^module^.
+element definition in section 4 of ^RFC5277^.
+It MUST conform to the schema for the "notification" element
+in section 4 of ^RFC5277^, except the XML namespace for
+this element is defined as:
+
+  urn:ietf:params:xml:ns:yang:ietf-restconf
+
+For JSON encoding purposes, the module name is "ietf-restconf".
 
 An example SSE notification encoded using XML:
 
@@ -2200,7 +2210,8 @@ YANG Tree Diagram for <errors> Data:
          +--ro error-info
 
 The semantics and syntax for RESTCONF error messages are
-defined in the "errors" YANG grouping in ^module^.
+defined in the "application/yang.errors" restconf-resource
+extension in ^module^.
 
 Examples:
 
@@ -2262,18 +2273,15 @@ The server might respond:
 * RESTCONF module @module@
 
 The "ietf-restconf" module defines conceptual definitions
-within groupings, which are not meant to be implemented
-as datastore contents by a server. The "restconf" container
-is not intended to be implemented as a top-level data node
-(under the "/restconf/data" entry point).
-
-The "ietf-yang-types" module from ^RFC6991^
-is used by this module for some type definitions.
+within an extension and two groupings, which are
+not meant to be implemented as datastore contents by a server.
+E.g., the "restconf" container is not intended to be implemented
+as a top-level data node (under the "/restconf/data" entry point).
 
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-01-11.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-01-13.yang"
 
 * RESTCONF Monitoring
 
@@ -2337,7 +2345,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2014-12-09.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-01-13.yang"
 
 * YANG Module Library
 
@@ -2412,7 +2420,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-yang-library.yang extract-to="ietf-yang-library@2014-10-25.yang"
+!! include-figure ietf-yang-library.yang extract-to="ietf-yang-library@2015-01-13.yang"
 
 * IANA Considerations @iana@
 
@@ -2590,8 +2598,10 @@ security of the connection.
 
 * Acknowledgements
 
-The authors would like to thank for following for lively discussions
-on list and in the halls (ordered by last name): Rex Fernando
+The authors would like to thank the following people for
+their contributions to this document: Ladislav Lhotka,
+Rex Fernando.
+
 
 *! start-appendix
 
@@ -2610,6 +2620,9 @@ to draft-ietf-netconf-restconf-collection-00 (#3)
 - added mandatory "defaults" protocol capability URI (#4)
 - added optional "with-defaults" query parameter URI (#4)
 - clarified authentication procedure (#9)
+- clarified that JSON encoding of module name in a URI
+MUST follow the netmod-yang-json encoding rules (#14)
+- added restconf-resource extension (#15)
 - remove 'content" query parameter URI and made this
 parameter mandatory (#16)
 - clarified datastore usage
@@ -2677,7 +2690,7 @@ field, and RFC 2392 does not apply.
 by RESTCONF are widely supported.
 
 - removed encoding rules from section on RESTCONF Meta-Data. This is now
-defined in "I-D.lhotka-netmod-json".
+defined in "I-D.lhotka-netmod-yang-json".
 
 - added media type application/yang.errors to map to errors YANG grouping.
 Updated error examples to use new media type.
@@ -3339,11 +3352,11 @@ The server might respond as follows.
          },
          {
            "name" : "ietf-restconf-monitoring",
-           "revision" : "2014-12-09"
+           "revision" : "2015-01-13"
          },
          {
            "name" : "ietf-yang-library",
-           "revision" : "2014-10-25"
+           "revision" : "2015-01-13"
          }
        ]
      }
