@@ -139,7 +139,7 @@ YANG module.
 
 The conceptual datastore contents, data-model-specific
 operations and notification events are identified by this set of
-YANG module resources.  All RESTCONF content identified
+YANG modules.  All RESTCONF content identified
 as either a data resource, operation resource, or event stream resource
 is defined with the YANG language.
 
@@ -201,7 +201,6 @@ The following terms are defined in ^RFC7232^:
 
 - entity tag
 
-
 *** YANG
 
 The following terms are defined in ^RFC6020^:
@@ -224,7 +223,6 @@ The following terms are used within this document:
 
 - API resource: a resource with the media type
 "application/yang.api+xml" or "application/yang.api+json".
-API resources can only be edited by the server.
 
 - data resource: a resource with the media type
 "application/yang.data+xml" or "application/yang.data+json".
@@ -233,8 +231,7 @@ resources.
 
 - datastore resource: a resource with the media type
 "application/yang.datastore+xml" or
-"application/yang.datastore+json". Represents a configuration
-datastore.
+"application/yang.datastore+json". Represents a datastore.
 
 - edit operation: a RESTCONF operation on a data resource
 using the POST, PUT, PATCH, or DELETE method.
@@ -315,7 +312,6 @@ marked with a colon (":").
 
 ### END OF INTRODUCTION
 
-
 * Transport Protocol Requirements
 
 ** Integrity and Confidentiality
@@ -348,7 +344,6 @@ The RESTCONF client identity determined from any HTTP authentication scheme is h
 
 
 ### END OF TRANSPORT PROTOCOL REQUIREMENTS
-
 
 * Resources @resources@
 
@@ -389,11 +384,9 @@ within the YANG modules advertised by the server
 are used to construct a predictable operation or data
 resource identifier.
 
-
-
 ** Root Resource Discovery @root-resource-discovery@
 
-In line the best practices defined by ^get-off-my-lawn^, RESTCONF
+In line with the best practices defined by ^get-off-my-lawn^, RESTCONF
 enables deployments to specify where the RESTCONF API is located.
 When first connecting to a RESTCONF server, a RESTCONF client MUST
 determine the root of the RESTCONF API.  The client discovers this
@@ -635,13 +628,12 @@ for more details on edit operations.
 
 The resource definition version for a data resource
 is identified by the revision date of the YANG module
-containing the YANG definition for the data resource,
-specified in the "{+restconf}/modules" sub-tree.
+containing the YANG definition for the data resource.
 
 *** Encoding YANG Instance Identifiers in the Request URI @uri-encoding@
 
 In YANG, data nodes are named with an absolute
-XPath expression, defined in ^XPath^ , starting
+XPath expression, defined in ^XPath^, starting
 from the document root to the target resource.
 In RESTCONF, URL encoded Location header expressions are used instead.
 
@@ -770,7 +762,7 @@ return the default values that are in use by the server.
 
 ** Operation Resource @operation-resource@
 
-An operation resource represents an protocol operation
+An operation resource represents a protocol operation
 defined with the YANG "rpc" statement.
 
 All operation resources share the same module namespace
@@ -896,10 +888,9 @@ The server might respond:
 
 ** Schema Resource @schema-resource@
 
-If the server supports the "schema" leaf within the API then
-the client can retrieve the YANG schema text for the associated
-YANG module or submodule, using the GET method.
-First the client needs to retrieve the URL for retrieving the schema.
+The server can optionally support retrieval of the YANG modules it
+supports.  To retrieve a YANG module, a client first needs to get
+the URL for retrieving the schema.
 
 The client might send the following GET request message:
 
@@ -941,9 +932,9 @@ The server might respond:
       // rest of YANG module content deleted...
    }
 
-** Stream Resource @stream-resource@
+** Event Stream Resource @stream-resource@
 
-A "stream" resource represents a source for system generated
+An "event stream" resource represents a source for system generated
 event notifications.  Each stream is created and modified
 by the server only.  A client can retrieve a stream resource
 or initiate a long-poll server sent event stream,
@@ -1016,8 +1007,9 @@ The server SHOULD implement this method, however the same information
 could be extracted from the YANG modules and the RESTCONF
 protocol specification.
 
-If the PATCH method is supported, then the "Accept-Patch" header
-MUST be supported, as defined in ^RFC5789^.
+If the PATCH method is supported, then the "Accept-Patch" header MUST
+be supported and returned in the response to the OPTIONS request, as
+defined in ^RFC5789^.
 
 ** HEAD @head@
 
@@ -1105,10 +1097,11 @@ to determine how to process the request.
 
 *** Create Resource Mode
 
-If the target resource type is a datastore or data resource,
-then the POST is treated as a request to create a resource or
-child resource.  The message-body is expected to contain the
-content of a child resource to create within the parent (target resource).
+If the target resource type is a datastore or data resource, then the
+POST is treated as a request to create a top-level resource or child
+resource, respectively.  The message-body is expected to contain the
+content of a child resource to create within the parent (target
+resource).
 
 The "insert" and "point" query parameters are supported
 by the POST method for datastore and data resource types,
@@ -1251,7 +1244,9 @@ in ^RFC5789^ to provide an extensible framework for
 resource patching mechanisms.  It is optional to implement
 by the server.  Each patch type needs a unique
 media type.  Zero or more PATCH media types MAY be supported
-by the server.
+by the server.  The media types supported by a server can be
+discovered by the client by sending an OPTIONS request (see
+^options^).
 
 A plain patch is used to create or update
 a child resource within the target resource.
@@ -1349,11 +1344,11 @@ resource used, in the request.
 !! row  ! content ! GET ! Select config and/or non-config data resources
 !! row  ! depth ! GET ! Request limited sub-tree depth in the reply content
 !! row  ! fields ! GET ! Request a subset of the target resource contents
-!! row  ! filter ! GET ! Boolean notification filter for event-stream resources
+!! row  ! filter ! GET ! Boolean notification filter for event stream resources
 !! row  ! insert ! POST, PUT ! Insertion mode for user-ordered data resources
 !! row  ! point ! POST, PUT ! Insertion point for user-ordered data resources
-!! row  ! start-time ! GET ! Replay buffer start time for event-stream resources
-!! row  ! stop-time ! GET ! Replay buffer stop time for event-stream resources
+!! row  ! start-time ! GET ! Replay buffer start time for event stream resources
+!! row  ! stop-time ! GET ! Replay buffer stop time for event stream resources
 !! row  ! with-defaults ! GET ! Control retrieval of default values
 
 Query parameters can be given in any order.
@@ -1368,7 +1363,7 @@ parameter names in order to avoid collisions with other parameters.
 
 *** Query Parameter URIs
 
-A new set of NETCONF Capability URNs are defined to identify the specific
+A new set of RESTCONF Capability URIs are defined to identify the specific
 query parameters supported by the server. One protocol capability URI
 is also defined called 'defaults'.
 
