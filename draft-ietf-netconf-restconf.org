@@ -1278,7 +1278,6 @@ for display purposes only:
 
    {
      "example-jukebox:album" : {
-       "genre" : "example-jukebox:rock",
        "year" : 2011
      }
    }

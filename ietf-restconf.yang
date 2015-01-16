@@ -106,6 +106,7 @@ module ietf-restconf {
          - mandatory-stmt
          - unique-stmt
          - ordered-by
+         - instance-identitifer data type
 
       The following data-def-stmt sub-statements have special
       meaning when used within a restconf-resource extension
