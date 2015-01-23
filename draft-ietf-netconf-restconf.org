@@ -424,8 +424,7 @@ custom "play" operation is supported:
    -------
    GET /restconf/operations  HTTP/1.1
    Host: example.com
-   Accept: application/yang.api+json,
-           application/yang.errors+json
+   Accept: application/yang.api+json
 
    Response
    --------
@@ -497,8 +496,7 @@ query parameter (see ^content^).
    GET /restconf/data/example-jukebox:jukebox/library
       ?content=nonconfig  HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond:
 
@@ -882,8 +880,7 @@ The client might send the following POST request message:
 
    POST /restconf/operations/example-ops:get-reboot-info HTTP/1.1
    Host: example.com
-   Accept: application/yang.operation+json,
-           application/yang.errors+json
+   Accept: application/yang.operation+json
 
 
 The server might respond:
@@ -913,8 +910,7 @@ The client might send the following GET request message:
    GET /restconf/data/ietf-yang-library:modules/module=
       example-jukebox,2014-07-03/schema HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond:
 
@@ -935,7 +931,7 @@ The client might send the following GET request message:
    GET http://example.com/mymodules/example-jukebox/2014-07-03
       HTTP/1.1
    Host: example.com
-   Accept: application/yang, application/yang.errors+json
+   Accept: application/yang
 
 
 The server might respond:
@@ -1074,8 +1070,7 @@ JSON representation of the "library" resource:
    GET /restconf/data/example-jukebox:jukebox/
      library/artist=Foo%20Fighters/album  HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond:
 
@@ -1923,8 +1918,7 @@ The client might send the following request:
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
       streams HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+xml,
-           application/yang.errors+xml
+   Accept: application/yang.data+xml
 
 
 The server might send the following response:
@@ -2003,8 +1997,7 @@ The client might send the following request:
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
       streams/stream=NETCONF/encoding=xml/events HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+xml,
-           application/yang.errors+xml
+   Accept: application/yang.data+xml
 
 
 The server might send the following response:
@@ -2206,7 +2199,15 @@ or an operation resource, and a "4xx" class of status codes
 then the server SHOULD send a response message-body containing
 the information described by the "errors" container definition
 within the YANG module ^module^.  The Content-Type of this
-response message MUST be application/yang.errors.
+response message MUST be application/yang.errors (see example
+below).  
+
+The client MAY specify the desired encoding for error messages
+by specifying the appropriate media-type in the Accept header.
+If no error media is specified, the server MUST assume that
+"application/yang.errors+xml" was specified.  All of the examples
+in this document, except for the one below, assume the default
+XML encoding will be returned if there is an error.
 
 YANG Tree Diagram for <errors> Data:
 
@@ -2232,11 +2233,18 @@ Examples:
 The following example shows an error returned for
 an "lock-denied" error that can occur if a NETCONF
 client has locked a datastore. The RESTCONF client
-is attempting to delete a data resource.
+is attempting to delete a data resource.  Note that
+an Accept header is used to specify the desired
+encoding for the error message. This example's
+use of the Accept header is especially notable 
+since the DELETE method typically doesn't return a
+message-body and hence Accept headers are typically
+not passed.
 
    DELETE /restconf/data/example-jukebox:jukebox/
       library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
+   Accept: application/yang.errors+json
 
 The server might respond:
 
@@ -2808,8 +2816,7 @@ API resource, using the entry point URI "{+restconf}".
 
    GET /restconf   HTTP/1.1
    Host: example.com
-   Accept: application/yang.api+json,
-           application/yang.errors+json
+   Accept: application/yang.api+json
 
 The server might respond as follows:
 
@@ -2833,8 +2840,7 @@ the "Accept" header can be used, as in this example request:
 
    GET /restconf HTTP/1.1
    Host: example.com
-   Accept: application/yang.api+xml,
-           application/yang.errors+xml
+   Accept: application/yang.api+xml
 
 The server will return the same response either way,
 which might be as follows :
@@ -2861,8 +2867,7 @@ from the server in JSON format:
 
    GET /restconf/data/ietf-yang-library:modules HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 
 The server might respond as follows.
@@ -2931,8 +2936,7 @@ the RESTCONF query parameters, plus one vendor parameter:
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
        capabilities  HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 
 The server might respond as follows.
@@ -3035,8 +3039,7 @@ updated.
      library/artist=Foo%20Fighters/album=Wasting%20Light/year
      HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
    If-Unmodified-Since: Mon, 23 Apr 2012 17:01:00 GMT
    Content-Type: application/yang.data+json
 
@@ -3083,8 +3086,7 @@ is set to "all". The client might send:
    GET /restconf/data/example-events:events?content=all
        HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond:
 
@@ -3123,8 +3125,7 @@ the content parameter value is "config".
    GET /restconf/data/example-events:events?content=config
       HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond:
 
@@ -3162,8 +3163,7 @@ that configuration ancestors (if any) and list key leafs
    GET /restconf/data/example-events:events?content=nonconfig
       HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond:
 
@@ -3208,8 +3208,7 @@ Note that some strings are wrapped for display purposes only.
    GET /restconf/data/example-jukebox:jukebox?depth=unbounded
       HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond:
 
@@ -3286,8 +3285,7 @@ a given target resource, the value "1" is used.
 
    GET /restconf/data/example-jukebox:jukebox?depth=1 HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond:
 
@@ -3309,8 +3307,7 @@ the value "3" is used.
 
    GET /restconf/data/example-jukebox:jukebox?depth=3 HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond:
 
@@ -3347,8 +3344,7 @@ from each module, in JSON format:
 
    GET /restconf/data?fields=modules/module(name;revision) HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond as follows.
 
@@ -3490,8 +3486,7 @@ Without query parameter:
 
    GET /restconf/data/interfaces/interface=eth1 HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond as follows.
 
@@ -3518,8 +3513,7 @@ With query parameter:
    GET /restconf/data/interfaces/interface=eth1
       ?with-defaults=report-all HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json,
-           application/yang.errors+json
+   Accept: application/yang.data+json
 
 The server might respond as follows.
 
