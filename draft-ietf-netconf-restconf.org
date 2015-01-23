@@ -245,6 +245,10 @@ It contains a conceptual system or data-model specific event
 that is delivered within a notification event stream.
 Also called a "stream resource".
 
+- media-type: HTTP uses Internet media types ^RFC2046^ in the Content-Type
+and Accept header fields in order to provide open and extensible
+data typing and type negotiation.
+
 - operation: the conceptual RESTCONF operation for a message,
 derived from the HTTP method, request URI, headers, and message-body.
 
@@ -413,7 +417,8 @@ using the <Link> element containing the "restconf" attribute :
 Once discovering the RESTCONF API root, the client MUST prepend it to
 any subsequent request to a RESTCONF resource.  For instance, using
 the "/restconf" path discovered above, the client can now determine
-the operations supported by the the server:
+the operations supported by the the server; e.g. in this example a
+custom "play" operation is supported:
 
    Request
    -------
@@ -565,35 +570,45 @@ in RESTCONF, for datastore and data resources.
 **** Timestamp
 
 The last change time is maintained and
-the "Last-Modified" and "Date" headers are returned in the
+the "Last-Modified" (^RFC7232^, section 2.2) header is returned in the
 response for a retrieval request.
 The "If-Unmodified-Since" header can be used
 in edit operation requests to cause the server
 to reject the request if the resource has been modified
 since the specified timestamp.
 
-The server MUST maintain a last-modified timestamp for this
-resource, and return the "Last-Modified" header when this
-resource is retrieved with the GET or HEAD methods.
+The server MUST maintain a last-modified timestamp for the
+top-level {+restconf}/data resource and SHOULD maintain
+last-modified timestamps for decendent resources.  For all
+resources, the server MUST return the "Last-Modified" header
+when the resource is retrieved with the GET or HEAD methods.
+If the server does not maintain a timestamp for a resource,
+it MUST return the timestamp of the resource's ancestor, a
+process that may recurse up to the top-level {+restconf}/data resource.
 Only changes to configuration data resources within
-the datastore affect this timestamp.
+the datastore affect the timestamp.
 
 **** Entity tag
 
 A unique opaque string is maintained and
-the "ETag" header is returned in the
+the "ETag" (^RFC7232^, section 2.3) header is returned in the
 response for a retrieval request.
 The "If-Match" header can be used
 in edit operation requests to cause the server
 to reject the request if the resource entity tag
 does not match the specified value.
 
-The server MUST maintain a resource entity tag for this
-resource, and return the "ETag" header when this
-resource is retrieved with the GET or HEAD methods.
-The resource entity tag MUST be changed to a new
-previously unused value if changes to any configuration
-data resources within the datastore are made.
+The server MUST maintain an entity tag for the
+top-level {+restconf}/data resource and SHOULD maintain
+entity tags for decendent resources.  For all
+resources, the server MUST return the "ETag" header
+when the resource is retrieved with the GET or HEAD methods.
+If the server does not maintain an entity tag for a resource,
+it MUST return the entity tag of the resource's ancestor, a
+process that may recurse up to the top-level {+restconf}/data resource.
+Only changes to configuration data resources within
+the datastore affect the entity tag.
+
 
 ** Data Resource  @data-resource@
 
@@ -698,13 +713,14 @@ does not know about.
 Examples:
 
    container top {
-        list list1 {
-        key "key1 key2 key3";
-        ...
-        list list2 {
-            key "key4 key5";
+       list list1 {
+           key "key1 key2 key3";
             ...
-            leaf X { type string; }
+            list list2 {
+                key "key4 key5";
+                ...
+                leaf X { type string; }
+            }
         }
     }
 
@@ -740,14 +756,13 @@ path identifiers:
 
 Note 1: The syntax for "api-identifier" MUST conform to the
 JSON identifier encoding rules in section 4 of ^I-D.ietf-netmod-yang-json^.
+
 *** Defaults Handling
 
-RESTCONF requires that a server report its default handling mode.
-See ^defaults-uri^ for details.  The optional "with-defaults" query
-parameter is also available to report default leaf node values
-that are in effect within a data model. See ^with-defaults^
-for details on using the "with-defaults" query parameter to
-control retrieval of default values.
+RESTCONF requires that a server report its default handling mode 
+(see ^defaults-uri^ for details).  If the optional "with-defaults" query
+parameter is supported by the server, a client may use it to control
+retrieval of default values  (see ^with-defaults^ for details).
 
 If the target of a GET method is a data node
 that represents a leaf that has a default value,
@@ -758,7 +773,8 @@ If the target of a GET method is a data node
 that represents a container or list that has any child resources
 with default values, for the child resources that have not been given
 value yet, the server MAY
-return the default values that are in use by the server.
+return the default values that are in use by the server, in accordance
+with its reported default handing mode and query parameters passed by the client.
 
 ** Operation Resource @operation-resource@
 
@@ -977,7 +993,8 @@ NETCONF protocol operations:
 The NETCONF "remove" operation attribute is not supported
 by the HTTP DELETE method. The resource must exist or
 the DELETE method will fail. The PATCH method is equivalent to
-a "merge" operation for a plain patch.
+a "merge" operation when using a plain patch (see ^patch^),
+other media-types may provide more granular controll.
 
 Access control mechanisms may be used to limit what operations
 can be used.  In particular, RESTCONF is compatible with the
@@ -1000,8 +1017,7 @@ each HTTP method.
 
 The OPTIONS method is sent by the client to
 discover which methods are supported by the server
-for a specific resource.
-If supported, it SHOULD be implemented for all media types.
+for a specific resource (e.g., GET, POST, DELETE, etc.).  
 
 The server SHOULD implement this method, however the same information
 could be extracted from the YANG modules and the RESTCONF
@@ -1101,7 +1117,9 @@ If the target resource type is a datastore or data resource, then the
 POST is treated as a request to create a top-level resource or child
 resource, respectively.  The message-body is expected to contain the
 content of a child resource to create within the parent (target
-resource).
+resource).  The data-model for the child tree is the subtree is 
+defined by YANG for the child resource.
+
 
 The "insert" and "point" query parameters are supported
 by the POST method for datastore and data resource types,
@@ -1248,6 +1266,8 @@ by the server.  The media types supported by a server can be
 discovered by the client by sending an OPTIONS request (see
 ^options^).
 
+This draft defines a plain patching mechanism using the application/yang.data media-type.  Please see ^draft-ietf-netconf-yang-patch-02^ for an alternate media-type supporting more granular control.
+
 A plain patch is used to create or update
 a child resource within the target resource.
 If the target resource instance does not exist, the server MUST
@@ -1274,6 +1294,7 @@ for display purposes only:
    PATCH /restconf/data/example-jukebox:jukebox/
       library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
+   If-Match: b8389233a4c
    Content-Type: application/yang.data+json
 
    {
@@ -1299,7 +1320,6 @@ The XML encoding for the same request might be:
    Content-Type: application/yang.data+xml
 
    <album xmlns="http://example.com/ns/example-jukebox">
-      <genre>example-jukebox:rock</genre>
       <year>2011</year>
    </album>
 
@@ -1374,7 +1394,7 @@ is also defined called 'defaults'.
 !! row  ! filter ! urn:ietf:params:restconf:capability:filter:1.0
 !! row  ! insert ! urn:ietf:params:restconf:capability:insert:1.0
 !! row  ! replay ! urn:ietf:params:restconf:capability:replay:1.0
-!! row  ! with-defaults ! urn:ietf:params:restconf:capability:restconf-with-defaults:1.0
+!! row  ! with-defaults ! urn:ietf:params:restconf:capability:with-defaults:1.0
 
 *** The "defaults" Protocol Capability URI @defaults-uri@
 
@@ -1688,7 +1708,7 @@ then the server MUST adhere to the defaults reporting behavior defined in
 its "basic-mode" parameter for the "defaults" protocol capability URI,
 defined in ^defaults-uri^.
 
-If the server includes the "restconf-with-defaults" query parameter URI in
+If the server includes the "with-defaults" query parameter URI in
 the "capability" leaf-list in ^mon-mod^, then the "with-defaults"
 query parameter MUST be supported.
 
@@ -2546,8 +2566,8 @@ registry
   :replay
       urn:ietf:params:restconf:capability:replay:1.0
 
-  :restconf-with-defaults
-      urn:ietf:params:restconf:capability:restconf-with-defaults:1.0
+  :with-defaults
+      urn:ietf:params:restconf:capability:with-defaults:1.0
 
 * Security Considerations
 
@@ -2594,7 +2614,7 @@ security of the connection.
 
 The authors would like to thank the following people for
 their contributions to this document: Ladislav Lhotka,
-Rex Fernando.
+Rex Fernando, and Robert Wilton.
 
 
 *! start-appendix

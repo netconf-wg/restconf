@@ -1,5 +1,20 @@
 <references title="Normative References">
 
+  <reference anchor='RFC2046'>
+    <front>
+      <title abbrev='Media Types'>Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types</title>
+      <author initials='N.' surname='Freed' fullname='Ned Freed'>
+        <organization>Innosoft International, Inc.</organization>
+      </author>
+      <author initials='N.' surname='Borenstein' fullname='Nathaniel S. Borenstein'>
+        <organization>First Virtual Holdings</organization>
+      </author>
+      <date year='1996' month='November' />
+    </front>
+    <seriesInfo name='RFC' value='2046' />
+    <format type='TXT' octets='105854' target='http://www.rfc-editor.org/rfc/rfc2046.txt' />
+  </reference>
+
   <reference anchor="RFC2119">
     <front>
       <title>Key words for use in RFCs to Indicate Requirement Levels</title>
@@ -778,4 +793,25 @@ the Design of Network-based Software Architectures</title>
       <seriesInfo name="World Wide Web Consortium Recommendation" value="REC-xpath-19991116"/>
       <format type="HTML" target="http://www.w3.org/TR/1999/REC-xpath-19991116"/>
 </reference>
+
+
+<reference anchor="draft-ietf-netconf-yang-patch-02">
+      <front>
+        <title>YANG Patch Media Type</title>
+        <author initials="A.B." surname="Bierman" fullname="Andy Bierman">
+          <organization />
+        </author>
+        <author initials="M.B." surname="Bjorklund" fullname="Martin Bjorklund">
+          <organization />
+        </author>
+        <author initials="K.W." surname="Watsen" fullname="Kent Watsen">
+          <organization />
+        </author>
+        <date year="2015" />
+      </front>
+      <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-patch-02" />
+      <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-patch-02"/>
+</reference>
+
+
 </references>
