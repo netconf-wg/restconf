@@ -267,6 +267,11 @@ is "application/yang.data+xml" or "application/yang.data+json".
 - query parameter: a parameter (and its value if any),
 encoded within the query component of the request URI.
 
+- RESTCONF capability: An optional RESTCONF protocol feature
+supported by the server, which is identified by an IANA registered
+NETCONF Capability URI, and advertised with an entry in
+the "capability" leaf-list in ^mon-mod^.
+
 - retrieval request: a request using the GET or HEAD methods.
 
 - target resource: the resource that is associated with
@@ -467,7 +472,7 @@ YANG Tree Diagram for "application/yang.api" Resource Type:
       +--rw data
       +--rw operations
 
-The "application/yang.api" restconf-resource extension
+The "application/yang.api" restconf-media-type extension
 in the "ietf-restconf" module
 defined in ^module^ is used to specify the structure and syntax
 of the conceptual child resources within the API resource.
@@ -577,7 +582,7 @@ since the specified timestamp.
 
 The server MUST maintain a last-modified timestamp for the
 top-level {+restconf}/data resource and SHOULD maintain
-last-modified timestamps for decendent resources.  For all
+last-modified timestamps for descendant resources.  For all
 resources, the server MUST return the "Last-Modified" header
 when the resource is retrieved with the GET or HEAD methods.
 If the server does not maintain a timestamp for a resource,
@@ -598,7 +603,7 @@ does not match the specified value.
 
 The server MUST maintain an entity tag for the
 top-level {+restconf}/data resource and SHOULD maintain
-entity tags for decendent resources.  For all
+entity tags for descendant resources.  For all
 resources, the server MUST return the "ETag" header
 when the resource is retrieved with the GET or HEAD methods.
 If the server does not maintain an entity tag for a resource,
@@ -957,15 +962,17 @@ Notifications specification ^RFC5277^. The available streams
 can be retrieved from the stream list,
 which specifies the syntax and semantics of a stream resource.
 
-** Errors Resource @errors-resource@
+** Errors Media Type @errors-media-type@
 
-An "errors" resource is a collection of error information that
+An "errors" media type is a collection of error information that
 is sent as the message-body in a server response message,
 if an error occurs while processing a request message.
+It is not considered a resource type because no instances
+can be retrieved with a GET request.
 
 The "ietf-restconf" YANG module contains the "application/yang.errors"
-restconf-resource extension which specifies the syntax and
-semantics of an "errors" resource.
+restconf-media-type extension which specifies the syntax and
+semantics of an "errors" media type.
 RESTCONF error handling behavior is defined in ^error-reporting^.
 
 * Operations @operations@
@@ -990,7 +997,7 @@ The NETCONF "remove" operation attribute is not supported
 by the HTTP DELETE method. The resource must exist or
 the DELETE method will fail. The PATCH method is equivalent to
 a "merge" operation when using a plain patch (see ^patch^),
-other media-types may provide more granular controll.
+other media-types may provide more granular control.
 
 Access control mechanisms may be used to limit what operations
 can be used.  In particular, RESTCONF is compatible with the
@@ -1378,8 +1385,7 @@ parameter names in order to avoid collisions with other parameters.
 *** Query Parameter URIs
 
 A new set of RESTCONF Capability URIs are defined to identify the specific
-query parameters supported by the server. One protocol capability URI
-is also defined called 'defaults'.
+query parameters and protocol features supported by the server.
 
 !! table RESTCONF Query Parameter URIs
 !! head ! Name ! URI
@@ -2225,7 +2231,7 @@ YANG Tree Diagram for <errors> Data:
          +--ro error-info
 
 The semantics and syntax for RESTCONF error messages are
-defined in the "application/yang.errors" restconf-resource
+defined in the "application/yang.errors" restconf-media-type
 extension in ^module^.
 
 Examples:
@@ -2303,7 +2309,7 @@ as a top-level data node (under the "/restconf/data" entry point).
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-01-13.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-01-24.yang"
 
 * RESTCONF Monitoring
 
@@ -2367,7 +2373,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-01-13.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-01-24.yang"
 
 * YANG Module Library
 
@@ -2442,7 +2448,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-yang-library.yang extract-to="ietf-yang-library@2015-01-13.yang"
+!! include-figure ietf-yang-library.yang extract-to="ietf-yang-library@2015-01-24.yang"
 
 * IANA Considerations @iana@
 
@@ -2622,7 +2628,7 @@ security of the connection.
 
 The authors would like to thank the following people for
 their contributions to this document: Ladislav Lhotka,
-Rex Fernando, and Robert Wilton.
+Juergen Schoenwaelder, Rex Fernando, and Robert Wilton.
 
 
 *! start-appendix
@@ -2644,12 +2650,13 @@ to draft-ietf-netconf-restconf-collection-00 (#3)
 - clarified authentication procedure (#9)
 - clarified that JSON encoding of module name in a URI
 MUST follow the netmod-yang-json encoding rules (#14)
-- added restconf-resource extension (#15)
+- added restconf-media-type extension (#15)
 - remove 'content" query parameter URI and made this
 parameter mandatory (#16)
 - clarified datastore usage
 - changed lock-denied error example
 - added with-defaults query parameter example
+- added term "RESTCONF Capability"
 
 ** 02 - 03
 
