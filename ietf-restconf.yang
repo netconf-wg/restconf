@@ -70,12 +70,20 @@ module ietf-restconf {
    }
    description
      "This extension is used to specify a YANG data structure which
-      represents a specific RESTCONF media type. Data definition
-      statements within this extension specify the syntax for the
-      specific media type.
+      represents a conceptual RESTCONF media type template.
+      Data definition statements within this extension specify
+      the 'generic syntax' for the specific media type.
+
+      YANG is mapped to specific encoding formats outside the
+      scope of this extension statement. RFC 6020 defines XML
+      encoding rules for all RESTCONF media types that use
+      the '+xml' suffix. draft-ietf-netmod-yang-json defines
+      JSON encoding rules for all RESTCONF media types that
+      use the '+json' suffix.
 
       The 'media-type-id' parameter value identifies the media type
-      that is being defined.
+      that is being defined. It contains the string associated
+      with the generic media type, i.e., no suffix is specified.
 
       This extension is ignored unless it appears as a top-level
       statement. It SHOULD contain data definition statements
