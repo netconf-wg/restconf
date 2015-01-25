@@ -3373,11 +3373,11 @@ The server might respond as follows.
          },
          {
            "name" : "ietf-restconf-monitoring",
-           "revision" : "2015-01-13"
+           "revision" : "2015-01-24"
          },
          {
            "name" : "ietf-yang-library",
-           "revision" : "2015-01-13"
+           "revision" : "2015-01-24"
          }
        ]
      }
