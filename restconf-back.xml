@@ -795,7 +795,7 @@ the Design of Network-based Software Architectures</title>
 </reference>
 
 
-<reference anchor="draft-ietf-netconf-yang-patch-02">
+  <reference anchor="I-D.ietf-netconf-yang-patch">
       <front>
         <title>YANG Patch Media Type</title>
         <author initials="A.B." surname="Bierman" fullname="Andy Bierman">

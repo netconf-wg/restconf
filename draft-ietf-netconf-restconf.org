@@ -261,8 +261,8 @@ or data resource.
 The media type of the message-body content will identify
 the patch type in use.
 
-- plain patch: a PATCH request where the media type
-is "application/yang.data+xml" or "application/yang.data+json".
+- plain patch: a PATCH request that can be used for simple merge
+operations.
 
 - query parameter: a parameter (and its value if any),
 encoded within the query component of the request URI.
@@ -452,11 +452,16 @@ resource types are defined in RESTCONF:
 
 !! table RESTCONF Media Types
 !! head ! Resource    ! Media Type
-!! row  ! API         ! application/yang.api
-!! row  ! Datastore   ! application/yang.datastore
-!! row  ! Data        ! application/yang.data
-!! row  ! Errors      ! application/yang.errors
-!! row  ! Operation   ! application/yang.operation
+!! row  ! API         ! application/yang.api+xml
+!! row  !             ! application/yang.api+json
+!! row  ! Datastore   ! application/yang.datastore+xml
+!! row  !             ! application/yang.datastore+json
+!! row  ! Data        ! application/yang.data+xml
+!! row  !             ! application/yang.data+json
+!! row  ! Errors      ! application/yang.errors+xml
+!! row  !             ! application/yang.errors+json
+!! row  ! Operation   ! application/yang.operation+xml
+!! row  !             ! application/yang.operation+json
 !! row  ! Schema      ! application/yang
 
 ** API Resource @api-resource@
@@ -466,7 +471,7 @@ the RESTCONF features.
 It is the top-level resource and has the media type
 "application/yang.api+xml" or "application/yang.api+json".
 
-YANG Tree Diagram for "application/yang.api" Resource Type:
+YANG Tree Diagram for an API Resource:
 
    +--rw restconf
       +--rw data
@@ -996,7 +1001,7 @@ NETCONF protocol operations:
 The NETCONF "remove" operation attribute is not supported
 by the HTTP DELETE method. The resource must exist or
 the DELETE method will fail. The PATCH method is equivalent to
-a "merge" operation when using a plain patch (see ^patch^),
+a "merge" operation when using a plain patch (see ^plain-patch^),
 other media-types may provide more granular control.
 
 Access control mechanisms may be used to limit what operations
@@ -1268,12 +1273,8 @@ by the server.  The media types supported by a server can be
 discovered by the client by sending an OPTIONS request (see
 ^options^).
 
-This draft defines a plain patching mechanism using the application/yang.data media-type.  Please see ^draft-ietf-netconf-yang-patch-02^ for an alternate media-type supporting more granular control.
-
-A plain patch is used to create or update
-a child resource within the target resource.
-If the target resource instance does not exist, the server MUST
-NOT create it.
+If the target resource instance does not exist, the server MUST NOT
+create it.
 
 If the PATCH request succeeds, a "200 OK" Status-Line
 is returned if there is a message-body, and "204 No Content"
@@ -1284,6 +1285,22 @@ an error response containing
 a "403 Forbidden" or "404 Not Found" Status-Line is returned to
 the client.  All other error responses are handled according to
 the procedures defined in ^error-reporting^.
+
+*** Plain Patch @plain-patch@
+
+The plain patch mechanism merges the contents of the message body with
+the target resource.  If the target resource is a datastore resource
+(see ^datastore-resource^), the message body MUST be either
+application/yang.datastore+xml or application/yang.datastore+json.  If
+then the target resource is a data resource (see ^data-resource^),
+then the message body MUST be either application/yang.data+xml or
+application/yang.data+json.  same as the media-type of
+application/yang.data.
+
+Plain patch can used to create or update, but not delete, a child
+resource within the target resource.  Please see
+^I-D.ietf-netconf-yang-patch^ for an alternate media-type supporting
+more granular control.
 
 Example:
 
