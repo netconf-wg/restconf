@@ -53,7 +53,7 @@ module ietf-yang-library {
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2015-01-13 {
+  revision 2015-01-24 {
     description
       "Initial revision.";
     reference
