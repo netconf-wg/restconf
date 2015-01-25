@@ -653,25 +653,12 @@ The resource definition version for a data resource
 is identified by the revision date of the YANG module
 containing the YANG definition for the data resource.
 
-*** Encoding YANG Instance Identifiers in the Request URI @uri-encoding@
+*** Encoding Data Resource Identifiers in the Request URI @uri-encoding@
 
 In YANG, data nodes are named with an absolute
 XPath expression, defined in ^XPath^, starting
 from the document root to the target resource.
 In RESTCONF, URL encoded Location header expressions are used instead.
-
-The YANG "instance-identifier" (i-i) data type is represented
-in RESTCONF with the path expression format defined
-in this section.
-
-!! table RESTCONF instance-identifier Type Conversion
-!! head ! Name ! Comments
-!! row  ! point ! Insertion point is always a full i-i
-!! row  ! path ! Request URI path is a full or partial i-i
-
-The "path" component of the request URI contains the
-absolute path expression that identifies the
-target resource.
 
 A predictable location for a data resource
 is important, since applications will code to the YANG
