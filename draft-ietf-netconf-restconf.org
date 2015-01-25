@@ -740,6 +740,7 @@ path identifiers:
 
 Note 1: The syntax for "api-identifier" MUST conform to the
 JSON identifier encoding rules in section 4 of ^I-D.ietf-netmod-yang-json^.
+
 *** Defaults Handling
 
 RESTCONF requires that a server report its default handling mode.
@@ -909,14 +910,14 @@ The server might respond:
 
    {
      "ietf-yang-library:schema":
-      "http://example.com/mymodules/example-jukebox/2014-07-03"
+      "https://example.com/mymodules/example-jukebox/2014-07-03"
    }
 
 Next the client needs to retrieve the actual YANG schema.
 
 The client might send the following GET request message:
 
-   GET http://example.com/mymodules/example-jukebox/2014-07-03
+   GET https://example.com/mymodules/example-jukebox/2014-07-03
       HTTP/1.1
    Host: example.com
    Accept: application/yang, application/yang.errors+json
@@ -1135,7 +1136,7 @@ If the resource is created, the server might respond as follows:
    HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
-   Location: http://example.com/restconf/data/example-jukebox:jukebox
+   Location: https://example.com/restconf/data/example-jukebox:jukebox
    Last-Modified: Mon, 23 Apr 2012 17:01:00 GMT
    ETag: b3a3e673be2
 
@@ -1925,11 +1926,11 @@ The server might send the following response:
          </replay-log-creation-time>
          <encoding>
             <type>xml</type>
-            <events>http://example.com/streams/NETCONF</events>
+            <events>https://example.com/streams/NETCONF</events>
          </encoding>
          <encoding>
             <type>json</type>
-            <events>http://example.com/streams/NETCONF-JSON</events>
+            <events>https://example.com/streams/NETCONF-JSON</events>
          </encoding>
       </stream>
       <stream>
@@ -1938,7 +1939,7 @@ The server might send the following response:
          <replay-support>false</replay-support>
          <encoding>
             <type>xml</type>
-            <events>http://example.com/streams/SNMP</events>
+            <events>https://example.com/streams/SNMP</events>
          </encoding>
       </stream>
       <stream>
@@ -1952,7 +1953,7 @@ The server might send the following response:
          <encoding>
             <type>xml</type>
             <events>
-              http://example.com/streams/syslog-critical
+              https://example.com/streams/syslog-critical
             </events>
          </encoding>
       </stream>
@@ -1994,7 +1995,7 @@ The server might send the following response:
 
    <events
      xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
-     http://example.com/streams/NETCONF
+     https://example.com/streams/NETCONF
    </events>
 
 
@@ -2256,7 +2257,7 @@ The server might respond:
        "error": {
          "error-type": "protocol",
          "error-tag": "data-exists",
-         "error-urlpath": "http://example.com/restconf/data/
+         "error-urlpath": "https://example.com/restconf/data/
               example-jukebox:jukebox",
          "error-message":
            "Data already exists, cannot create new resource"
@@ -2829,7 +2830,7 @@ which might be as follows :
    <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <data/>
      <operations>
-       <play xmlns="http://example.com/ns/example-jukebox"/>
+       <play xmlns="https://example.com/ns/example-jukebox"/>
      </operations>
    </restconf>
 
@@ -2861,7 +2862,7 @@ The server might respond as follows.
          {
            "name" : "foo",
            "revision" : "2012-01-02",
-           "schema" : "http://example.com/mymodules/foo/2012-01-02",
+           "schema" : "https://example.com/mymodules/foo/2012-01-02",
            "namespace" : "http://example.com/ns/foo",
            "feature" : [ "feature1", "feature2" ],
            "conformance" : true
@@ -2870,7 +2871,7 @@ The server might respond as follows.
            "name" : "foo-types",
            "revision" : "2012-01-05",
            "schema" :
-             "http://example.com/mymodules/foo-types/2012-01-05",
+             "https://example.com/mymodules/foo-types/2012-01-05",
            "schema" : [null],
            "namespace" : "http://example.com/ns/foo-types",
            "conformance" : false
@@ -2878,7 +2879,7 @@ The server might respond as follows.
          {
            "name" : "bar",
            "revision" : "2012-11-05",
-           "schema" : "http://example.com/mymodules/bar/2012-11-05",
+           "schema" : "https://example.com/mymodules/bar/2012-11-05",
            "namespace" : "http://example.com/ns/bar",
            "feature" : [ "bar-ext" ],
            "conformance" : true,
@@ -2887,13 +2888,13 @@ The server might respond as follows.
                "name" : "bar-submod1",
                "revision" : "2012-11-05",
                "schema" :
-                "http://example.com/mymodules/bar-submod1/2012-11-05"
+                "https://example.com/mymodules/bar-submod1/2012-11-05"
              },
              {
                "name" : "bar-submod2",
                "revision" : "2012-11-05",
                "schema" :
-                "http://example.com/mymodules/bar-submod2/2012-11-05"
+                "https://example.com/mymodules/bar-submod2/2012-11-05"
              }
            ]
          }
@@ -2965,7 +2966,7 @@ for display purposes only:
    HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2012 17:02:00 GMT
    Server: example-server
-   Location: http://example.com/restconf/data/
+   Location: https://example.com/restconf/data/
         example-jukebox:jukebox/library/artist=Foo%20Fighters
    Last-Modified: Mon, 23 Apr 2012 17:02:00 GMT
    ETag: b3830f23a4c
@@ -2995,7 +2996,7 @@ for display purposes only:
    HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2012 17:03:00 GMT
    Server: example-server
-   Location: http://example.com/restconf/data/
+   Location: https://example.com/restconf/data/
      example-jukebox:jukebox/library/artist=Foo%20Fighters/
      album=Wasting%20Light
    Last-Modified: Mon, 23 Apr 2012 17:03:00 GMT
@@ -3238,14 +3239,14 @@ The server might respond:
            "song" : [
              {
                "index" : 1,
-               "id" : "http://example.com/restconf/data/
+               "id" : "https://example.com/restconf/data/
                      example-jukebox:jukebox/library/artist=
                      Foo%20Fighters/album/Wasting%20Light/
                      song/Rope"
              },
              {
                "index" : 2,
-               "id" : "http://example.com/restconf/data/
+               "id" : "https://example.com/restconf/data/
                      example-jukebox:jukebox/library/artist=
                      Foo%20Fighters/album/Wasting%20Light/song/
                      Bridge%20Burning"
@@ -3382,7 +3383,7 @@ Response from server:
    Date: Mon, 23 Apr 2012 13:01:20 GMT
    Server: example-server
    Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
-   Location: http://example.com/restconf/data/
+   Location: https://example.com/restconf/data/
       example-jukebox:jukebox/playlist=Foo-One/song=1
    ETag: eeeada438af
 
