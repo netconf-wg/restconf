@@ -800,9 +800,9 @@ If the "rpc" statement has an "input" section, then a message-body
 MAY be sent by the client in the request, otherwise the request
 message MUST NOT include a message-body.
 If the "rpc" statement has an "output" section, then a message-body
-MAY be sent by the server in the response. Otherwise the
-server MUST NOT include a message-body in the response message,
-and MUST send a "204 No Content" Status-Line instead.
+MAY be sent by the server in the response, otherwise the response
+message MUST NOT include a message-body in the response message,
+and MUST send a "204 No Content" Status header line instead.
 
 *** Encoding Operation Input Parameters
 
