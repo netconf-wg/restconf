@@ -188,8 +188,9 @@ The following terms are defined in ^RFC7230^:
 
 - header
 - message-body
-- Request-Line
+- request-line
 - request URI
+- status-line
 
 The following terms are defined in ^RFC7231^:
 
@@ -802,7 +803,7 @@ message MUST NOT include a message-body.
 If the "rpc" statement has an "output" section, then a message-body
 MAY be sent by the server in the response, otherwise the response
 message MUST NOT include a message-body in the response message,
-and MUST send a "204 No Content" Status header line instead.
+and MUST send a "204 No Content" status-line instead.
 
 *** Encoding Operation Input Parameters
 
@@ -1052,7 +1053,7 @@ The server MUST NOT return any data resources for which the user
 does not have read privileges.
 If the user is not authorized to read
 the target resource, an error response containing
-a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+a "403 Forbidden" or "404 Not Found" status-line is returned to
 the client.
 
 If the user is authorized to read some but not all of
@@ -1120,14 +1121,14 @@ by the POST method for datastore and data resource types,
 as specified in the YANG definition in ^module^.
 
 If the POST method succeeds,
-a "201 Created" Status-Line is returned and there is
+a "201 Created" status-line is returned and there is
 no response message-body.  A "Location" header identifying
 the child resource that was created MUST be present
 in the response in this case.
 
 If the user is not authorized to create the target resource,
 an error response containing
-a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+a "403 Forbidden" or "404 Not Found" status-line is returned to
 the client.  All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
@@ -1161,14 +1162,14 @@ The message-body (if any) is processed as the operation input
 parameters.  Refer to ^operation-resource^ for details
 on operation resources.
 
-If the POST request succeeds, a "200 OK" Status-Line
+If the POST request succeeds, a "200 OK" status-line
 is returned if there is a response message-body, and
-a "204 No Content" Status-Line is returned if there is
+a "204 No Content" status-line is returned if there is
 no response message-body.
 
 If the user is not authorized to invoke the target operation,
 an error response containing
-a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+a "403 Forbidden" or "404 Not Found" status-line is returned to
 the client.  All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
@@ -1209,12 +1210,12 @@ The "insert" (^insert^) and "point" (^point^) query parameters are
 supported by the PUT method for data resources.
 
 Consistent with ^RFC7231^, if the PUT request creates a new resource,
-a "201 Created" Status-Line is returned.   If an existing resource
+a "201 Created" status-line is returned.   If an existing resource
 is modified, either "200 OK" or "204 No Content" are returned.
 
 If the user is not authorized to create or replace the target resource
 an error response containing
-a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+a "403 Forbidden" or "404 Not Found" status-line is returned to
 the client.  All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
@@ -1225,7 +1226,7 @@ is replaced or created if it does not already exist.
 
 To replace the "album" resource contents,
 the client might send as follows.
-Note that the Request-Line is wrapped
+Note that the request-line is wrapped
 for display purposes only:
 
    PUT /restconf/data/example-jukebox:jukebox/
@@ -1263,13 +1264,13 @@ discovered by the client by sending an OPTIONS request (see
 If the target resource instance does not exist, the server MUST NOT
 create it.
 
-If the PATCH request succeeds, a "200 OK" Status-Line
+If the PATCH request succeeds, a "200 OK" status-line
 is returned if there is a message-body, and "204 No Content"
 is returned if no response message-body is sent.
 
 If the user is not authorized to alter the target resource
 an error response containing
-a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+a "403 Forbidden" or "404 Not Found" status-line is returned to
 the client.  All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
@@ -1294,7 +1295,7 @@ Example:
 To replace just the "year" field in the "album" resource
 (instead of replacing the entire resource with the PUT method),
 the client might send a plain patch as follows.
-Note that the Request-Line is wrapped
+Note that the request-line is wrapped
 for display purposes only:
 
    PATCH /restconf/data/example-jukebox:jukebox/
@@ -1332,12 +1333,12 @@ The XML encoding for the same request might be:
 ** DELETE @delete@
 
 The DELETE method is used to delete the target resource.
-If the DELETE request succeeds, a "204 No Content" Status-Line
+If the DELETE request succeeds, a "204 No Content" status-line
 is returned, and there is no response message-body.
 
 If the user is not authorized to delete the target resource then
 an error response containing
-a "403 Forbidden" or "404 Not Found" Status-Line is returned to
+a "403 Forbidden" or "404 Not Found" status-line is returned to
 the client.  All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
@@ -1866,8 +1867,8 @@ JSON encoding of meta-data is defined in ^I-D.lhotka-netmod-yang-metadata^.
 ** Return Status
 
 Each message represents some sort of resource access.
-An HTTP "Status-Line" header line is returned for each request.
-If a 4xx or 5xx range status code is returned in the Status-Line,
+An HTTP "status-line" header line is returned for each request.
+If a 4xx or 5xx range status code is returned in the status-line,
 then the error information will be returned in the response,
 according to the format defined in ^errors^.
 
@@ -1886,7 +1887,7 @@ and/or "Last-Modified" headers returned by the server for the
 datastore resource (or data resource if the server supports it).
 A retrieval request for a resource can include
 the "If-None-Match" and/or "If-Modified-Since" headers, which
-will cause the server to return a "304 Not Modified" Status-Line
+will cause the server to return a "304 Not Modified" status-line
 if the resource has not changed.
 The client MAY use the HEAD method to retrieve just
 the message headers, which SHOULD include the "ETag"
@@ -2141,7 +2142,7 @@ restart the event stream.
 
 * Error Reporting @error-reporting@
 
-HTTP Status-Lines are used to report success or failure
+HTTP status-lines are used to report success or failure
 for RESTCONF operations.
 The <rpc-error> element returned in NETCONF error responses
 contains some useful information.  This error information
