@@ -6,7 +6,7 @@ using the datastores defined in NETCONF.
 
 * Introduction
 
-There is a need for standard mechanisms to allow WEB applications
+There is a need for standard mechanisms to allow Web applications
 to access the configuration data, operational data,
 data-model specific protocol operations, and notification events
 within a networking device, in a modular and extensible manner.
@@ -75,7 +75,7 @@ is compatible with a resource-oriented device abstraction.
 The following figure shows the system components:
 
       +-----------+           +-----------------+
-      |  WEB app  | <-------> |                 |
+      |  Web app  | <-------> |                 |
       +-----------+   HTTP    | network device  |
                               |                 |
       +-----------+           |   +-----------+ |
@@ -93,11 +93,11 @@ manner.   This strategy obviates the need for responses provided
 by the server to contain HATEOAS links, originally described in
 Roy Fielding's doctoral dissertation ^rest-dissertation^.
 
-A REST client using HATEOAS principles would not use
+In contrast, a REST client using HATEOAS principles would not use
 any data modeling language to define the application-specific content
-of the API.  The client would discover each new child
-resource as it traverses the URIs returned as Location IDs
-to discover the server capabilities.  This approach has 3 significant
+of the API.  The client would need to discover each new child
+resource as it traverses the URIs 
+to discover the server capabilities.  This approach has the following significant
 weaknesses with regards to control of complex networking devices:
 
 - inefficient performance: configuration APIs will be quite
@@ -115,7 +115,7 @@ content schema to function.  Such tools can automate
 various programming and documentation tasks related
 to specific data models.
 
-Data model modules such as YANG modules serve as an "API contract"
+Data models such as YANG modules serve as an "API contract"
 that will be honored by the server.  An application designer
 can code to the data model, knowing in advance important details
 about the exact protocol operations and datastore content
@@ -235,7 +235,7 @@ resources.
 "application/yang.datastore+json". Represents a datastore.
 
 - edit operation: a RESTCONF operation on a data resource
-using the POST, PUT, PATCH, or DELETE method.
+using either a POST, PUT, PATCH, or DELETE method.
 
 - event stream resource: This resource represents
 an SSE (Server-Sent Events) event stream. The content consists of text
@@ -262,8 +262,8 @@ or data resource.
 The media type of the message-body content will identify
 the patch type in use.
 
-- plain patch: a PATCH request that can be used for simple merge
-operations.
+- plain patch: a specific PATCH request type that can be used
+ for simple merge operations.
 
 - query parameter: a parameter (and its value if any),
 encoded within the query component of the request URI.
@@ -302,8 +302,8 @@ Throughout this document, the URI template ^RFC6570^ syntax
 "{+restconf}" is used to refer to the RESTCONF API entry point outside
 of an example.  See ^root-resource-discovery^ for details.
 
-All of the examples in this document assume "/restconf" as the
-discovered RESTCONF API root path.
+For simplicity, all of the examples in this document assume 
+"/restconf" as the discovered RESTCONF API root path.
 
 *** Tree Diagrams
 
@@ -326,7 +326,7 @@ marked with a colon (":").
 
 ** Integrity and Confidentiality
 
-HTTP ^RFC7230^ is an application layer protocol that may be layered on any reliable transport-layer protocol.  RESTCONF is defined on top of HTTP, but due to the sensitive nature of the information conveyed, RESTCONF requires that the transport-layer protocol provides both data integrity and confidentiality, such as is provided by the TLS protocol ^RFC5246^.
+HTTP ^RFC7230^ is an application layer protocol that may be layered on any reliable transport-layer protocol.  RESTCONF is defined on top of HTTP, but due to the sensitive nature of the information conveyed, RESTCONF requires that the transport-layer protocol provides both data integrity and confidentiality, such as are provided by the TLS protocol ^RFC5246^.
 
 ** HTTPS with X.509v3 Certificates
 
@@ -373,7 +373,7 @@ A resource can be created and deleted independently of its
 parent resource, as long as the parent resource exists.
 
 All RESTCONF resources are defined in this document except
-datastore contents, protocol operations, and notification events.
+specific datastore contents, protocol operations, and notification events.
 The syntax and semantics for these resource types are
 defined in YANG modules.
 
@@ -384,10 +384,6 @@ will determine the data model specific operations,
 top-level data node resources, and notification event messages
 supported by the server.
 
-The resources used in the RESTCONF protocol are identified
-by the "path" component in the request URI.  Each operation
-is performed on a target resource.
-
 The RESTCONF protocol does not include a
 resource discovery mechanism.  Instead, the definitions
 within the YANG modules advertised by the server
@@ -396,7 +392,7 @@ resource identifier.
 
 ** Root Resource Discovery @root-resource-discovery@
 
-In line with the best practices defined by ^get-off-my-lawn^, RESTCONF
+In line with the best practices defined by ^RFC7320^, RESTCONF
 enables deployments to specify where the RESTCONF API is located.
 When first connecting to a RESTCONF server, a RESTCONF client MUST
 determine the root of the RESTCONF API.  The client discovers this
@@ -469,7 +465,7 @@ resource types are defined in RESTCONF:
 
 The API resource contains the state and access points for
 the RESTCONF features.
-It is the top-level resource and has the media type
+It is the top-level resource located at {+restconf} and has the media type
 "application/yang.api+xml" or "application/yang.api+json".
 
 YANG Tree Diagram for an API Resource:
@@ -569,7 +565,9 @@ saved to non-volatile storage in an
 implementation-specific matter by the server.
 There is no guarantee that configuration changes
 are saved immediately, or that the saved configuration
-is always a mirror of the running configuration.
+is always a mirror of the NETCONF running datastore,
+if the server also supports NETCONF.
+
 
 *** Edit Collision Detection @edit-collision@
 
@@ -622,8 +620,14 @@ the datastore affect the entity tag.
 ** Data Resource  @data-resource@
 
 A data resource represents a YANG data node that is a descendant
-node of a datastore resource.  Containers, leafs, list entries and
-anyxml nodes are data resources.
+node of a datastore resource.  Each YANG-defined data node can be uniquely
+targeted by the request-line of an HTTP operation.  Containers, 
+leafs, list entries and anyxml nodes are data resources.
+
+The representation maintained for each data resource is the YANG
+defined subtree for that node.  HTTP operations on a data
+resource affect both the targeted data node and all
+its decendents, if any.
 
 For configuration data resources,
 the server MAY maintain a last-modified timestamp for the
@@ -659,7 +663,7 @@ containing the YANG definition for the data resource.
 In YANG, data nodes are named with an absolute
 XPath expression, defined in ^XPath^, starting
 from the document root to the target resource.
-In RESTCONF, URL encoded Location header expressions are used instead.
+In RESTCONF, URL encoded path expressions are used instead.
 
 A predictable location for a data resource
 is important, since applications will code to the YANG
@@ -1282,8 +1286,7 @@ the target resource.  If the target resource is a datastore resource
 application/yang.datastore+xml or application/yang.datastore+json.  If
 then the target resource is a data resource (see ^data-resource^),
 then the message body MUST be either application/yang.data+xml or
-application/yang.data+json.  same as the media-type of
-application/yang.data.
+application/yang.data+json. 
 
 Plain patch can used to create or update, but not delete, a child
 resource within the target resource.  Please see
