@@ -682,20 +682,22 @@ the Design of Network-based Software Architectures</title>
 </reference>
 
 
-<reference anchor="get-off-my-lawn">
-      <front>
-        <title>URI Design and Ownership</title>
-        <author initials="M." surname="Nottingham"
-                fullname="Mark Nottingham">
-          <organization />
-        </author>
-        <date month="May" day="21" year="2014" />
-      </front>
-      <seriesInfo name="Best Current Practice"
-                  value="draft-ietf-appsawg-uri-get-off-my-lawn-05" />
-      <format
-          type="TXT"
-          target="http://tools.ietf.org/id/draft-ietf-appsawg-uri-get-off-my-lawn-05.txt"/>
+<reference anchor="RFC7320">
+<front>
+<title>URI Design and Ownership</title>
+<author initials="M." surname="Nottingham" fullname="M. Nottingham">
+<organization/>
+</author>
+<date year="2014" month="July"/>
+<abstract>
+<t>
+Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible naming system wherein each scheme's specification may further restrict the syntax and semantics of identifiers using that scheme." In other words, the structure of a URI is defined by its scheme. While it is common for schemes to further delegate their substructure to the URI's owner, publishing independent standards that mandate particular forms of URI substructure is inappropriate, because that essentially usurps ownership. This document further describes this problematic practice and provides some acceptable alternatives for use in standards.
+</t>
+</abstract>
+</front>
+<seriesInfo name="BCP" value="190"/>
+<seriesInfo name="RFC" value="7320"/>
+<format type="TXT" octets="18275" target="http://www.rfc-editor.org/rfc/rfc7320.txt"/>
 </reference>
 
 
