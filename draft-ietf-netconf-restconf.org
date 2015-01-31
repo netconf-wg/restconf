@@ -134,8 +134,8 @@ client opens a management session to a server.
 
 The RESTCONF protocol operates on a conceptual datastore defined with
 the YANG data modeling language.  The server lists each YANG
-module it supports under "/modules" defined in the "ietf-yang-library"
-YANG module.
+module it supports using the "ietf-yang-library"
+YANG module, defined in ^I-D.ietf-netconf-yang-library^.
 
 The conceptual datastore contents, data-model-specific
 operations and notification events are identified by this set of
@@ -627,7 +627,7 @@ leafs, list entries and anyxml nodes are data resources.
 The representation maintained for each data resource is the YANG
 defined subtree for that node.  HTTP operations on a data
 resource affect both the targeted data node and all
-its decendents, if any.
+its descendants, if any.
 
 For configuration data resources,
 the server MAY maintain a last-modified timestamp for the
@@ -2317,7 +2317,7 @@ as a top-level data node (under the "/restconf/data" entry point).
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-01-24.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-01-30.yang"
 
 * RESTCONF Monitoring
 
@@ -2381,33 +2381,16 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-01-24.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-01-30.yang"
 
 * YANG Module Library
 
-The "ietf-yang-library" module provides information about
+The "ietf-yang-library" module defined in ^I-D.ietf-netconf-yang-library^
+provides information about
 the YANG modules and submodules used by the RESTCONF server.
 Implementation is mandatory for RESTCONF servers.
 All YANG modules and submodules used by the server MUST
 be identified in the YANG module library.
-
-YANG Tree Diagram for "ietf-yang-library" module:
-
-  +--ro modules
-      +--ro module-set-id?   string
-      +--ro module* [name revision]
-         +--ro name           yang:yang-identifier
-         +--ro revision       union
-         +--ro schema?        inet:uri
-         +--ro namespace      inet:uri
-         +--ro feature*       yang:yang-identifier
-         +--ro deviation*     yang:yang-identifier
-         +--ro conformance    boolean
-         +--ro submodules
-            +--ro submodule* [name revision]
-               +--ro name        yang:yang-identifier
-               +--ro revision    union
-               +--ro schema?     inet:uri
 
 ** modules
 
@@ -2429,8 +2412,8 @@ for each YANG data model module supported by the server.
 There MUST be an instance of this list for every
 YANG module that is used by the server.
 
-The contents of the "module" list are defined in
-the "module" YANG list statement in ^library-module^.
+The contents of this list are defined in
+the "module" YANG list statement in ^I-D.ietf-netconf-yang-library^.
 
 The server MAY maintain a last-modified timestamp for
 each instance of this list entry, and return the
@@ -2444,19 +2427,6 @@ of this list entry, and return the "ETag" header when this
 data node is retrieved with the GET or HEAD methods.
 If not supported then the timestamp for the
 parent "modules" container MAY be used instead.
-
-** YANG Library Module @library-module@
-
-The "ietf-yang-library" module defines monitoring
-information for the YANG modules used by a RESTCONF server.
-
-The "ietf-yang-types" and "ietf-inet-types" modules from ^RFC6991^
-are used by this module for some type definitions.
-
-RFC Ed.: update the date below with the date of RFC publication and
-remove this note.
-
-!! include-figure ietf-yang-library.yang extract-to="ietf-yang-library@2015-01-24.yang"
 
 * IANA Considerations @iana@
 
@@ -2492,7 +2462,7 @@ Relation Type Registry defined by ^RFC5988^:
 `
 ** YANG Module Registry
 
-This document registers three URIs in the IETF XML registry
+This document registers two URIs in the IETF XML registry
 ^RFC3688^. Following the format in RFC 3688, the following
 registration is requested to be made.
 
@@ -2504,11 +2474,7 @@ registration is requested to be made.
      Registrant Contact: The NETMOD WG of the IETF.
      XML: N/A, the requested URI is an XML namespace.
 
-     URI: urn:ietf:params:xml:ns:yang:ietf-yang-library
-     Registrant Contact: The NETMOD WG of the IETF.
-     XML: N/A, the requested URI is an XML namespace.
-
-This document registers three YANG modules in the YANG Module Names
+This document registers two YANG modules in the YANG Module Names
 registry ^RFC6020^.
 
   name:         ietf-restconf
@@ -2520,12 +2486,6 @@ registry ^RFC6020^.
   name:         ietf-restconf-monitoring
   namespace:    urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring
   prefix:       rcmon
-  // RFC Ed.: replace XXXX with RFC number and remove this note
-  reference:    RFC XXXX
-
-  name:         ietf-yang-library
-  namespace:    urn:ietf:params:xml:ns:yang:ietf-yang-library
-  prefix:       yanglib
   // RFC Ed.: replace XXXX with RFC number and remove this note
   reference:    RFC XXXX
 
@@ -2559,11 +2519,16 @@ sub-types for this media type.
    // RFC Ed.: replace XXXX with RFC number and remove this note
    Published specification: RFC XXXX
 
-** NETCONF Capability URNs
+** RESTCONF Capability URNs
+
+
+   [Note to RFC Editor:
+    The RESTCONF Protocol Capability Registry does not yet exist;
+    Need to ask IANA to create it; remove this note for publication
+   ]
 
 This document registers several capability identifiers in
-"Network Configuration Protocol (NETCONF) Capability URNs"
-registry
+"RESTCONF Protocol Capability URNs" registry
 
 
   Index
@@ -2636,7 +2601,8 @@ security of the connection.
 
 The authors would like to thank the following people for
 their contributions to this document: Ladislav Lhotka,
-Juergen Schoenwaelder, Rex Fernando, and Robert Wilton.
+Juergen Schoenwaelder, Rex Fernando, Robert Wilton,
+and Jonathan Hansford.
 
 
 *! start-appendix
@@ -3377,11 +3343,11 @@ The server might respond as follows.
          },
          {
            "name" : "ietf-restconf-monitoring",
-           "revision" : "2015-01-24"
+           "revision" : "2015-01-30"
          },
          {
            "name" : "ietf-yang-library",
-           "revision" : "2015-01-24"
+           "revision" : "2015-01-30"
          }
        ]
      }
@@ -3445,7 +3411,7 @@ Request from client:
 Response from server:
 
    HTTP/1.1 204 No Content
-   Date: Mon, 23 Apr 2012 13:01:20 GMT
++   Date: Mon, 23 Apr 2012 13:01:20 GMT
    Server: example-server
    Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
    ETag: abcada438af

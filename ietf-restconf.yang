@@ -9,11 +9,11 @@ module ietf-restconf {
     "WG Web:   <http://tools.ietf.org/wg/netconf/>
      WG List:  <mailto:netconf@ietf.org>
 
-     WG Chair: Bert Wijnen
-               <mailto:bertietf@bwijnen.net>
-
      WG Chair: Mehmet Ersue
                <mailto:mehmet.ersue@nsn.com>
+
+     WG Chair: Mahesh Jethanandani
+               <mailto:mjethanandani@gmail.com>
 
      Editor:   Andy Bierman
                <mailto:andy@yumaworks.com>
@@ -56,7 +56,7 @@ module ietf-restconf {
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2015-01-24 {
+  revision 2015-01-30 {
     description
       "Initial revision.";
     reference

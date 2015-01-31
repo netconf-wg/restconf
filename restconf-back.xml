@@ -775,8 +775,23 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
           target="https://tools.ietf.org/html/draft-thomson-httpbis-cant-01"/>
 </reference>
 
-
-
+  <reference anchor="I-D.ietf-netconf-yang-library">
+      <front>
+        <title>YANG Module Library</title>
+        <author initials="A.B." surname="Bierman" fullname="Andy Bierman">
+          <organization />
+        </author>
+        <author initials="M.B." surname="Bjorklund" fullname="Martin Bjorklund">
+          <organization />
+        </author>
+        <author initials="K.W." surname="Watsen" fullname="Kent Watsen">
+          <organization />
+        </author>
+        <date year="2015" month="January"/>
+      </front>
+      <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-library-00" />
+      <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-library-00"/>
+</reference>
 
 </references>
 
@@ -809,10 +824,10 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
         <author initials="K.W." surname="Watsen" fullname="Kent Watsen">
           <organization />
         </author>
-        <date year="2015" />
+        <date year="2015" month="January"/>
       </front>
-      <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-patch-02" />
-      <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-patch-02"/>
+      <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-patch-03" />
+      <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-patch-03"/>
 </reference>
 
 
