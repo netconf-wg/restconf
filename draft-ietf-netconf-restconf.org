@@ -2622,6 +2622,7 @@ to draft-ietf-netconf-restconf-collection-00 (#3)
 - added mandatory "defaults" protocol capability URI (#4)
 - added optional "with-defaults" query parameter URI (#4)
 - clarified authentication procedure (#9)
+- moved ietf-yang-library module to draft-ietf-netconf-yang-library-00 (#13)
 - clarified that JSON encoding of module name in a URI
 MUST follow the netmod-yang-json encoding rules (#14)
 - added restconf-media-type extension (#15)
@@ -2631,6 +2632,8 @@ parameter mandatory (#16)
 - changed lock-denied error example
 - added with-defaults query parameter example
 - added term "RESTCONF Capability"
+- changed NETCONF Capability URI registry usage to new
+RESTCONF Capability URI Registry usage
 
 ** 02 - 03
 
