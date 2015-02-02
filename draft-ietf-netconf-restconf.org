@@ -338,7 +338,8 @@ When presented an X.509 certificate, the RESTCONF peer MUST use X.509 certificat
 
 ** Authenticated Server Identity
 
-The RESTCONF client MUST carefully examine the certificate presented by the RESTCONF server to determine if it meets the client's expectations.  If the RESTCONF client has external information as to the expected identity of the RESTCONF server, the hostname check MAY be omitted.  Otherwise, the RESTCONF client MUST check its understanding of the RESTCONF server hostname against the server's identity as presented in the server certificate message.  Matching is performed according to the rules and guidelines defined in ^RFC6125^.  If the match fails, the RESTCONF client MUST either ask for explicit user confirmation or terminate the connection with an indication that the RESTCONF server's identity is suspect.
+The RESTCONF client MUST carefully examine the certificate presented by the RESTCONF server to determine if it meets the client's expectations.  The RESTCONF client MUST check the identity of the server according to Section 6 of ^RFC6125^, including processing the outcome as described in Section 6.6.
+
 
 ** Authenticated Client Identity
 
@@ -348,7 +349,7 @@ The RESTCONF server MUST authenticate the client access to any protected resourc
 - Digest               ^draft-ietf-httpauth-digest-09^
 - ClientCertificate    ^draft-thomson-httpbis-cant-01^
 
-These authentication schemes are selected due to their similarity to authentication schemes supported by NETCONF.  In particular, the Basic and Digest authentication schemes both directly provide an identity and verification of a shared secret, much like NETCONF over SSH, when using the SSH "password" authentication method ^RFC4252^.  Similarly, the ClientCertificate authentication scheme is much like NETCONF over TLS's use of X.509 client-certificates.  When using the ClientCertificate authentication scheme, the RESTCONF server MUST verify the identity of the RESTCONF client using the algorithm defined in section 7 of ^draft-ietf-netconf-rfc5539bis-07^.
+These authentication schemes are selected due to their similarity to authentication schemes supported by NETCONF.  In particular, the Basic and Digest authentication schemes both directly provide an identity and verification of a shared secret, much like NETCONF over SSH, when using the SSH "password" authentication method ^RFC4252^.  Similarly, the ClientCertificate authentication scheme is much like NETCONF over TLS's use of X.509 client-certificates.  When using the ClientCertificate authentication scheme, the RESTCONF server MUST verify the identity of the RESTCONF client using the algorithm defined in Section 7 of ^draft-ietf-netconf-rfc5539bis-07^.
 
 The RESTCONF client identity determined from any HTTP authentication scheme is hereafter known as the "RESTCONF username" and subject to the NETCONF Access Control Module (NACM) ^RFC6536^.
 
@@ -577,7 +578,7 @@ in RESTCONF, for datastore and data resources.
 **** Timestamp
 
 The last change time is maintained and
-the "Last-Modified" (^RFC7232^, section 2.2) header is returned in the
+the "Last-Modified" (^RFC7232^, Section 2.2) header is returned in the
 response for a retrieval request.
 The "If-Unmodified-Since" header can be used
 in edit operation requests to cause the server
@@ -598,7 +599,7 @@ the datastore affect the timestamp.
 **** Entity tag
 
 A unique opaque string is maintained and
-the "ETag" (^RFC7232^, section 2.3) header is returned in the
+the "ETag" (^RFC7232^, Section 2.3) header is returned in the
 response for a retrieval request.
 The "If-Match" header can be used
 in edit operation requests to cause the server
@@ -755,7 +756,7 @@ path identifiers:
                   *(ALPHA / DIGIT / "_" / "-" / ".")
 
 Note 1: The syntax for "api-identifier" MUST conform to the
-JSON identifier encoding rules in section 4 of ^I-D.ietf-netmod-yang-json^.
+JSON identifier encoding rules in Section 4 of ^I-D.ietf-netmod-yang-json^.
 
 *** Defaults Handling
 
@@ -1426,15 +1427,15 @@ the MUST be listed in the "capability" leaf-list in ^mon-mod^.
 
 If the "basic-mode" is set to "report-all" then the server MUST
 adhere to the defaults handling behavior defined in
-section 2.1 of ^RFC6243^.
+Section 2.1 of ^RFC6243^.
 
 If the "basic-mode" is set to "trim" then the server MUST
 adhere to the defaults handling behavior defined in
-section 2.2 of ^RFC6243^.
+Section 2.2 of ^RFC6243^.
 
 If the "basic-mode" is set to "explicit" then the server MUST
 adhere to the defaults handling behavior defined in
-section 2.3 of ^RFC6243^.
+Section 2.3 of ^RFC6243^.
 
 Example: (split for display purposes only)
 
@@ -1608,7 +1609,7 @@ evaluated in the following context:
 -  The set of variable bindings is empty.
 -  The context node is the root node.
 
-The filter is used as defined in ^RFC5277^, section 3.6.
+The filter is used as defined in ^RFC5277^, Section 3.6.
 If the boolean result of the expression is true when applied
 to the conceptual "notification" document root, then the
 notification event is delivered to the client.
@@ -1685,7 +1686,7 @@ information about default data nodes should be returned
 in response to GET requests on data resources.
 
 If the server supports this capability, then it MUST implement
-the behavior in section 4.5.1 of ^RFC6243^, except applied to
+the behavior in Section 4.5.1 of ^RFC6243^, except applied to
 the RESTCONF GET operation, instead of the NETCONF operations.
 
 
@@ -1698,19 +1699,19 @@ the RESTCONF GET operation, instead of the NETCONF operations.
 
 If the "with-defaults" parameter is set to "report-all" then the server MUST
 adhere to the defaults reporting behavior defined in
-section 3.1 of ^RFC6243^.
+Section 3.1 of ^RFC6243^.
 
 If the "with-defaults" parameter is set to "trim" then the server MUST
 adhere to the defaults reporting behavior defined in
-section 3.2 of ^RFC6243^.
+Section 3.2 of ^RFC6243^.
 
 If the "with-defaults" parameter is set to "explicit" then the server MUST
 adhere to the defaults reporting behavior defined in
-section 3.3 of ^RFC6243^.
+Section 3.3 of ^RFC6243^.
 
 If the "with-defaults" parameter is set to "report-all-tagged"
 then the server MUST adhere to the defaults reporting behavior defined in
-section 3.4 of ^RFC6243^.
+Section 3.4 of ^RFC6243^.
 
 If the "with-defaults" parameter is not present
 then the server MUST adhere to the defaults reporting behavior defined in
@@ -1777,9 +1778,9 @@ There is a specific set of parameters defined,
 although the server MAY choose to support query
 parameters not defined in this document.
 The contents of the any query parameter value MUST be encoded
-according to ^RFC2396^, section 3.4. Any reserved characters
+according to ^RFC2396^, Section 3.4. Any reserved characters
 MUST be encoded with escape sequences, according to ^RFC2396^,
-section 2.4.
+Section 2.4.
 
 - fragment: This field is not used by the RESTCONF protocol.
 
@@ -2074,9 +2075,9 @@ definition of the event stream.  The NETCONF stream
 defined in ^RFC5277^ is encoded in XML format.
 
 The structure of the event data is based on the "notification"
-element definition in section 4 of ^RFC5277^.
+element definition in Section 4 of ^RFC5277^.
 It MUST conform to the schema for the "notification" element
-in section 4 of ^RFC5277^, except the XML namespace for
+in Section 4 of ^RFC5277^, except the XML namespace for
 this element is defined as:
 
   urn:ietf:params:xml:ns:yang:ietf-restconf
