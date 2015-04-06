@@ -1,0 +1,430 @@
+
+Here is my review of draft-ietf-netconf-restconf-04. Comments come
+roughly in the order of the document. I am running out of time to get
+a review done of draft-ietf-netconf-yang-patch-03 by today's deadline.
+I may get to it by Monday (but no hard promise).
+
+/js
+
+- I suggest to follow RFC 6020 and use 'RPC operations' instead of
+  'protocol operations' but then I note that RFC 6241 uses 'protocol
+  operations'. Too bad that we are not consistent. (Should we try to
+  settle on a single term? Perhaps we should fix this in YANG 1.1?)
+
+>> ++ did not change term "protocol operation"
+
+- I suggest to use 'event notifications' instead of 'notification
+  events'. The model, I think, is that event occurs that leads to a
+  notification. I later parts of the document the term 'event
+  notification' is actually used.
+
+
+>> changed term to "event notification"
+
+- What exactly is the 'framework' and in particular the 'meta-model'
+  referred to in section 1.1? I do not understand the 'instead' -
+  instead of what?
+
+>> removed these terms and shortened intro text
+
+- The document talks about API resources pretty early but it is
+  somewhat unclear what API resources are. Even section 3.3 is leaving
+  me as an almost first time reader somewhat confused. Why is this
+  thing called an API resource? Section 3.3 makes me believe this is
+  simply a top-level container for data and operations (not sure where
+  the other resources hang in the URI space or why they are not API
+  resources).
+
+>> tried to simplify text. It is just the API entry points
+
+
+- What does it meant that "configuration persistence are handled by
+  the server and not controlled by the client." Is this trying to tell
+  me that the client has no way of knowing whether any config changes
+  persist? If so, is this useful? Or is the idea that all edits will
+  eventually persist but not necessarily immediately,which seems to
+  be what the last paragraph in 3.4 hints at. I am also unsure what
+  this means: "There is no guarantee [...] that the saved
+  configuration is always a mirror of the NETCONF running datastore,
+  if the server also supports NETCONF." What is a NETCONF/RESTCONF
+  server that supports #startup doing if edits are received via both
+  NETCONF and RESTCONF? Perhaps there is a need to factor all this out
+  into a separate section discussing NETCONF/RESTCONF coexistence. I
+  think there are additional things to discuss, e.g. that a combined
+  server also MUST maintain NETCONF last change time stamps, no?
+
+
+>> changed so server is required to persist configuration changes
+in an implementation specific way
+
+- It often reads as if there can be multiple datastore resources but
+  then at other places it seems there is only one datastore resource,
+  namely {+restconf}/data. (I am wondering why this is actually a good
+  idea, why do we not have {+restconf}/running plus optionally
+  {+restconf}/startup? I can understand why exposing candidate may not
+  be useful, but saying there is {+restconf}/data and it magically
+  interacts with NETCONF's running and startup datastores makes it
+  difficult for me to understand what is going on. If the goal is to
+  not expose startup, then why not {+restconf}/running? How does
+  {+restconf}/data different from NETCONF's running?
+
+>> ++ no change -- extra datastores not exposed in RESTCONF
+
+
+- I am not sure I fully understand how key values are encoded in
+  corner cases where the value includes characters that conflict with
+  the format. What exactly is 'a quoted or unquoted empty string'?
+  Which quoting rules apply? And is the syntax defined in section
+  3.5.1 the syntax before or after URI pct-encoding? I guess this is
+  before pct-encoding, no? I think this encoding needs additional
+  clarification and perhaps some examples showing how clashes are
+  handled.
+
+>> updated syntax but need to add specific URI encoding reference
+
+
+- It seems section 3.6 says operation resources only need a module
+  name if the server supports operations with conflicting names. I
+  think this makes interoperability actually more complex. I would
+  prefer is both top-level data resources as well as operations
+  resources require to use a module name.
+
+>> changed to require module name (aligned with JSON draft encoding)
+
+- In section 3.6, why is sending a body a MAY if the "rpc" statement
+  defines either input or output? Should this not be a MUST?
+
+>> updated text, but if all optional params then no message body
+>> is needed; server will send error response if
+>> any mandatory parameters are missing
+
+- Since XML is the default to implement encoding, would it make sense
+  to show the examples in XML instead of JSON? Or show them in both
+  encodings? (A few examples, e.g. section 4.6, do show both.)
+
+>> ++ examples not changed yet
+
+- Perhaps add 'module example-ops { ... }' around the examples in
+  sections 3.6.1 and 3.6.2 so that it is clear where example-ops is
+  coming from.
+
+>> done
+
+- The example insection 3.7 seems to use the data model defined in
+  draft-ietf-netconf-yang-library-00.txt. I think there should be an
+  explicit reference to it (and this needs to be consistent with the
+  above mentioned I-D).
+
+>> added reference to YANG module and draft
+
+- Section 4.5 says that data resources can be created using PUT, which
+  is slightly at odds with Table 1.
+
+>> ++ NEED TO DECIDE IF PUT CAN CREATE OR JUST REPLACE
+
+- Section 4.2 and following sections refer to an "entry point
+  component". Is this the same as "entry point" or something
+  different? I am not sure what it is. Should this term be defined in
+  the terminology or can we replace it with something already defined?
+
+>> changed to "entry point"
+
+- Section 4.3, when do I return 403 and when 404 or can I choose
+  between these error responses as I like? This seems to also apply
+  to subsequent sections.
+
+>> ++ HTTP defines this behavior.  No extra text added yet
+
+
+- The line wrapping in the table in section 4.8.1 is unfortunate since
+  it makes with-defaults to read as two separate entries.
+
+>> ++ no change
+
+- Section 4.8 is about query parameters but then it section 4.8.1 and
+  subsequent sections discuss restconf capabilities that are not query
+  parameters. I found this a bit confusing and perhaps the document
+  structure should be changed to avoid discussing general protocol
+  capabilities where a reader expects a discussion of query
+  parameters. When discussing (protocol) capabilities, it may be
+  useful to mention how they can be retrieved.
+
+>> moved query parameters and defaults URI to RESTCONF monitoring section
+
+- In section 4.8.4, I am not sure yet how nest levels are counted. If
+  I request {+restconf}/data/foo which contains the child bar, is the
+  child bar at nest level 2 or 1? An explicit example might help.
+
+>> added text that target resource starts level 1 and level 2
+>> is the target resource and its child nodes
+
+
+- Should the "insert" and "point" parameters not be required to
+  implement? If they are optional, then adding something to a list or
+  leaf-list ordered by user will be impossible, no?
+
+- For the notification examples, would it make sense to provide an
+  outline of the the corresponding YANG definition, e.g,
+
+  module example-mod {
+    namespace "http://example.com/event/1.0";
+
+    notification event {
+     leaf event-class { type string; }
+     container reporting-entity {
+       leaf card { type string; }
+     }
+     leaf severity { type string; }
+    }
+  }
+
+  Did I get this right? Not sure this is the best example. Perhaps we
+  should consider using already RFC published data model snippets as
+  examples instead of mock-up examples. Well, this already leads to
+  another question. Does netconf-config-change (RFC 6470) makes sense
+  for RESTCONF? If so, how to fill in the details? So perhaps these
+  notifications do only apply to a NETCONF server but not to a
+  RESTCONF server. So do we have similar definitions for RESTCONF?
+
+- Looking at the tree diagram of the ietf-restconf-monitoring module,
+  I was wondering whether
+
+               +--ro encoding* [type]
+                  +--ro type      string
+                  +--ro events    inet:uri
+
+   should not be better named
+
+               +--ro access* [encoding]
+                  +--ro encoding  string
+                  +--ro location  inet:uri
+
+- I am also wondering whether ietf-restconf-monitoring is really the
+  right module name. It defines objects to obtain the restconf
+  capabilities and to find access points for the notification streams,
+  this is not exactly monitoring. Perhaps -monitoring was a not so
+  good choice back then and we now stay with it for consistency...
+
+  Anyway, should there be explicit text that restconf capabilities
+  must not show up in ietf-netconf-monitoring and that the counters in
+  ietf-netconf-monitoring will not be bumped by restconf interactions?
+  Perhaps this also belongs into a section discussing NETCONF/RESTCONF
+  coexistance issues, see above.
+
+- Section 10 normatively depends on draft-ietf-netconf-yang-library
+  (as correctly stated in 14.1 - there are acutally quite a few things
+  that we need to finish up in order to publish this document). I am
+  not sure, though, that [rest-dissertation] really is
+  normative. [XPATH] on the other hand seems to be normative rather
+  than informative (see the filter option).
+
+- Several TBD in 11.3 probably need to be filled in.
+
+- For creating a RESTCONF Capability Registry (section 11.4), it will
+  be necessary to specify the rules IANA should use to handle the
+  registry.
+
+- In section 12, I do not understand what is meant with this:
+
+      Implementors SHOULD provide a comprehensive
+      authorization scheme with RESTCONF and ensure that the resulting
+      NETCONF username is made available to the RESTCONF server.
+
+  Is this authorization or authentication? And what does
+  "comprehensive" translate to?
+
+  What does "SHOULD be implemented carefully with adequate attention
+  to all manner of attack one might expect to experience with other
+  management interfaces." mean? Do you mean 'implemented' or
+  'deployed'?
+
+- In the jukebox YANG module (I understand it is only an example), I
+  am somewhat concerned to see rc:data-resource-identifier. This kind
+  of sends the signal that it is OK to write RESTCONF specific YANG
+  data models. Frankly, if the end result is that we get RESTCONF and
+  NETCONF specific data models, then perhaps we should not even do
+  RESTCONF in the first place. I do understand the value of having a
+  REST interface but I am also very much concerned if data models
+  become either NETCONF or RESTCONF specific.
+
+- I have not reviewed the examples in appendix D.
+
+
+----------------------------------------------------------------------
+
+
+
+And here is my review of draft-ietf-netconf-yang-patch-03...
+
+- I wonder whether the title can be improved; this document does not
+  only define a media type, it actually defines a complete datastore
+  patch method. Perhaps a more descriptive title can be found?
+
+- The introduction is kind of mis-leading since NETCONF has a method
+  to patch a datastore (edit-config). This document is primarily
+  written to support RESTCONF I assume. And then the first paragraph
+  says "simpler edit request format" - simpler compared to what?
+
+- What is the reason for not defining a NETCONF RPC operation?
+
+- Should it no be 'datastore resource' instead 'datasource resource'
+  in 1.1.4?
+
+- Change "1.1.5. Terms" to "1.1.5. YANG Patch"? The whole section 1.1
+  is about terminology.
+
+- I did not know how to understand this sentence in section 2 until
+  looking up the YANG module:
+
+    The specific fields are defined with
+    the 'application/yang.patch' extension definition in the YANG module
+    Section 3.
+
+  Perhaps less is more:
+
+    The specific fields are defined in the YANG module in Section 3.
+
+- Again, I find it somewhat strange that the document says how one has
+  to define the NETCONF RPC operation (e.g., section 2.1) - why not
+  simply define this instead of leaving this out?
+
+- In section 2.3, I again stumbled across " syntax specification is
+  defined by the 'application/yang.patch-status' extension statement".
+  The statement defining application/yang.patch-status is
+  rc:restconf-media-type but the text makes it sound as if
+  application/yang.patch-status would be a statement.
+
+- Perhaps some text can be added to 2.2 and 2.3 to briefly outline
+  what the various objects do. Some like:
+
+    A YANG patch is optionally identified by a unique patch-id and it
+    may have an optional comment.  A patch is an ordered collection of
+    edits. Each edit is identified by an edit-id and it has an edit
+    operation (create, delete, insert, merge, move, replace, remove)
+    that is applied to ...
+
+  I think that in particular target, point, and where may need some
+  explanation for a first time reader.
+
+- Why is it useful to have absolute and relative target paths? Would
+  it not be simpler if target path would always be absolute that the
+  root would always be a datastore? Perhaps it makes sense to have
+  both but it is not clear why.
+
+- Should the edit operations not be described using YANG terminology?
+  This is supposed to be YANG patch and not RESTCONF patch.
+
+- Why is there an automatic commit to startup? Would this not be
+  somewhat surprising from a NETCONF point of view? Can I use YANG
+  patch to modify some other datastore, e.g., candidate with NETCONF?
+  If so, why would this lead to a copy of running to startup? Perhaps
+  this is not the intention but the text is not clear. I am also not
+  clear why the text says "after the edits have been attempted" - why
+  does the text not require that all edits have been successful?
+
+- If there would be an RPC binding for NETCONF, would I also be able
+  to invoke this RPC via RESTCONF if the corresponding module is
+  announce? I would assume so - perhaps this does not need
+  clarification (just checking).
+
+- Why do we use RESTCONF specific types in the YANG module? Why not be
+  protocol agnostic by using instance-identifier instead of
+  target-resource-offset? I also do not know where "Data Resource
+  Identifier" is defined and as such target-resource-offset is under
+  specified (and "offset" may be misleading people, no?).
+
+- What about the TBDs in sections 4.2 and 4.3?
+
+- How can the error objects use RESTCONF specific definitions if we claim
+  that this would also work with NETCONF?
+
+- The description of yang-patch says on error the datastore MUST NOT
+  be changed while previously the text said "SHOULD be returned to its
+  original state".
+
+- I do not understand this:
+
+            A patch MUST be validated by the server to be a
+            well-formed message before any of the patch edits
+            are validated or attempted.
+
+  Where is it detailed how an implementation has to validate a patch
+  edit? While applying a sequence of edits, things may temporarily not
+  validate. Does this matter? Why not simply require that the
+  datastore must be valid if the complete patch succeeds and if
+  validation fails after all edits have been applied, then this is
+  reported? That is, validate the result obtained after applying all
+  all edits but not all intermediate steps.
+
+- Why is the comment restricted to 1024 characters? Seems like an
+  arbitrary restriction.
+
+- The description of the operation enumeration is less RESTCONF
+  specific but it still talks about data resources, which I think it
+  should not. Same for target and other leafs.
+
+- It is not entirely clear whether say a move moves the data node
+  identified by point + where to the target or whether it moves the
+  target to point + where.
+
+- The usage of anyxml seems under-specified. It is non-interoperable
+  using the JSON encoding document (which is not even referenced from
+  this document - even though we have several examples with JSON
+  encoding - but for this anyxml usage, we need some normative text
+  that clearly says how anyxml is encoded). This actually seems to be
+  a usage of anydata.
+
+- What about putting the ok leaf into an explicit case? Might be
+  easier to read.
+
+- Why is edit-id numeric in some of JSON examples? The YANG model says
+  it is a string. Lada would throw an error on this...
+
+------------------------------------------------------------------
+
+Juergen Schoenwaelder writes:
+>- The introduction is kind of mis-leading since NETCONF has a method
+>  to patch a datastore (edit-config). This document is primarily
+>  written to support RESTCONF I assume. And then the first paragraph
+>  says "simpler edit request format" - simpler compared to what?
+
+This is my big issue with yang-patch: Why can't this be done using
+edit-config?  What does yang-patch add that can't be performed with
+edit-config?  Does restconf not expose an edit-config operation?
+What's the value of inventing a second way of doing config edits?
+How does a second way help us in advancing standardized network
+management operations?  Are there sufficient benefits with yang-patch
+to justify the expense, churn, duplication, and confusion it will
+bring?
+
+Thanks,
+ Phil
+
+
+-----------------------------------------------------------------------
+
+ What is so great about the implementation-dependent <config> blob?
+> Why are a set of attributes (1 in NETCONF, the rest defined in YANG)
+> better than an edit list?
+
+To be fair, I think Phil is right in that the expressiveness of both
+formats are equal.  Which one you prefer is subjective, possibly
+influenced by implementation choices.
+
+The question boils down to if we think it is good to have two more or
+less equal ways of doing things, or if there is value in having one
+single mechanism.
+
+> I have heard some comments that the patch approach is more direct
+> and easier for the client to convey its intent.  A set of ordered edits
+> provides more client control for setting up dependencies.
+
+Even with YANG PATCH, it is the resulting datastore that is validated,
+so the order of the edits doesn't matter.
+
+
+/martin
+
+----------------------------------------------------------------------
+
+

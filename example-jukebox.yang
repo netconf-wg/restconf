@@ -7,7 +7,7 @@ module example-jukebox {
    organization "Example, Inc.";
    contact "support at example.com";
    description "Example Jukebox Data Model Module";
-   revision "2014-07-03" {
+   revision "2015-04-04" {
      description "Initial version.";
      reference "example.com document 1-4673";
    }
@@ -194,11 +194,13 @@ module example-jukebox {
          leaf index {    // not really needed
            type uint32;
            description
-             "An arbitrary integer index for this
-              playlist song.";
+             "An arbitrary integer index for this playlist song.";
          }
          leaf id {
-           type rc:data-resource-identifier;
+           type leafref {
+             path "/rc:jukebox/rc:library/rc:artist/rc:album" +
+                  "/rc:song/rc:name";
+           }
            mandatory true;
            description
              "Song identifier. Must identify an instance of
