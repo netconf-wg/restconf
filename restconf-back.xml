@@ -589,15 +589,15 @@ the Design of Network-based Software Architectures</title>
       <author initials="L." surname="Lhotka" fullname="L. Lhotka">
 	<organization>CZ.NIC</organization>
       </author>
-      <date year="2014" month="September"/>
+      <date year="2015" month="February"/>
     </front>
     <seriesInfo name="Internet-Draft"
-                value="draft-lhotka-netmod-yang-metadata-00"/>
+                value="draft-lhotka-netmod-yang-metadata-01"/>
     <format type='TXT'
     target='http://www.ietf.org/id/draft-lhotka-netmod-yang-metadata-00.txt'/>
   </reference>
 
-<reference anchor='RFC6415'>
+<reference anchor="RFC6415">
 <front>
 <title>Web Host Metadata</title>
 <author initials='E.' surname='Hammer-Lahav' fullname='Eran Hammer-Lahav'><organization /></author>
