@@ -250,7 +250,9 @@ and ietf-restconf-monitoring.  No text added
 
 - For creating a RESTCONF Capability Registry (section 11.4), it will
   be necessary to specify the rules IANA should use to handle the
-  registry.
+  registry.m
+
+>>>> added text to define the registry
 
 - In section 12, I do not understand what is meant with this:
 
@@ -261,10 +263,14 @@ and ietf-restconf-monitoring.  No text added
   Is this authorization or authentication? And what does
   "comprehensive" translate to?
 
+>>>> Need Kent to fix this text
+
   What does "SHOULD be implemented carefully with adequate attention
   to all manner of attack one might expect to experience with other
   management interfaces." mean? Do you mean 'implemented' or
   'deployed'?
+
+>>>> Need Kent to fix this text
 
 - In the jukebox YANG module (I understand it is only an example), I
   am somewhat concerned to see rc:data-resource-identifier. This kind
@@ -275,184 +281,9 @@ and ietf-restconf-monitoring.  No text added
   REST interface but I am also very much concerned if data models
   become either NETCONF or RESTCONF specific.
 
+>>>> removed data-resource-identifier from spec. Using leafref now
+
 - I have not reviewed the examples in appendix D.
 
-
-----------------------------------------------------------------------
-
-
-
-And here is my review of draft-ietf-netconf-yang-patch-03...
-
-- I wonder whether the title can be improved; this document does not
-  only define a media type, it actually defines a complete datastore
-  patch method. Perhaps a more descriptive title can be found?
-
-- The introduction is kind of mis-leading since NETCONF has a method
-  to patch a datastore (edit-config). This document is primarily
-  written to support RESTCONF I assume. And then the first paragraph
-  says "simpler edit request format" - simpler compared to what?
-
-- What is the reason for not defining a NETCONF RPC operation?
-
-- Should it no be 'datastore resource' instead 'datasource resource'
-  in 1.1.4?
-
-- Change "1.1.5. Terms" to "1.1.5. YANG Patch"? The whole section 1.1
-  is about terminology.
-
-- I did not know how to understand this sentence in section 2 until
-  looking up the YANG module:
-
-    The specific fields are defined with
-    the 'application/yang.patch' extension definition in the YANG module
-    Section 3.
-
-  Perhaps less is more:
-
-    The specific fields are defined in the YANG module in Section 3.
-
-- Again, I find it somewhat strange that the document says how one has
-  to define the NETCONF RPC operation (e.g., section 2.1) - why not
-  simply define this instead of leaving this out?
-
-- In section 2.3, I again stumbled across " syntax specification is
-  defined by the 'application/yang.patch-status' extension statement".
-  The statement defining application/yang.patch-status is
-  rc:restconf-media-type but the text makes it sound as if
-  application/yang.patch-status would be a statement.
-
-- Perhaps some text can be added to 2.2 and 2.3 to briefly outline
-  what the various objects do. Some like:
-
-    A YANG patch is optionally identified by a unique patch-id and it
-    may have an optional comment.  A patch is an ordered collection of
-    edits. Each edit is identified by an edit-id and it has an edit
-    operation (create, delete, insert, merge, move, replace, remove)
-    that is applied to ...
-
-  I think that in particular target, point, and where may need some
-  explanation for a first time reader.
-
-- Why is it useful to have absolute and relative target paths? Would
-  it not be simpler if target path would always be absolute that the
-  root would always be a datastore? Perhaps it makes sense to have
-  both but it is not clear why.
-
-- Should the edit operations not be described using YANG terminology?
-  This is supposed to be YANG patch and not RESTCONF patch.
-
-- Why is there an automatic commit to startup? Would this not be
-  somewhat surprising from a NETCONF point of view? Can I use YANG
-  patch to modify some other datastore, e.g., candidate with NETCONF?
-  If so, why would this lead to a copy of running to startup? Perhaps
-  this is not the intention but the text is not clear. I am also not
-  clear why the text says "after the edits have been attempted" - why
-  does the text not require that all edits have been successful?
-
-- If there would be an RPC binding for NETCONF, would I also be able
-  to invoke this RPC via RESTCONF if the corresponding module is
-  announce? I would assume so - perhaps this does not need
-  clarification (just checking).
-
-- Why do we use RESTCONF specific types in the YANG module? Why not be
-  protocol agnostic by using instance-identifier instead of
-  target-resource-offset? I also do not know where "Data Resource
-  Identifier" is defined and as such target-resource-offset is under
-  specified (and "offset" may be misleading people, no?).
-
-- What about the TBDs in sections 4.2 and 4.3?
-
-- How can the error objects use RESTCONF specific definitions if we claim
-  that this would also work with NETCONF?
-
-- The description of yang-patch says on error the datastore MUST NOT
-  be changed while previously the text said "SHOULD be returned to its
-  original state".
-
-- I do not understand this:
-
-            A patch MUST be validated by the server to be a
-            well-formed message before any of the patch edits
-            are validated or attempted.
-
-  Where is it detailed how an implementation has to validate a patch
-  edit? While applying a sequence of edits, things may temporarily not
-  validate. Does this matter? Why not simply require that the
-  datastore must be valid if the complete patch succeeds and if
-  validation fails after all edits have been applied, then this is
-  reported? That is, validate the result obtained after applying all
-  all edits but not all intermediate steps.
-
-- Why is the comment restricted to 1024 characters? Seems like an
-  arbitrary restriction.
-
-- The description of the operation enumeration is less RESTCONF
-  specific but it still talks about data resources, which I think it
-  should not. Same for target and other leafs.
-
-- It is not entirely clear whether say a move moves the data node
-  identified by point + where to the target or whether it moves the
-  target to point + where.
-
-- The usage of anyxml seems under-specified. It is non-interoperable
-  using the JSON encoding document (which is not even referenced from
-  this document - even though we have several examples with JSON
-  encoding - but for this anyxml usage, we need some normative text
-  that clearly says how anyxml is encoded). This actually seems to be
-  a usage of anydata.
-
-- What about putting the ok leaf into an explicit case? Might be
-  easier to read.
-
-- Why is edit-id numeric in some of JSON examples? The YANG model says
-  it is a string. Lada would throw an error on this...
-
-------------------------------------------------------------------
-
-Juergen Schoenwaelder writes:
->- The introduction is kind of mis-leading since NETCONF has a method
->  to patch a datastore (edit-config). This document is primarily
->  written to support RESTCONF I assume. And then the first paragraph
->  says "simpler edit request format" - simpler compared to what?
-
-This is my big issue with yang-patch: Why can't this be done using
-edit-config?  What does yang-patch add that can't be performed with
-edit-config?  Does restconf not expose an edit-config operation?
-What's the value of inventing a second way of doing config edits?
-How does a second way help us in advancing standardized network
-management operations?  Are there sufficient benefits with yang-patch
-to justify the expense, churn, duplication, and confusion it will
-bring?
-
-Thanks,
- Phil
-
-
------------------------------------------------------------------------
-
- What is so great about the implementation-dependent <config> blob?
-> Why are a set of attributes (1 in NETCONF, the rest defined in YANG)
-> better than an edit list?
-
-To be fair, I think Phil is right in that the expressiveness of both
-formats are equal.  Which one you prefer is subjective, possibly
-influenced by implementation choices.
-
-The question boils down to if we think it is good to have two more or
-less equal ways of doing things, or if there is value in having one
-single mechanism.
-
-> I have heard some comments that the patch approach is more direct
-> and easier for the client to convey its intent.  A set of ordered edits
-> provides more client control for setting up dependencies.
-
-Even with YANG PATCH, it is the resulting datastore that is validated,
-so the order of the edits doesn't matter.
-
-
-/martin
-
-----------------------------------------------------------------------
 
 

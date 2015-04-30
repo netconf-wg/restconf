@@ -2553,14 +2553,23 @@ sub-types for this media type.
 
 ** RESTCONF Capability URNs
 
-
    [Note to RFC Editor:
     The RESTCONF Protocol Capability Registry does not yet exist;
     Need to ask IANA to create it; remove this note for publication
    ]
 
+This document defines a registry for RESTCONF capability identifiers.
+The name of the registry is "RESTCONF Capability URNs".
+The registry shall record for each entry:
+
+- the name of the RESTCONF capability. By convention, this name is
+prefixed with the colon ':' character.
+
+- the URN for the RESTCONF capability.
+
+
 This document registers several capability identifiers in
-"RESTCONF Protocol Capability URNs" registry
+"RESTCONF Capability URNs" registry:
 
 
   Index
@@ -2585,6 +2594,7 @@ This document registers several capability identifiers in
   :with-defaults
       urn:ietf:params:restconf:capability:with-defaults:1.0
 
+
 * Security Considerations
 
 This section provides security considerations for the resources
@@ -2599,16 +2609,18 @@ associated with each HTTP request.  The authentication scheme
 MAY be implemented in the underlying transport layer (e.g.,
 client certificates) or within the HTTP layer (e.g., Basic
 Auth, OAuth, etc.).  RESTCONF does not itself define an
-authentication mechanism, authentication MUST occur in a
+authentication mechanism. Authentication MUST occur in a
 lower layer.  Implementors SHOULD provide a comprehensive
 authorization scheme with RESTCONF and ensure that the resulting
 NETCONF username is made available to the RESTCONF server.
 
 Authorization of individual user access to operations and data
 MAY be configured via NETCONF Access Control Model (NACM)
-^RFC6536^, as specified in ^operations^.  Other authorization
-models MAY be used, but are outside of the scope of this
-document.
+^RFC6536^, as specified in ^operations^.
+
+#Other authorization
+#models MAY be used, but are outside of the scope of this
+#document.
 
 Configuration information is by its very nature sensitive.  Its
 transmission in the clear and without integrity checking leaves
@@ -2660,6 +2672,8 @@ https://github.com/netconf-wg/restconf/issues
 - renamed stream/encoding/events to stream/access/location
 - changed XPath from informative to normative reference
 - changed rest-dissertation from normative to informative reference
+- changed example-jukebox playlist 'id' from a data-resource-identifier
+to a leafref pointing at the song name
 
 ** 03 - 04
 
