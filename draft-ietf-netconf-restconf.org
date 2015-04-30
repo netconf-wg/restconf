@@ -491,7 +491,7 @@ query parameter (see ^content^).
    GET /restconf/data/example-jukebox:jukebox/library
       ?content=nonconfig  HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json
+   Accept: application/yang.data+xml
 
 The server might respond:
 
@@ -500,15 +500,13 @@ The server might respond:
    Server: example-server
    Cache-Control: no-cache
    Pragma: no-cache
-   Content-Type: application/yang.data+json
+   Content-Type: application/yang.data+xml
 
-   {
-     "example-jukebox:library" : {
-        "artist-count" : 42,
-        "album-count" : 59,
-        "song-count" : 374
-     }
-   }
+   <library xmlns="https://example.com/ns/example-jukebox">
+     <artist-count>42</artist-count>
+     <album-count>59</album-count>
+     <song-count>374</song-count>
+   </library>
 
 *** {+restconf}/operations
 
@@ -651,7 +649,7 @@ target resource.
 
 If a data node in the path expression is a YANG list node,
 then the key values for the list (if any) MUST be encoded
-according to the following rules.
+according to the following rules:
 
 - The key leaf values for a data resource representing a YANG
 list MUST be encoded using one path segment ^RFC3986^.
@@ -664,6 +662,11 @@ leaf value.
 identified in the "key" statement is encoded
 in the order specified in the YANG "key" statement, with a
 comma separating them.
+
+- The key value is specified as a string, using the
+canonical represention for the YANG data type.
+Any reserved characters MUST be encoded with
+escape sequences, according to ^RFC2396^, Section 2.4.
 
 - All the components in the "key" statement MUST be encoded.
 Partial instance identifiers are not supported.
@@ -780,7 +783,7 @@ If the operation is not successfully invoked, then a message-body
 SHOULD be sent by the server, containing an "errors" resource,
 as defined in ^errors-media-type^.
 
-*** Encoding Operation Input Parameters
+*** Encoding Operation Input Parameters @example-ops-mod@
 
 If the "rpc" statement has an "input" section, then
 the "input" node is provided in the message-body,
@@ -793,7 +796,9 @@ The following YANG definition is used for the examples in this
 section.
 
   module example-ops {
-    ...
+   namespace "https://example.com/ns/example-ops";
+   prefix "ops";
+
     rpc reboot {
       input {
         leaf delay {
@@ -805,21 +810,31 @@ section.
         leaf language { type string; }
       }
     }
+
+    rpc get-reboot-info {
+      output {
+        leaf reboot-time {
+          units seconds;
+          type uint32;
+        }
+        leaf message { type string; }
+        leaf language { type string; }
+      }
+    }
   }
+
 
 The client might send the following POST request message:
 
    POST /restconf/operations/example-ops:reboot HTTP/1.1
    Host: example.com
-   Content-Type: application/yang.operation+json
+   Content-Type: application/yang.operation+xml
 
-   {
-     "example-ops:input" : {
-       "delay" : 600,
-       "message" : "Going down for system maintenance",
-       "language" : "en-US"
-     }
-   }
+   <input xmlns="https://example.com/ns/example-ops">
+    <delay>600</delay>
+    <message>Going down for system maintenance</message>
+    <language>en-US</language>
+   </input>
 
 The server might respond:
 
@@ -836,23 +851,8 @@ within the "output" section.
 
 Example:
 
-The following YANG definition is used for the examples in this
-section.
-
-  module example-ops {
-    ...
-    rpc get-reboot-info {
-      output {
-        leaf reboot-time {
-          units seconds;
-          type uint32;
-        }
-        leaf message { type string; }
-        leaf language { type string; }
-      }
-    }
-  }
-
+The "example-ops" YANG module defined in ^example-ops-mod^
+is used for the examples in this section.
 
 The client might send the following POST request message:
 
@@ -889,15 +889,13 @@ the client might send the following POST request message:
 
    POST /restconf/operations/example-ops:reboot HTTP/1.1
    Host: example.com
-   Content-Type: application/yang.operation+json
+   Content-Type: application/yang.operation+xml
 
-   {
-     "example-ops:input" : {
-       "delay" : -33,
-       "message" : "Going down for system maintenance",
-       "language" : "en-US"
-     }
-   }
+   <input xmlns="https://example.com/ns/example-ops">
+    <delay>-33</delay>
+    <message>Going down for system maintenance</message>
+    <language>en-US</language>
+   </input>
 
 
 The server might respond with an "invalid-value" error:
@@ -906,19 +904,18 @@ The server might respond with an "invalid-value" error:
    HTTP/1.1 400 Bad Request
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
-   Content-Type: application/yang.errors+json
+   Content-Type: application/yang.errors+xml
 
-   {
-     "ietf-restconf:errors": {
-       "error": {
-         "error-type": "protocol",
-         "error-tag": "invalid-value",
-         "error-path": "/example-ops:input/delay",
-         "error-message": "Invalid input parameter"
-       }
-     }
-   }
-
+   <errors xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
+    <error>
+     <error-type>protocol</error-type>
+     <error-tag>invalid-value</error-tag>
+     <error-path xmlns:err="https://example.com/ns/example-ops">
+       err:input/err:delay
+     </error-path>
+     <error-message>Invalid input parameter</error-message>
+    </error>
+   </errors>
 
 ** Schema Resource @schema-resource@
 
@@ -962,10 +959,8 @@ The server might respond:
 
    module example-jukebox {
 
-      namespace "http://example.com/ns/example-jukebox";
-      prefix "jbox";
+      // contents of YANG module deleted for this example...
 
-      // rest of YANG module content deleted...
    }
 
 ** Event Stream Resource @stream-resource@
@@ -1008,7 +1003,7 @@ NETCONF protocol operations:
 !! row  ! HEAD     ! none
 !! row  ! GET      ! <get-config>, <get>
 !! row  ! POST     ! <edit-config> (operation="create")
-!! row  ! PUT      ! <edit-config> (operation="replace")
+!! row  ! PUT      ! <edit-config> (operation="create/replace")
 !! row  ! PATCH    ! <edit-config> (operation="merge")
 !! row  ! DELETE   ! <edit-config> (operation="delete")
 
@@ -1096,28 +1091,27 @@ JSON representation of the "library" resource:
    GET /restconf/data/example-jukebox:jukebox/
      library/artist=Foo%20Fighters/album  HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json
+   Accept: application/yang.data+xml
 
 The server might respond:
 
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2012 17:02:40 GMT
    Server: example-server
-   Content-Type: application/yang.data+json
+   Content-Type: application/yang.data+xml
    Cache-Control: no-cache
    Pragma: no-cache
    ETag: a74eefc993a2b
    Last-Modified: Mon, 23 Apr 2012 11:02:14 GMT
 
-   {
-     "example-jukebox:album" : [
-       {
-         "name" : "Wasting Light",
-         "genre" : "example-jukebox:alternative",
-         "year" : 2011
-       }
-     ]
-   }
+   <album xmlns="http://example.com/ns/example-jukebox">
+    <name>Wasting Light</name>
+    <genre xmlns:g="http://example.com/ns/example-jukebox>
+      g:alternative
+    </genre>
+    <year>2011</2011>
+   </album>
+
 
 ** POST @post@
 
@@ -1327,13 +1321,12 @@ for display purposes only:
       library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
    If-Match: b8389233a4c
-   Content-Type: application/yang.data+json
+   Content-Type: application/yang.data+xml
 
-   {
-     "example-jukebox:album" : {
-       "year" : 2011
-     }
-   }
+   <album xmlns="http://example.com/ns/example-jukebox">
+    <year>2011</year>
+   </album>
+
 
 If the field is updated, the server might respond:
 
@@ -1342,18 +1335,6 @@ If the field is updated, the server might respond:
    Server: example-server
    Last-Modified: Mon, 23 Apr 2012 17:49:30 GMT
    ETag: b2788923da4c
-
-The XML encoding for the same request might be:
-
-   PATCH /restconf/data/example-jukebox:jukebox/
-      library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
-   Host: example.com
-   If-Match: b8389233a4c
-   Content-Type: application/yang.data+xml
-
-   <album xmlns="http://example.com/ns/example-jukebox">
-      <year>2011</year>
-   </album>
 
 ** DELETE @delete@
 
@@ -1524,10 +1505,7 @@ then a "point" query parameter for the insertion
 parameter MUST also be present, or a 400 Bad Request
 error is returned.
 
-If the "insert" query parameter URI is listed in
-the "capability" leaf-list in ^mon-mod^, then
-the "insert" and "point" query parameters are supported
-by the server.
+The "insert" query parameter MUST be supported by the server.
 
 *** The "point" Query Parameter @point@
 
@@ -1552,10 +1530,7 @@ This parameter contains the instance identifier of the
 resource to be used as the insertion point for a
 POST or PUT method.
 
-If the "insert" query parameter URI is listed in
-the "capability" leaf-list in ^mon-mod^, then
-the "insert" and "point" query parameters are supported
-by the server.
+The "point" query parameter MUST be supported by the server.
 
 *** The "filter" Query Parameter @filter@
 
@@ -1922,23 +1897,25 @@ The server might send the following response:
          <replay-log-creation-time>
             2007-07-08T00:00:00Z
          </replay-log-creation-time>
-         <encoding>
-            <type>xml</type>
-            <events>https://example.com/streams/NETCONF</events>
-         </encoding>
-         <encoding>
-            <type>json</type>
-            <events>https://example.com/streams/NETCONF-JSON</events>
-         </encoding>
+         <access>
+            <encoding>xml</encoding>
+            <location>https://example.com/streams/NETCONF
+            </location>
+         </access>
+         <access>
+            <encoding>json</encoding>
+            <location>https://example.com/streams/NETCONF-JSON
+            </location>
+         </access>
       </stream>
       <stream>
          <name>SNMP</name>
          <description>SNMP notifications</description>
          <replay-support>false</replay-support>
-         <encoding>
-            <type>xml</type>
-            <events>https://example.com/streams/SNMP</events>
-         </encoding>
+         <access>
+            <encoding>xml</encoding>
+            <location>https://example.com/streams/SNMP</location>
+         </access>
       </stream>
       <stream>
          <name>syslog-critical</name>
@@ -1948,12 +1925,12 @@ The server might send the following response:
          <replay-log-creation-time>
             2007-07-01T00:00:00Z
          </replay-log-creation-time>
-         <encoding>
-            <type>xml</type>
-            <events>
+         <access>
+            <encoding>xml</encoding>
+            <location>
               https://example.com/streams/syslog-critical
-            </events>
-         </encoding>
+            </location>
+         </access>
       </stream>
    </streams>
 
@@ -1961,7 +1938,7 @@ The server might send the following response:
 
 RESTCONF clients can determine the URL for the subscription resource
 (to receive notifications) by sending an
-HTTP GET request for the "events" leaf with the stream list
+HTTP GET request for the "location" leaf with the stream list
 entry. The value returned by the server can be used for the actual
 notification subscription.
 
@@ -1980,7 +1957,7 @@ The client might send the following request:
 
 
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
-      streams/stream=NETCONF/encoding=xml/events HTTP/1.1
+      streams/stream=NETCONF/encoding=xml/location HTTP/1.1
    Host: example.com
    Accept: application/yang.data+xml
 
@@ -1990,10 +1967,10 @@ The server might send the following response:
    HTTP/1.1 200 OK
    Content-Type: application/yang.api+xml
 
-   <events
+   <location
      xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
      https://example.com/streams/NETCONF
-   </events>
+   </location>
 
 
 The RESTCONF client can then use this URL value to start
@@ -2052,7 +2029,30 @@ this element is defined as:
 
   urn:ietf:params:xml:ns:yang:ietf-restconf
 
-For JSON encoding purposes, the module name is "ietf-restconf".
+For JSON encoding purposes, the module name for
+the "notification" element is "ietf-restconf".
+
+Two child nodes within the "notification" container
+are expected, representing the event time and
+the event payload.  The "event-time" node is
+defined within the "ietf-restconf" module namespace.
+The name and namespace of the payload element are determined
+by the YANG module containing the notification-stmt.
+
+In the following example, the YANG module "example-mod"
+is used:
+
+  module example-mod {
+    namespace "http://example.com/event/1.0";
+
+    notification event {
+     leaf event-class { type string; }
+     container reporting-entity {
+       leaf card { type string; }
+     }
+     leaf severity { type string; }
+    }
+  }
 
 An example SSE event notification encoded using XML:
 
@@ -2305,9 +2305,9 @@ YANG Tree Diagram for "ietf-restconf-monitoring" module:
             +--ro description?                string
             +--ro replay-support?             boolean
             +--ro replay-log-creation-time?   yang:date-and-time
-            +--ro encoding* [type]
-               +--ro type      string
-               +--ro events    inet:uri
+            +--ro access* [type]
+               +--ro encoding  string
+               +--ro location  inet:uri
 
 ** restconf-state/capabilities
 
@@ -2344,7 +2344,6 @@ optional query parameter that it supports.
 !! row  ! depth ! ^depth^ ! urn:ietf:params:restconf:capability:depth:1.0
 !! row  ! fields ! ^fields^ ! urn:ietf:params:restconf:capability:fields:1.0
 !! row  ! filter ! ^filter^ ! urn:ietf:params:restconf:capability:filter:1.0
-!! row  ! insert ! ^insert^ ^point^ ! urn:ietf:params:restconf:capability:insert:1.0
 !! row  ! replay ! ^start-time^ ^stop-time^ ! urn:ietf:params:restconf:capability:replay:1.0
 !! row  ! with-defaults ! urn:ietf:params:restconf:capability:with-defaults:1.0
 
@@ -2414,7 +2413,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-01-30.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-04-29.yang"
 
 * YANG Module Library
 
@@ -2580,9 +2579,6 @@ This document registers several capability identifiers in
   :filter
       urn:ietf:params:restconf:capability:filter:1.0
 
-  :insert
-      urn:ietf:params:restconf:capability:insert:1.0
-
   :replay
       urn:ietf:params:restconf:capability:replay:1.0
 
@@ -2656,6 +2652,14 @@ https://github.com/netconf-wg/restconf/issues
 - removed text about not immediate persistence of edits
 - removed RESTCONF-specific data-resource-identifier typedef and its usage
 - clarified encoding of key leafs
+- changed several examples from JSON to XML encoding
+- made 'insert' and 'point' query parameters mandatory to implement
+- removed ":insert" capability URI
+- renamed stream/encoding to stream/access
+- renamed stream/encoding/type to stream/access/encoding
+- renamed stream/encoding/events to stream/access/location
+- changed XPath from informative to normative reference
+- changed rest-dissertation from normative to informative reference
 
 ** 03 - 04
 
@@ -2963,10 +2967,12 @@ the RESTCONF query parameters, plus one vendor parameter:
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
        capabilities  HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json
+   Accept: application/yang.data+xml
 
 
 The server might respond as follows.
+The extra whitespace in 'capability' elements
+for display purposes only.
 
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2012 17:02:00 GMT
@@ -2974,23 +2980,35 @@ The server might respond as follows.
    Cache-Control: no-cache
    Pragma: no-cache
    Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
-   Content-Type: application/yang.data+json
+   Content-Type: application/yang.data+xml
 
-   {
-     "ietf-restconf-monitoring:capabilities": {
-       "capability": [
-         "urn:ietf:params:restconf:capability:content:1.0",
-         "urn:ietf:params:restconf:capability:depth:1.0",
-         "urn:ietf:params:restconf:capability:fields:1.0",
-         "urn:ietf:params:restconf:capability:filter:1.0",
-         "urn:ietf:params:restconf:capability:insert:1.0",
-         "urn:ietf:params:restconf:capability:point:1.0",
-         "urn:ietf:params:restconf:capability:start-time:1.0",
-         "urn:ietf:params:restconf:capability:stop-time:1.0",
-         "http://example.com/capabilities/myparam"
-       ]
-     }
-   }
+   <capabilities xmlns="">
+    <capability>
+     urn:ietf:params:restconf:capability:content:1.0
+    </capability>
+    <capability>
+     urn:ietf:params:restconf:capability:depth:1.0
+    </capability>
+    <capability>
+     urn:ietf:params:restconf:capability:fields:1.0
+    </capability>
+    <capability>
+     urn:ietf:params:restconf:capability:filter:1.0
+    </capability>
+    <capability>
+     urn:ietf:params:restconf:capability:point:1.0
+    </capability>
+    <capability>
+     urn:ietf:params:restconf:capability:start-time:1.0
+    </capability>
+    <capability>
+     urn:ietf:params:restconf:capability:stop-time:1.0
+    </capability>
+    <capability>
+     http://example.com/capabilities/myparam
+    </capability>
+   </capabilities>
+
 
 ** Edit Resource Examples
 

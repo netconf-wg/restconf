@@ -556,17 +556,6 @@ specifications of each URI scheme.
   </reference>
 
 
-  <reference anchor='rest-dissertation'>
-      <front>
-	<title>Architectural Styles and
-the Design of Network-based Software Architectures</title>
-	<author initials='R.F.' surname='Fielding' fullname='Roy Fielding'>
-	  <organization>University of California, Irvine</organization>
-	</author>
-	<date year='2000'/>
-      </front>
-  </reference>
-
 
   <reference anchor="I-D.ietf-netmod-yang-json">
     <front>
@@ -793,9 +782,6 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
       <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-library-00"/>
 </reference>
 
-</references>
-
-<references title="Informative References">
 <reference anchor="XPath" target="http://www.w3.org/TR/1999/REC-xpath-19991116">
       <front>
         <title>XML Path Language (XPath) Version 1.0</title>
@@ -810,6 +796,22 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
       <seriesInfo name="World Wide Web Consortium Recommendation" value="REC-xpath-19991116"/>
       <format type="HTML" target="http://www.w3.org/TR/1999/REC-xpath-19991116"/>
 </reference>
+
+
+</references>
+
+<references title="Informative References">
+
+  <reference anchor='rest-dissertation'>
+      <front>
+	<title>Architectural Styles and
+the Design of Network-based Software Architectures</title>
+	<author initials='R.F.' surname='Fielding' fullname='Roy Fielding'>
+	  <organization>University of California, Irvine</organization>
+	</author>
+	<date year='2000'/>
+      </front>
+  </reference>
 
 
   <reference anchor="I-D.ietf-netconf-yang-patch">

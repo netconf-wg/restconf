@@ -52,7 +52,7 @@ module ietf-restconf-monitoring {
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2015-01-30 {
+  revision 2015-04-29 {
     description
       "Initial revision.";
     reference
@@ -124,7 +124,7 @@ module ietf-restconf-monitoring {
              element.";
         }
 
-        list encoding {
+        list access {
           key type;
           min-elements 1;
           description
@@ -134,7 +134,7 @@ module ietf-restconf-monitoring {
              for all event streams. This list identifies the
              sub-types supported for this stream.";
 
-          leaf type {
+          leaf encoding {
             type string;
             description
               "This is the secondary encoding format within the
@@ -146,7 +146,7 @@ module ietf-restconf-monitoring {
 
           }
 
-          leaf events {
+          leaf location {
             type inet:uri;
             mandatory true;
             description

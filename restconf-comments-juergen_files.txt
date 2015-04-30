@@ -6,6 +6,11 @@ I may get to it by Monday (but no hard promise).
 
 /js
 
+Key:
+>> comments added by Andy April 9, 2015
+>>>> comments added by Andy, April 29, 2015
+
+
 - I suggest to follow RFC 6020 and use 'RPC operations' instead of
   'protocol operations' but then I note that RFC 6241 uses 'protocol
   operations'. Too bad that we are not consistent. (Should we try to
@@ -81,7 +86,7 @@ in an implementation specific way
   handled.
 
 >> updated syntax but need to add specific URI encoding reference
-
+>>>> added reference to RFC 2396
 
 - It seems section 3.6 says operation resources only need a module
   name if the server supports operations with conflicting names. I
@@ -103,12 +108,14 @@ in an implementation specific way
   encodings? (A few examples, e.g. section 4.6, do show both.)
 
 >> ++ examples not changed yet
+>>>> changed almost 1/2 the examples to XML
 
 - Perhaps add 'module example-ops { ... }' around the examples in
   sections 3.6.1 and 3.6.2 so that it is clear where example-ops is
   coming from.
 
 >> done
+>>>> put both rpc-stmt in the same example module
 
 - The example insection 3.7 seems to use the data model defined in
   draft-ietf-netconf-yang-library-00.txt. I think there should be an
@@ -121,6 +128,7 @@ in an implementation specific way
   is slightly at odds with Table 1.
 
 >> ++ NEED TO DECIDE IF PUT CAN CREATE OR JUST REPLACE
+>>>> updated table to say create/replace
 
 - Section 4.2 and following sections refer to an "entry point
   component". Is this the same as "entry point" or something
@@ -158,10 +166,11 @@ in an implementation specific way
 >> added text that target resource starts level 1 and level 2
 >> is the target resource and its child nodes
 
-
 - Should the "insert" and "point" parameters not be required to
   implement? If they are optional, then adding something to a list or
   leaf-list ordered by user will be impossible, no?
+
+>>>> made insert and point parameters mandatory; remove :insert capability
 
 - For the notification examples, would it make sense to provide an
   outline of the the corresponding YANG definition, e.g,
@@ -178,6 +187,9 @@ in an implementation specific way
     }
   }
 
+
+>>>> done
+
   Did I get this right? Not sure this is the best example. Perhaps we
   should consider using already RFC published data model snippets as
   examples instead of mock-up examples. Well, this already leads to
@@ -185,6 +197,8 @@ in an implementation specific way
   for RESTCONF? If so, how to fill in the details? So perhaps these
   notifications do only apply to a NETCONF server but not to a
   RESTCONF server. So do we have similar definitions for RESTCONF?
+
+>>>> did not address this issue; used example-mod from above
 
 - Looking at the tree diagram of the ietf-restconf-monitoring module,
   I was wondering whether
@@ -199,17 +213,26 @@ in an implementation specific way
                   +--ro encoding  string
                   +--ro location  inet:uri
 
+>>>> done; changed module and examples
+
+
 - I am also wondering whether ietf-restconf-monitoring is really the
   right module name. It defines objects to obtain the restconf
   capabilities and to find access points for the notification streams,
   this is not exactly monitoring. Perhaps -monitoring was a not so
   good choice back then and we now stay with it for consistency...
 
+>>>> no change
+
   Anyway, should there be explicit text that restconf capabilities
   must not show up in ietf-netconf-monitoring and that the counters in
   ietf-netconf-monitoring will not be bumped by restconf interactions?
   Perhaps this also belongs into a section discussing NETCONF/RESTCONF
   coexistance issues, see above.
+
+>>>> The WG punted on co-existence between ietf-netconf-monitoring
+and ietf-restconf-monitoring.  No text added
+
 
 - Section 10 normatively depends on draft-ietf-netconf-yang-library
   (as correctly stated in 14.1 - there are acutally quite a few things
@@ -218,7 +241,12 @@ in an implementation specific way
   normative. [XPATH] on the other hand seems to be normative rather
   than informative (see the filter option).
 
+>>>> changed XPath from informative to normative reference
+>>>> changed rest-dissertation from normative to informative reference
+
 - Several TBD in 11.3 probably need to be filled in.
+
+>>>> application/yang sub-type parameters not filled in; need data
 
 - For creating a RESTCONF Capability Registry (section 11.4), it will
   be necessary to specify the rules IANA should use to handle the
