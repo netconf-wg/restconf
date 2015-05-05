@@ -56,23 +56,24 @@ module ietf-restconf {
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2015-04-04 {
+  revision 2015-05-04 {
     description
       "Initial revision.";
     reference
       "RFC XXXX: RESTCONF Protocol.";
   }
 
-
   extension restconf-media-type {
    argument media-type-id {
      yin-element true;
    }
+   // RFC Ed.: replace draft-ietf-netmod-yang-json with RFC number
+   // in the description below, and remove this note.
    description
      "This extension is used to specify a YANG data structure which
-      represents a conceptual RESTCONF media type template.
+      represents a conceptual RESTCONF media type.
       Data definition statements within this extension specify
-      the 'generic syntax' for the specific media type.
+      the generic syntax for the specific media type.
 
       YANG is mapped to specific encoding formats outside the
       scope of this extension statement. RFC 6020 defines XML
@@ -129,11 +130,9 @@ module ietf-restconf {
       ";
   }
 
-
   rc:restconf-media-type "application/yang.errors" {
     uses errors;
   }
-
 
   rc:restconf-media-type "application/yang.api" {
     uses restconf;
@@ -210,8 +209,7 @@ module ietf-restconf {
         }
       }
     }
-  } // grouping errors
-
+  }
 
   grouping restconf {
     description
@@ -252,10 +250,7 @@ module ietf-restconf {
               }
           ";
       }
-    } // container restconf
-  } // grouping restconf
-
-
-
+    }
+  }
 
 }

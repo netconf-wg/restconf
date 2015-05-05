@@ -83,12 +83,12 @@ manner.   This strategy obviates the need for responses provided
 by the server to contain HATEOAS links, originally described in
 Roy Fielding's doctoral dissertation ^rest-dissertation^.
 
-In contrast, a REST client using HATEOAS principles would not use
-any data modeling language to define the application-specific content
-of the API.  The client would need to discover each new child
-resource as it traverses the URIs 
-to discover the server capabilities.  This approach has the following significant
-weaknesses with regards to control of complex networking devices:
+In contrast, a REST client using HATEOAS principles would not use any
+data modeling language to define the application-specific content of
+the API.  The client would need to discover each new child resource as
+it traverses the URIs to discover the server capabilities.  This
+approach has the following significant weaknesses with regards to
+control of complex networking devices:
 
 - inefficient performance: configuration APIs will be quite
 complex and may require thousands of protocol messages to
@@ -313,41 +313,80 @@ marked with a colon (":").
 
 ** Integrity and Confidentiality
 
-HTTP ^RFC7230^ is an application layer protocol that may be layered on any reliable transport-layer protocol.  RESTCONF is defined on top of HTTP, but due to the sensitive nature of the information conveyed, RESTCONF requires that the transport-layer protocol provides both data integrity and confidentiality, such as are provided by the TLS protocol ^RFC5246^.
+HTTP ^RFC7230^ is an application layer protocol that may be layered on
+any reliable transport-layer protocol.  RESTCONF is defined on top of
+HTTP, but due to the sensitive nature of the information conveyed,
+RESTCONF requires that the transport-layer protocol provides both data
+integrity and confidentiality, such as are provided by the TLS
+protocol ^RFC5246^.
 
 ** HTTPS with X.509v3 Certificates
 
-Given the nearly ubiquitous support for HTTP over TLS ^RFC7230^, RESTCONF implementations MUST support the "https" URI scheme, which has the IANA assigned default port 443.  Consistent with the exclusive use of X.509v3 certificates for NETCONF over TLS ^draft-ietf-netconf-rfc5539bis-07^, use of certificates in RESTCONF is also limited to X.509v3 certificates.
+Given the nearly ubiquitous support for HTTP over TLS ^RFC7230^,
+RESTCONF implementations MUST support the "https" URI scheme, which
+has the IANA assigned default port 443.  Consistent with the exclusive
+use of X.509v3 certificates for NETCONF over TLS
+^draft-ietf-netconf-rfc5539bis-07^, use of certificates in RESTCONF is
+also limited to X.509v3 certificates.
 
 ** Certificate Validation
 
-When presented an X.509 certificate, the RESTCONF peer MUST use X.509 certificate path validation ^RFC5280^ to verify the integrity of the certificate.  The presented X.509 certificate MAY also be considered valid if it matches a locally configured certificate fingerprint.  If X.509 certificate path validation fails and the presented X.509 certificate does not match a locally configured certificate fingerprint, the connection MUST be terminated as defined in ^RFC5246^.
+When presented an X.509 certificate, the RESTCONF peer MUST use X.509
+certificate path validation ^RFC5280^ to verify the integrity of the
+certificate.  The presented X.509 certificate MAY also be considered
+valid if it matches a locally configured certificate fingerprint.  If
+X.509 certificate path validation fails and the presented X.509
+certificate does not match a locally configured certificate
+fingerprint, the connection MUST be terminated as defined in
+^RFC5246^.
 
 ** Authenticated Server Identity
 
-The RESTCONF client MUST carefully examine the certificate presented by the RESTCONF server to determine if it meets the client's expectations.  The RESTCONF client MUST check the identity of the server according to Section 6 of ^RFC6125^, including processing the outcome as described in Section 6.6.
-
+The RESTCONF client MUST carefully examine the certificate presented
+by the RESTCONF server to determine if it meets the client's
+expectations.  The RESTCONF client MUST check the identity of the
+server according to Section 6 of ^RFC6125^, including processing the
+outcome as described in Section 6.6 of ^RFC6125^.
 
 ** Authenticated Client Identity
 
-The RESTCONF server MUST authenticate the client access to any protected resource using HTTP Authentication ^RFC7235^.  If the RESTCONF client is not authenticated to access a resource, the server MUST send a response with status code 401 (Unauthorized) and a WWW-Authenticate header field containing at least one challenge applicable to the target resource.  The RESTCONF server MAY advertise support for any number of authentication schemes but, in order to ensure interoperability, the RESTCONF server MUST advertise at least one of the following authentication schemes:
+The RESTCONF server MUST authenticate the client access to any
+protected resource using HTTP Authentication ^RFC7235^.  If the
+RESTCONF client is not authenticated to access a resource, the server
+MUST send a response with status code 401 (Unauthorized) and a
+WWW-Authenticate header field containing at least one challenge
+applicable to the target resource.  The RESTCONF server MAY advertise
+support for any number of authentication schemes but, in order to
+ensure interoperability, the RESTCONF server MUST advertise at least
+one of the following authentication schemes:
 
 - Basic                ^draft-ietf-httpauth-basicauth-update-03^
 - Digest               ^draft-ietf-httpauth-digest-09^
 - ClientCertificate    ^draft-thomson-httpbis-cant-01^
 
-These authentication schemes are selected due to their similarity to authentication schemes supported by NETCONF.  In particular, the Basic and Digest authentication schemes both directly provide an identity and verification of a shared secret, much like NETCONF over SSH, when using the SSH "password" authentication method ^RFC4252^.  Similarly, the ClientCertificate authentication scheme is much like NETCONF over TLS's use of X.509 client-certificates.  When using the ClientCertificate authentication scheme, the RESTCONF server MUST verify the identity of the RESTCONF client using the algorithm defined in Section 7 of ^draft-ietf-netconf-rfc5539bis-07^.
+These authentication schemes are selected due to their similarity to
+authentication schemes supported by NETCONF.  In particular, the Basic
+and Digest authentication schemes both directly provide an identity
+and verification of a shared secret, much like NETCONF over SSH, when
+using the SSH "password" authentication method ^RFC4252^.  Similarly,
+the ClientCertificate authentication scheme is much like NETCONF over
+TLS's use of X.509 client-certificates.  When using the
+ClientCertificate authentication scheme, the RESTCONF server MUST
+verify the identity of the RESTCONF client using the algorithm defined
+in Section 7 of ^draft-ietf-netconf-rfc5539bis-07^.
 
-The RESTCONF client identity determined from any HTTP authentication scheme is hereafter known as the "RESTCONF username" and subject to the NETCONF Access Control Module (NACM) ^RFC6536^.
-
+The RESTCONF client identity determined from any HTTP authentication
+scheme is hereafter known as the "RESTCONF username" and subject to
+the NETCONF Access Control Module (NACM) ^RFC6536^.
 
 ### END OF TRANSPORT PROTOCOL REQUIREMENTS
 
 * Resources @resources@
 
-The RESTCONF protocol operates on a hierarchy of resources,
-starting with the top-level API resource itself (^root-resource-discovery^). Each resource
-represents a manageable component within the device.
+The RESTCONF protocol operates on a hierarchy of resources, starting
+with the top-level API resource itself
+(^root-resource-discovery^). Each resource represents a manageable
+component within the device.
 
 A resource can be considered a collection of conceptual data and the
 set of allowed methods on that data.  It can contain nested child
@@ -403,11 +442,10 @@ using the <Link> element containing the "restconf" attribute :
        <Link rel='restconf' href='/restconf'/>
    </XRD>
 
-
 Once discovering the RESTCONF API root, the client MUST prepend it to
 any subsequent request to a RESTCONF resource.  For instance, using
 the "/restconf" path discovered above, the client can now determine
-the operations supported by the the server; e.g. in this example a
+the operations supported by the the server.   In this example a
 custom "play" operation is supported:
 
    Request
@@ -427,7 +465,6 @@ custom "play" operation is supported:
    Content-Type: application/yang.api+json
 
    { "operations" : { "play" : [ null ] } }
-
 
 ** RESTCONF Resource Types
 
@@ -466,6 +503,8 @@ The "application/yang.api" restconf-media-type extension
 in the "ietf-restconf" module
 defined in ^module^ is used to specify the structure and syntax
 of the conceptual child resources within the API resource.
+
+The API resource can be retrieved with the GET method.
 
 This resource has the following child resources:
 
@@ -526,7 +565,7 @@ Operation resources are defined in ^operation-resource^.
 The "{+restconf}/data" subtree represents the datastore resource type,
 which is a collection of configuration and operational data nodes.
 
-This resource type is an abstraction of the systems underlying datastore
+This resource type is an abstraction of the system's underlying datastore
 implementation. It is used to simplify resource
 editing for the client. The RESTCONF datastore resource is a
 conceptual collection of all configuration and operational data
@@ -586,12 +625,11 @@ process that may recurse up to the top-level {+restconf}/data resource.
 Only changes to configuration data resources within
 the datastore affect the entity tag.
 
-
 ** Data Resource  @data-resource@
 
 A data resource represents a YANG data node that is a descendant
 node of a datastore resource.  Each YANG-defined data node can be uniquely
-targeted by the request-line of an HTTP operation.  Containers, 
+targeted by the request-line of an HTTP operation.  Containers,
 leafs, list entries and anyxml nodes are data resources.
 
 The representation maintained for each data resource is the YANG
@@ -757,14 +795,13 @@ An operation resource represents a protocol operation
 defined with the YANG "rpc" statement.
 It is invoked using a POST method on the operation resource.
 
-      POST {+restconf}/operations/<operation>
+   POST {+restconf}/operations/<operation>
 
 The <operation> field identifies the module name and
 rpc identifier string for the desired operation.
 
-For example, if "module-A" defined a "reset" operation,
- then invoking the operation from "module-A"
-would be requested as follows:
+For example, if "module-A" defined a "reset" operation, then invoking
+the operation from "module-A" would be requested as follows:
 
    POST /restconf/operations/module-A:reset HTTP/1.1
    Server example.com
@@ -863,7 +900,6 @@ The client might send the following POST request message:
 
 The server might respond:
 
-
    HTTP/1.1 200 OK
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
@@ -876,7 +912,6 @@ The server might respond:
        "language" : "en-US"
      }
    }
-
 
 *** Encoding Operation Errors
 
@@ -1087,7 +1122,6 @@ Example:
 The client might request the response headers for a
 JSON representation of the "library" resource:
 
-
    GET /restconf/data/example-jukebox:jukebox/
      library/artist=Foo%20Fighters/album  HTTP/1.1
    Host: example.com
@@ -1106,12 +1140,11 @@ The server might respond:
 
    <album xmlns="http://example.com/ns/example-jukebox">
     <name>Wasting Light</name>
-    <genre xmlns:g="http://example.com/ns/example-jukebox>
+    <genre xmlns:g="http://example.com/ns/example-jukebox">
       g:alternative
     </genre>
     <year>2011</2011>
    </album>
-
 
 ** POST @post@
 
@@ -1163,12 +1196,14 @@ To create a new "jukebox" resource, the client might send:
    { "example-jukebox:jukebox" : [null] }
 
 
-If the resource is created, the server might respond as follows:
+If the resource is created, the server might respond as follows.  Note
+that the "Location" header line is wrapped for display purposes only:
 
    HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
-   Location: https://example.com/restconf/data/example-jukebox:jukebox
+   Location: https://example.com/restconf/data/
+       example-jukebox:jukebox
    Last-Modified: Mon, 23 Apr 2012 17:01:00 GMT
    ETag: b3a3e673be2
 
@@ -1302,7 +1337,7 @@ the target resource.  If the target resource is a datastore resource
 application/yang.datastore+xml or application/yang.datastore+json.  If
 then the target resource is a data resource (see ^data-resource^),
 then the message body MUST be either application/yang.data+xml or
-application/yang.data+json. 
+application/yang.data+json.
 
 Plain patch can used to create or update, but not delete, a child
 resource within the target resource.  Please see
@@ -2567,7 +2602,6 @@ prefixed with the colon ':' character.
 
 - the URN for the RESTCONF capability.
 
-
 This document registers several capability identifiers in
 "RESTCONF Capability URNs" registry:
 
@@ -2593,7 +2627,6 @@ This document registers several capability identifiers in
 
   :with-defaults
       urn:ietf:params:restconf:capability:with-defaults:1.0
-
 
 * Security Considerations
 
@@ -2687,7 +2720,7 @@ to draft-ietf-netconf-restconf-collection-00 (#3)
 - clarified that JSON encoding of module name in a URI
 MUST follow the netmod-yang-json encoding rules (#14)
 - added restconf-media-type extension (#15)
-- remove 'content" query parameter URI and made this
+- remove "content" query parameter URI and made this
 parameter mandatory (#16)
 - clarified datastore usage
 - changed lock-denied error example
@@ -3035,7 +3068,8 @@ resource, the client might send the following request.
    Host: example.com
    Content-Type: application/yang.data+json
 
-   { "example-jukebox:artist" : {
+   {
+     "example-jukebox:artist" : {
        "name" : "Foo Fighters"
      }
    }
@@ -3049,7 +3083,7 @@ for display purposes only:
    Date: Mon, 23 Apr 2012 17:02:00 GMT
    Server: example-server
    Location: https://example.com/restconf/data/
-        example-jukebox:jukebox/library/artist=Foo%20Fighters
+       example-jukebox:jukebox/library/artist=Foo%20Fighters
    Last-Modified: Mon, 23 Apr 2012 17:02:00 GMT
    ETag: b3830f23a4c
 
@@ -3079,8 +3113,8 @@ for display purposes only:
    Date: Mon, 23 Apr 2012 17:03:00 GMT
    Server: example-server
    Location: https://example.com/restconf/data/
-     example-jukebox:jukebox/library/artist=Foo%20Fighters/
-     album=Wasting%20Light
+       example-jukebox:jukebox/library/artist=Foo%20Fighters/
+       album=Wasting%20Light
    Last-Modified: Mon, 23 Apr 2012 17:03:00 GMT
    ETag: b8389233a4c
 
@@ -3098,7 +3132,6 @@ updated.
      library/artist=Foo%20Fighters/album=Wasting%20Light/year
      HTTP/1.1
    Host: example.com
-   Accept: application/yang.data+json
    If-Unmodified-Since: Mon, 23 Apr 2012 17:01:00 GMT
    Content-Type: application/yang.data+json
 
@@ -3114,8 +3147,37 @@ header.  The server might respond:
    Last-Modified: Mon, 23 Apr 2012 17:45:00 GMT
    ETag: b34aed893a4c
 
-** Query Parameter Examples @ex-query@
+*** Edit a Datastore Resource
 
+In this example, the client modifies two different data nodes by
+sending a PATCH to the datastore resource:
+
+   PATCH /restconf/data HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.datastore+xml
+
+   <data xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
+     <jukebox xmlns=""http://example.com/ns/example-jukebox">
+       <library>
+         <artist>
+           <name>Foo Fighters</name>
+           <album>
+             <name>Wasting Light</name>
+             <year>2011</year>
+           </album>
+         </artist>
+         <artist>
+           <name>Nick Cave</name>
+           <album>
+             <name>Tender Prey</name>
+             <year>1988</year>
+           </album>
+         </artist>
+       </library>
+     </jukebox>
+   </data>
+
+** Query Parameter Examples @ex-query@
 *** "content" Parameter
 
 The "content" parameter is used to select the type of
@@ -3533,7 +3595,6 @@ specifications (lines wrapped for display purposes only):
 
    // start-time = 2014-10-25T10:02:00Z
    GET /mystreams/NETCONF?start-time=2014-10-25T10%3A02%3A00Z
-
 
 *** "stop-time" Parameter
 
