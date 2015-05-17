@@ -141,9 +141,30 @@ Data ordering behavior is derived from the YANG "ordered-by"
 statement.
 
 The RESTCONF datastore editing model is simple and direct,
-similar to the behavior of the ":writable-running"
+similar to the behavior of the :writable-running
 capability in NETCONF. Each RESTCONF edit of a datastore
 resource is activated upon successful completion of the transaction.
+
+** Coexistence with NETCONF @netconf-coexistence@
+
+RESTCONF can be implemented on a device that supports NETCONF.
+
+If the device supports :writable-running, all edits to configuration
+nodes in {+restconf}/data are performed in the running configuration
+datastore.
+
+Otherwise, if the device supports :candidate, all edits to
+configuration nodes in {+restconf}/data are performed in the candidate
+configuration datastore.  The candidate is automatically committed to
+running after a successful edit.
+
+If the device supports :startup, the device automatically copies the
+content of running to startup after running has been updated as
+a consequence of a RESTCONF edit operation.
+
+If a datastore that would be modified by a RESTCONF operation has an
+active lock, the RESTCONF edit operation MUST fail with a 409
+(Conflict) error code.
 
 ** Terminology
 
