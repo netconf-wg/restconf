@@ -2594,15 +2594,15 @@ sub-types for this media type.
 
    Subtype name: yang.xxx
 
-   Required parameters: TBD
+   Required parameters: none
 
-   Optional parameters: TBD
+   Optional parameters: See section 4.8 in RFC XXXX
 
-   Encoding considerations: TBD
+   Encoding considerations: 8-bit
 
-   Security considerations: TBD
+   Security considerations: See Section 12 in RFC XXXX
 
-   Interoperability considerations: TBD
+   Interoperability considerations: none
 
    // RFC Ed.: replace XXXX with RFC number and remove this note
    Published specification: RFC XXXX
