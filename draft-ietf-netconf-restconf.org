@@ -347,7 +347,7 @@ Given the nearly ubiquitous support for HTTP over TLS ^RFC7230^,
 RESTCONF implementations MUST support the "https" URI scheme, which
 has the IANA assigned default port 443.  Consistent with the exclusive
 use of X.509v3 certificates for NETCONF over TLS
-^draft-ietf-netconf-rfc5539bis-07^, use of certificates in RESTCONF is
+^draft-ietf-netconf-rfc5539bis-10^, use of certificates in RESTCONF is
 also limited to X.509v3 certificates.
 
 ** Certificate Validation
@@ -371,7 +371,7 @@ outcome as described in Section 6.6 of ^RFC6125^.
 
 ** Authenticated Client Identity
 
-The RESTCONF server MUST authenticate the client access to any
+The RESTCONF server MUST authenticate client access to any
 protected resource using HTTP Authentication ^RFC7235^.  If the
 RESTCONF client is not authenticated to access a resource, the server
 MUST send a response with status code 401 (Unauthorized) and a
@@ -385,16 +385,16 @@ one of the following authentication schemes:
 - Digest               ^draft-ietf-httpauth-digest-09^
 - ClientCertificate    ^draft-thomson-httpbis-cant-01^
 
-These authentication schemes are selected due to their similarity to
-authentication schemes supported by NETCONF.  In particular, the Basic
+These authentication schemes are selected for to their similarity to
+the authentication schemes supported by NETCONF.  In particular, the Basic
 and Digest authentication schemes both directly provide an identity
 and verification of a shared secret, much like NETCONF over SSH, when
 using the SSH "password" authentication method ^RFC4252^.  Similarly,
 the ClientCertificate authentication scheme is much like NETCONF over
 TLS's use of X.509 client-certificates.  When using the
 ClientCertificate authentication scheme, the RESTCONF server MUST
-verify the identity of the RESTCONF client using the algorithm defined
-in Section 7 of ^draft-ietf-netconf-rfc5539bis-07^.
+derive the identity of the RESTCONF client using the algorithm defined
+in Section 7 of ^draft-ietf-netconf-rfc5539bis-10^.
 
 The RESTCONF client identity determined from any HTTP authentication
 scheme is hereafter known as the "RESTCONF username" and subject to

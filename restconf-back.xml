@@ -690,7 +690,7 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
 </reference>
 
 
-<reference anchor="draft-ietf-netconf-rfc5539bis-07">
+<reference anchor="draft-ietf-netconf-rfc5539bis-10">
 <front>
 <title>Using the NETCONF Protocol over Transport Layer Security (TLS) with Mutual X.509 Authentication</title>
 <author initials='M.' surname='Badra' fullname='M. Badra'>
@@ -701,8 +701,8 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
 <organization /></author>
 <date month="Dec" day="8" year='2014'/>
 </front>
-<seriesInfo name='Internet-Draft' value='draft-ietf-netconf-rfc5539bis-07' />
-<format type='TXT' target='https://tools.ietf.org/html/draft-ietf-netconf-rfc5539bis-07' />
+<seriesInfo name='Internet-Draft' value='draft-ietf-netconf-rfc5539bis-10' />
+<format type='TXT' target='https://tools.ietf.org/html/draft-ietf-netconf-rfc5539bis-10' />
 </reference>
 
 
