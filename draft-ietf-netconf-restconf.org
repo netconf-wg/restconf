@@ -2401,7 +2401,7 @@ optional query parameter that it supports.
 !! row  ! fields ! ^fields^ ! urn:ietf:params:restconf:capability:fields:1.0
 !! row  ! filter ! ^filter^ ! urn:ietf:params:restconf:capability:filter:1.0
 !! row  ! replay ! ^start-time^ ^stop-time^ ! urn:ietf:params:restconf:capability:replay:1.0
-!! row  ! with-defaults ! urn:ietf:params:restconf:capability:with-defaults:1.0
+!! row  ! with-defaults ! ^with-defaults^ ! urn:ietf:params:restconf:capability:with-defaults:1.0
 
 *** The "defaults" Protocol Capability URI @defaults-uri@
 
