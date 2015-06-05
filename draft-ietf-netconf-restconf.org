@@ -723,7 +723,7 @@ in the order specified in the YANG "key" statement, with a
 comma separating them.
 
 - The key value is specified as a string, using the
-canonical represention for the YANG data type.
+canonical representation for the YANG data type.
 Any reserved characters MUST be encoded with
 escape sequences, according to ^RFC2396^, Section 2.4.
 
@@ -998,14 +998,14 @@ The server might respond:
 
    {
      "ietf-yang-library:schema":
-      "https://example.com/mymodules/example-jukebox/2014-07-03"
+      "https://example.com/mymodules/example-jukebox/2015-06-04"
    }
 
 Next the client needs to retrieve the actual YANG schema.
 
 The client might send the following GET request message:
 
-   GET https://example.com/mymodules/example-jukebox/2014-07-03
+   GET https://example.com/mymodules/example-jukebox/2015-06-04
       HTTP/1.1
    Host: example.com
    Accept: application/yang
@@ -2340,7 +2340,7 @@ as a top-level data node (under the "/restconf/data" entry point).
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-01-30.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-06-04.yang"
 
 * RESTCONF Monitoring
 
@@ -2469,7 +2469,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-04-29.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-06-04.yang"
 
 * YANG Module Library
 
@@ -2858,18 +2858,18 @@ a simple media jukebox interface.
 
 YANG Tree Diagram for "example-jukebox" Module
 
-   +--rw jukebox?
+   +--rw jukebox!
       +--rw library
-      |  +--rw artist [name]
+      |  +--rw artist* [name]
       |  |  +--rw name     string
-      |  |  +--rw album [name]
+      |  |  +--rw album* [name]
       |  |     +--rw name     string
       |  |     +--rw genre?   identityref
       |  |     +--rw year?    uint16
       |  |     +--rw admin
       |  |     |  +--rw label?              string
       |  |     |  +--rw catalogue-number?   string
-      |  |     +--rw song [name]
+      |  |     +--rw song* [name]
       |  |        +--rw name        string
       |  |        +--rw location    string
       |  |        +--rw format?     string
@@ -2877,12 +2877,12 @@ YANG Tree Diagram for "example-jukebox" Module
       |  +--ro artist-count?   uint32
       |  +--ro album-count?    uint32
       |  +--ro song-count?     uint32
-      +--rw playlist [name]
+      +--rw playlist* [name]
       |  +--rw name           string
       |  +--rw description?   string
-      |  +--rw song [index]
+      |  +--rw song* [index]
       |     +--rw index    uint32
-      |     +--rw id       instance-identifier
+      |     +--rw id       leafref
       +--rw player
          +--rw gap?   decimal64
 
@@ -3506,16 +3506,25 @@ The server might respond as follows.
        "module": [
          {
            "name" : "example-jukebox",
-           "revision" : "2014-07-03"
+           "revision" : "2015-06-04"
+         },
+         {
+           "name" : "ietf-inet-types",
+           "revision" : "2013-07-15"
          },
          {
            "name" : "ietf-restconf-monitoring",
-           "revision" : "2015-01-30"
+           "revision" : "2015-06-04"
          },
          {
            "name" : "ietf-yang-library",
            "revision" : "2015-01-30"
+         },
+         {
+           "name" : "ietf-yang-types",
+           "revision" : "2013-07-15"
          }
+
        ]
      }
    }

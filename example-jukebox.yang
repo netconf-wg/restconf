@@ -2,7 +2,6 @@ module example-jukebox {
 
    namespace "http://example.com/ns/example-jukebox";
    prefix "jbox";
-   import ietf-restconf { prefix rc; }
 
    organization "Example, Inc.";
    contact "support at example.com";
@@ -198,8 +197,8 @@ module example-jukebox {
          }
          leaf id {
            type leafref {
-             path "/rc:jukebox/rc:library/rc:artist/rc:album" +
-                  "/rc:song/rc:name";
+             path "/jbox:jukebox/jbox:library/jbox:artist/" +
+                  "jbox:album/jbox:song/jbox:name";
            }
            mandatory true;
            description
