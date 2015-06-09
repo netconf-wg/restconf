@@ -3407,14 +3407,14 @@ The server might respond:
                "index" : 1,
                "id" : "https://example.com/restconf/data/
                      example-jukebox:jukebox/library/artist=
-                     Foo%20Fighters/album/Wasting%20Light/
-                     song/Rope"
+                     Foo%20Fighters/album=Wasting%20Light/
+                     song=Rope"
              },
              {
                "index" : 2,
                "id" : "https://example.com/restconf/data/
                      example-jukebox:jukebox/library/artist=
-                     Foo%20Fighters/album/Wasting%20Light/song/
+                     Foo%20Fighters/album=Wasting%20Light/song=
                      Bridge%20Burning"
              }
            ]
@@ -3545,7 +3545,7 @@ Request from client:
      "example-jukebox:song" : {
         "index" : 1,
         "id" : "/example-jukebox:jukebox/library/
-            artist=Foo%20Fighters/album/Wasting%20Light/song/Rope"
+            artist=Foo%20Fighters/album=Wasting%20Light/song=Rope"
       }
    }
 
@@ -3568,7 +3568,7 @@ The request URI is split for display purposes only.
 Request from client:
 
    POST /restconf/data/example-jukebox:jukebox/
-      library/artist=Foo%20Fighters/album/Wasting%20Light?
+      library/artist=Foo%20Fighters/album=Wasting%20Light?
       insert=after&point=%2Fexample-jukebox%3Ajukebox%2F
       library%2Fartist%2FFoo%20Fighters%2Falbum%2F
       Wasting%20Light%2Fsong%2FBridge%20Burning   HTTP/1.1
