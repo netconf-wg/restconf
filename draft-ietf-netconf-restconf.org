@@ -312,7 +312,7 @@ Throughout this document, the URI template ^RFC6570^ syntax
 "{+restconf}" is used to refer to the RESTCONF API entry point outside
 of an example.  See ^root-resource-discovery^ for details.
 
-For simplicity, all of the examples in this document assume 
+For simplicity, all of the examples in this document assume
 "/restconf" as the discovered RESTCONF API root path.
 
 *** Tree Diagrams
@@ -598,8 +598,7 @@ Configuration edit transaction management and configuration persistence
 are handled by the server and not controlled by the client.
 A datastore resource can only be written directly with
 the PATCH method. Each RESTCONF edit of a datastore resource is
-saved to non-volatile storage in an
-implementation-specific matter by the server.
+saved to non-volatile storage by the server.
 
 *** Edit Collision Detection @edit-collision@
 
@@ -795,7 +794,7 @@ JSON identifier encoding rules in Section 4 of ^I-D.ietf-netmod-yang-json^.
 
 *** Defaults Handling
 
-RESTCONF requires that a server report its default handling mode 
+RESTCONF requires that a server report its default handling mode
 (see ^defaults-uri^ for details).  If the optional "with-defaults" query
 parameter is supported by the server, a client may use it to control
 retrieval of default values  (see ^with-defaults^ for details).
@@ -824,8 +823,8 @@ RPC operation is invoked as:
 The <operation> field identifies the module name and
 rpc identifier string for the desired operation.
 
-For example, if "module-A" defined a "reset" operation, then invoking
-the operation from "module-A" would be requested as follows:
+For example, if "module-A" defined a "reset" rpc operation, then
+invoking the operation from "module-A" would be requested as follows:
 
    POST /restconf/operations/module-A:reset HTTP/1.1
    Server example.com
@@ -1093,7 +1092,7 @@ each HTTP method.
 
 The OPTIONS method is sent by the client to
 discover which methods are supported by the server
-for a specific resource (e.g., GET, POST, DELETE, etc.).  
+for a specific resource (e.g., GET, POST, DELETE, etc.).
 
 The server SHOULD implement this method, however the same information
 could be extracted from the YANG modules and the RESTCONF
@@ -1189,7 +1188,7 @@ If the target resource type is a datastore or data resource, then the
 POST is treated as a request to create a top-level resource or child
 resource, respectively.  The message-body is expected to contain the
 content of a child resource to create within the parent (target
-resource).  The data-model for the child tree is the subtree is 
+resource).  The data-model for the child tree is the subtree is
 defined by YANG for the child resource.
 
 
@@ -2257,7 +2256,7 @@ then the server SHOULD send a response message-body containing
 the information described by the "errors" container definition
 within the YANG module ^module^.  The Content-Type of this
 response message MUST be application/yang.errors (see example
-below).  
+below).
 
 The client MAY specify the desired encoding for error messages
 by specifying the appropriate media-type in the Accept header.
@@ -2292,7 +2291,7 @@ client has locked a datastore. The RESTCONF client
 is attempting to delete a data resource.  Note that
 an Accept header is used to specify the desired
 encoding for the error message. This example's
-use of the Accept header is especially notable 
+use of the Accept header is especially notable
 since the DELETE method typically doesn't return a
 message-body and hence Accept headers are typically
 not passed.
@@ -2351,7 +2350,6 @@ The server might respond (some lines wrapped for display purposes):
        </error-message>
      </error>
    </errors>
-
 
 * RESTCONF module @module@
 
@@ -2412,7 +2410,7 @@ outside this document.
 *** Query Parameter URIs
 
 A new set of RESTCONF Capability URIs are defined to identify the specific
-query parameters (defined in ^query-parameters^) 
+query parameters (defined in ^query-parameters^)
 supported by the server.
 
 The server MUST include a "capability" leaf-list entry for each
@@ -2465,7 +2463,7 @@ Example: (split for display purposes only)
 
    urn:ietf:params:restconf:capability:defaults:1.0?
         basic-mode=explicit
-  
+
 ** restconf-state/streams
 
 This optional container provides access to the
