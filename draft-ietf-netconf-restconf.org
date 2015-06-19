@@ -1867,7 +1867,7 @@ is not defined in the YANG schema because it applies to the
 datastore, and is common across all data nodes.
 
 This information is encoded as attributes in XML.
-JSON encoding of meta-data is defined in ^I-D.lhotka-netmod-yang-metadata^.
+JSON encoding of meta-data is defined in ^I-D.ietf-netmod-yang-metadata^.
 
 ** Return Status
 
