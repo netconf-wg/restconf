@@ -48,11 +48,11 @@ module ietf-restconf-monitoring {
   // note.
 
   // RFC Ed.: remove this note
-  // Note: extracted from draft-ietf-netconf-restconf-05.txt
+  // Note: extracted from draft-ietf-netconf-restconf-06.txt
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2015-06-04 {
+  revision 2015-06-19 {
     description
       "Initial revision.";
     reference
@@ -125,7 +125,7 @@ module ietf-restconf-monitoring {
         }
 
         list access {
-          key type;
+          key encoding;
           min-elements 1;
           description
             "The server will create an entry in this list for each

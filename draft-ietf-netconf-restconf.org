@@ -2013,7 +2013,7 @@ The client might send the following request:
 
 
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
-      streams/stream=NETCONF/encoding=xml/location HTTP/1.1
+      streams/stream=NETCONF/access=xml/location HTTP/1.1
    Host: example.com
    Accept: application/yang.data+xml
 
@@ -2469,7 +2469,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-06-04.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-06-19.yang"
 
 * YANG Module Library
 
@@ -3514,7 +3514,7 @@ The server might respond as follows.
          },
          {
            "name" : "ietf-restconf-monitoring",
-           "revision" : "2015-06-04"
+           "revision" : "2015-06-19"
          },
          {
            "name" : "ietf-yang-library",
