@@ -2709,6 +2709,10 @@ and Jonathan Hansford.
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
 
+** 05 - 06
+
+- fixed RESTCONF issue #23  (ietf-restconf-monitoring bug)
+
 ** 04 - 05
 
 - changed term 'notification event' to 'event notification'
