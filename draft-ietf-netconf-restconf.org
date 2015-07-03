@@ -1140,8 +1140,8 @@ is returned to the client.
 
 Example:
 
-The client might request the response headers for a
-JSON representation of the "library" resource:
+The client might request the response headers for an
+XML representation of the "library" resource:
 
    GET /restconf/data/example-jukebox:jukebox/
      library/artist=Foo%20Fighters/album  HTTP/1.1
@@ -1350,6 +1350,7 @@ a "403 Forbidden" or "404 Not Found" status-line is returned to
 the client.  All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
+
 *** Plain Patch @plain-patch@
 
 The plain patch mechanism merges the contents of the message body with
@@ -1363,7 +1364,9 @@ application/yang.data+json.
 Plain patch can used to create or update, but not delete, a child
 resource within the target resource.  Please see
 ^I-D.ietf-netconf-yang-patch^ for an alternate media-type supporting
-more granular control.
+more granular control. The YANG Patch Media Type allows multiple
+sub-operations (e.g., merge, delete) within a single PATCH
+operation.
 
 Example:
 
@@ -1769,10 +1772,10 @@ is the API itself, represented by the media type "application/yang.api".
 
 - query: the set of parameters associated with the RESTCONF
 message. These have the familiar form of "name=value" pairs.
-All query parameters are optional to implement by the server
-and optional to use by the client. Each query parameter is
+Most query parameters are optional to implement by the server
+and optional to use by the client. Each optional query parameter is
 identified by a URI. The server MUST list the
-query parameter URIs it supports in the "capabilities"
+optional query parameter URIs it supports in the "capabilities"
 list defined in ^mon-mod^.
 
 There is a specific set of parameters defined,
@@ -2309,25 +2312,28 @@ The client might send:
    POST /restconf/data/example-jukebox:jukebox HTTP/1.1
    Host: example.com
 
-The server might respond:
+The server might respond (some lines wrapped for display purposes):
 
    HTTP/1.1 409 Conflict
    Date: Mon, 23 Apr 2012 17:11:00 GMT
    Server: example-server
-   Content-Type: application/yang.errors+json
+   Content-Type: application/yang.errors+xml
 
-   {
-     "ietf-restconf:errors": {
-       "error": {
-         "error-type": "protocol",
-         "error-tag": "data-exists",
-         "error-urlpath": "https://example.com/restconf/data/
-              example-jukebox:jukebox",
-         "error-message":
-           "Data already exists, cannot create new resource"
-       }
-     }
-   }
+   <errors xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
+     <error>
+       <error-type>protocol</error-type>
+       <error-tag>data-exists</error-tag>
+       <error-path
+         xmlns:rc="urn:ietf:params:xml:ns:yang:ietf-restconf"
+         xmlns:jb="https://example.com/ns/example-jukebox">
+         /rc:restconf/rc:data/jb:jukebox
+       </error-path>
+       <error-message>
+         Data already exists, cannot create new resource
+       </error-message>
+     </error>
+   </errors>
+
 
 * RESTCONF module @module@
 
@@ -2346,9 +2352,8 @@ remove this note.
 
 The "ietf-restconf-monitoring" module provides information about
 the RESTCONF protocol capabilities and event notification streams
-available from the server.  Implementation is
-mandatory for RESTCONF servers, if any protocol capabilities
-or event notification streams are supported.
+available from the server.  A RESTCONF server MUST implement
+the "/restconf-state/capabilities" container in this module.
 
 YANG Tree Diagram for "ietf-restconf-monitoring" module:
 
@@ -2416,7 +2421,7 @@ Capability for NETCONF" ^RFC6243^.
 !! row  ! defaults ! urn:ietf:params:restconf:capability:defaults:1.0
 
 This protocol capability URI MUST be supported by the server, and
-the MUST be listed in the "capability" leaf-list in ^mon-mod^.
+MUST be listed in the "capability" leaf-list in ^mon-mod^.
 
 
 | Value     | Description                                         |
@@ -2709,6 +2714,16 @@ and Jonathan Hansford.
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
 
+** 06 - 07
+
+- fixed all issues identified in email from Jernej Tuljak
+in netconf email 2015-06-22
+
+- fixed error example bug where error-urlpath was still used.
+Changed to error-path.
+
+- added mention of YANG Patch and informative reference
+
 ** 05 - 06
 
 - fixed RESTCONF issue #23  (ietf-restconf-monitoring bug)
@@ -2992,7 +3007,7 @@ The server might respond as follows.
            "schema" : "https://example.com/mymodules/foo/2012-01-02",
            "namespace" : "http://example.com/ns/foo",
            "feature" : [ "feature1", "feature2" ],
-           "conformance" : true
+           "conformance" : "implement"
          },
          {
            "name" : "foo-types",
@@ -3001,7 +3016,7 @@ The server might respond as follows.
              "https://example.com/mymodules/foo-types/2012-01-05",
            "schema" : [null],
            "namespace" : "http://example.com/ns/foo-types",
-           "conformance" : false
+           "conformance" : "import"
          },
          {
            "name" : "bar",
@@ -3009,7 +3024,7 @@ The server might respond as follows.
            "schema" : "https://example.com/mymodules/bar/2012-11-05",
            "namespace" : "http://example.com/ns/bar",
            "feature" : [ "bar-ext" ],
-           "conformance" : true,
+           "conformance" : "implement",
            "submodule" : [
              {
                "name" : "bar-submod1",
@@ -3522,7 +3537,7 @@ The server might respond as follows.
          },
          {
            "name" : "ietf-yang-library",
-           "revision" : "2015-01-30"
+           "revision" : "2015-07-03"
          },
          {
            "name" : "ietf-yang-types",
