@@ -3071,9 +3071,6 @@ for display purposes only.
 
    <capabilities xmlns="">
     <capability>
-     urn:ietf:params:restconf:capability:content:1.0
-    </capability>
-    <capability>
      urn:ietf:params:restconf:capability:depth:1.0
     </capability>
     <capability>
@@ -3081,9 +3078,6 @@ for display purposes only.
     </capability>
     <capability>
      urn:ietf:params:restconf:capability:filter:1.0
-    </capability>
-    <capability>
-     urn:ietf:params:restconf:capability:point:1.0
     </capability>
     <capability>
      urn:ietf:params:restconf:capability:start-time:1.0
