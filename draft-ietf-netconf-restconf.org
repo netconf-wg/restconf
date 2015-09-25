@@ -385,7 +385,7 @@ one of the following authentication schemes:
 - Digest               ^draft-ietf-httpauth-digest-09^
 - ClientCertificate    ^draft-thomson-httpbis-cant-01^
 
-These authentication schemes are selected for to their similarity to
+These authentication schemes are selected for their similarity to
 the authentication schemes supported by NETCONF.  In particular, the Basic
 and Digest authentication schemes both directly provide an identity
 and verification of a shared secret, much like NETCONF over SSH, when
