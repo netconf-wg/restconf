@@ -1524,11 +1524,11 @@ retrieve only the "genre" and "year" of an album, use:
 Parentheses are used to specify sub-selectors of a node.
 For example, to retrieve only the "label" and
 "catalogue-number" of an album, use:
-"fields=admin(label;catalogue-number)".
+"fields=album(label;catalogue-number)".
 
 "/" is used in a path to retrieve a child node of a node.
 For example, to retrieve only the "label" of an album, use:
-"fields=admin/label".
+"fields=album/label".
 
 This parameter is only allowed for GET methods on api,
 datastore, and data resources.  A 400 Bad Request error
