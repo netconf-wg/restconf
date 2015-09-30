@@ -1847,10 +1847,11 @@ The "utf-8" character set is used for all messages.
 RESTCONF message content is sent in the HTTP message-body.
 
 Content is encoded in either JSON or XML format.
-A server MUST support XML encoding and MAY support JSON encoding.
+A server MUST support XML or JSON encoding.
 XML encoding rules for data nodes are defined in ^RFC6020^.
 The same encoding rules are used for all XML content.
 JSON encoding rules are defined in ^I-D.ietf-netmod-yang-json^.
+JSON encoding of meta-data is defined in ^I-D.ietf-netmod-yang-metadata^.
 This encoding is valid JSON, but also has
 special encoding rules to identify module namespaces
 and provide consistent type processing of YANG data.
@@ -1859,10 +1860,13 @@ Request input content encoding format is identified with the Content-Type
 header.  This field MUST be present if a message-body is sent
 by the client.
 
+The server MUST support the "Accept" header and "406 Not Acceptable"
+status code, as defined in ^RFC7231^.
 Response output content encoding format is identified with the Accept
-header in the request, or if is not specified, the request
+header in the request. If is not specified, the request
 input encoding format is used.
-If there was no request input, then the default output encoding is XML.
+If there was no request input, then the default output encoding
+is XML or JSON, depending or server preference.
 File extensions encoded in the request are not used to identify
 format encoding.
 
@@ -2254,10 +2258,13 @@ below).
 
 The client MAY specify the desired encoding for error messages
 by specifying the appropriate media-type in the Accept header.
-If no error media is specified, the server MUST assume that
-"application/yang.errors+xml" was specified.  All of the examples
-in this document, except for the one below, assume the default
-XML encoding will be returned if there is an error.
+If no error media is specified, then the media type of
+the request message is used. If there is no request message
+the server MUST select "application/yang.errors+xml"
+or "application/yang.errors+json", depending on server preference.
+All of the examples
+in this document, except for the one below, assume
+that XML encoding will be returned if there is an error.
 
 YANG Tree Diagram for <errors> Data:
 
