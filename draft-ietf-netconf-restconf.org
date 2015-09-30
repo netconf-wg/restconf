@@ -3204,7 +3204,7 @@ sending a PATCH to the datastore resource:
    Content-Type: application/yang.datastore+xml
 
    <data xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
-     <jukebox xmlns=""http://example.com/ns/example-jukebox">
+     <jukebox xmlns="http://example.com/ns/example-jukebox">
        <library>
          <artist>
            <name>Foo Fighters</name>
