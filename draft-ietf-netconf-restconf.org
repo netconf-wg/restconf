@@ -2269,10 +2269,10 @@ All of the examples
 in this document, except for the one below, assume
 that XML encoding will be returned if there is an error.
 
-YANG Tree Diagram for <errors> Data:
+YANG Tree Diagram for <errors> data:
 
    +--ro errors
-      +--ro error
+      +--ro error*
          +--ro error-type       enumeration
          +--ro error-tag        string
          +--ro error-app-tag?   string
@@ -2311,11 +2311,13 @@ The server might respond:
 
    {
      "ietf-restconf:errors": {
-       "error": {
-         "error-type": "protocol",
-         "error-tag": "lock-denied",
-         "error-message": "Lock failed, lock already held"
-       }
+       "error": [
+         {
+           "error-type": "protocol",
+           "error-tag": "lock-denied",
+           "error-message": "Lock failed, lock already held"
+         }
+       ]
      }
    }
 
@@ -2382,7 +2384,7 @@ YANG Tree Diagram for "ietf-restconf-monitoring" module:
             +--ro description?                string
             +--ro replay-support?             boolean
             +--ro replay-log-creation-time?   yang:date-and-time
-            +--ro access* [type]
+            +--ro access* [encoding]
                +--ro encoding  string
                +--ro location  inet:uri
 
@@ -2965,9 +2967,11 @@ The server might respond as follows:
           "ietf-yang-library:modules": [ null ],
           "example-jukebox:jukebox" : [ null ]
        },
-       "operations" : {
+       "operations" : [
+         {
           "example-jukebox:play" : [ null ]
-       }
+         }
+       ]
      }
    }
 
