@@ -479,6 +479,21 @@ specifications of each URI scheme.
     <format type="TXT" octets="324178" target="http://www.rfc-editor.org/rfc/rfc6020.txt"/>
   </reference>
 
+<reference anchor="I-D.ietf-netmod-rfc6020bis">
+  <front>
+    <title>The YANG 1.1 Data Modeling Language</title>
+    <author initials="M" surname="Bjorklund" fullname="Martin Bjorklund">
+      <organization/>
+    </author>
+    <date month="September" day="23" year="2015"/>
+    <abstract>
+      <t>YANG is a data modeling language used to model configuration data, state data, remote procedure calls, and notifications for network management protocols like the Network Configuration Protocol (NETCONF).</t>
+    </abstract>
+  </front>
+  <seriesInfo name="Internet-Draft" value="draft-ietf-netmod-rfc6020bis-07"/>
+  <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-netmod-rfc6020bis-07.txt"/>
+</reference>
+
 
   <reference anchor='RFC6241'>
       <front>

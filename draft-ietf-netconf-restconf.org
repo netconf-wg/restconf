@@ -12,8 +12,9 @@ data-model specific protocol operations, and event notifications
 within a networking device, in a modular and extensible manner.
 
 This document describes an HTTP ^RFC7230^ based protocol called
-RESTCONF, for accessing data defined in YANG ^RFC6020^, using
-datastores defined in NETCONF ^RFC6241^.
+RESTCONF, for accessing data defined in YANG version 1 ^RFC6020^ or
+YANG version 1.1 ^I-D.ietf-netmod-rfc6020bis^, using datastores defined
+in NETCONF ^RFC6241^.
 
 The NETCONF protocol defines configuration datastores and
 a set of Create, Retrieve, Update, Delete (CRUD) operations
@@ -32,10 +33,10 @@ can be modified with the DELETE, PATCH, POST, and PUT methods.
 Data is encoded with either XML ^W3C.REC-xml-20081126^
 or JSON ^RFC7158^.
 
-Data-model specific protocol operations defined with
-the YANG "rpc" statement can be invoked with the POST method.
-Data-model specific event notifications defined with
-the YANG "notification" statement can be accessed.
+Data-model specific protocol operations defined with the YANG "rpc" or
+"action" statements can be invoked with the POST method.  Data-model
+specific event notifications defined with the YANG "notification"
+statement can be accessed.
 
 ** Simple Subset of NETCONF Functionality
 
@@ -217,19 +218,20 @@ The following terms are defined in ^RFC7232^:
 
 *** YANG
 
-The following terms are defined in ^RFC6020^:
+The following terms are defined in ^I-D.ietf-netmod-rfc6020bis^:
 
+- action
 - container
 - data node
 - key leaf
 - leaf
 - leaf-list
 - list
-- presence container (or P-container)
-- RPC operation (now called protocol operation)
 - non-presence container (or NP-container)
 - ordered-by system
 - ordered-by user
+- presence container (or P-container)
+- RPC operation (now called protocol operation)
 
 *** Terms
 
@@ -240,7 +242,7 @@ The following terms are used within this document:
 
 - data resource: a resource with the media type
 "application/yang.data+xml" or "application/yang.data+json".
-Containers, leafs, list entries and anyxml nodes can be data
+Containers, leafs, list entries, anydata and anyxml nodes can be data
 resources.
 
 - datastore resource: a resource with the media type
@@ -485,7 +487,7 @@ custom "play" operation is supported:
    Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
    Content-Type: application/yang.api+json
 
-   { "operations" : { "play" : [ null ] } }
+   { "operations" : { "example-jukebox:play" : [ null ] } }
 
 ** RESTCONF Resource Types
 
@@ -575,9 +577,9 @@ data-model specific protocol operations supported by the server.
 The server MAY omit this resource if no data-model specific
 operations are advertised.
 
-Any data-model specific operations defined in the YANG
-modules advertised by the server MAY be available
-as child nodes of this resource.
+Any data-model specific protocol operations defined in the YANG
+modules advertised by the server MAY be available as child nodes of
+this resource.
 
 Operation resources are defined in ^operation-resource^.
 
@@ -651,7 +653,7 @@ the datastore affect the entity tag.
 A data resource represents a YANG data node that is a descendant
 node of a datastore resource.  Each YANG-defined data node can be uniquely
 targeted by the request-line of an HTTP operation.  Containers,
-leafs, list entries and anyxml nodes are data resources.
+leafs, list entries, anydata and anyxml nodes are data resources.
 
 The representation maintained for each data resource is the YANG
 defined subtree for that node.  HTTP operations on a data
@@ -813,8 +815,9 @@ with its reported default handing mode and query parameters passed by the client
 ** Operation Resource @operation-resource@
 
 An operation resource represents a protocol operation
-defined with the YANG "rpc" statement.
-It is invoked using a POST method on the operation resource.
+defined with one of the YANG "action" or "rpc" statements.
+It is invoked using a POST method on the operation resource.  An
+RPC operation is invoked as:
 
    POST {+restconf}/operations/<operation>
 
@@ -827,15 +830,15 @@ the operation from "module-A" would be requested as follows:
    POST /restconf/operations/module-A:reset HTTP/1.1
    Server example.com
 
-If the "rpc" statement has an "input" section, then a message-body
-MAY be sent by the client in the request, otherwise the request
-message MUST NOT include a message-body.
+If the "action" or "rpc" statement has an "input" section, then a
+message-body MAY be sent by the client in the request, otherwise the
+request message MUST NOT include a message-body.
 
-If the operation is successfully invoked, and if the "rpc" statement
-has an "output" section, then a message-body
-MAY be sent by the server in the response, otherwise the response
-message MUST NOT include a message-body in the response message,
-and MUST send a "204 No Content" status-line instead.
+If the operation is successfully invoked, and if the "action" or "rpc"
+statement has an "output" section, then a message-body MAY be sent by
+the server in the response, otherwise the response message MUST NOT
+include a message-body in the response message, and MUST send a "204
+No Content" status-line instead.
 
 If the operation is not successfully invoked, then a message-body
 SHOULD be sent by the server, containing an "errors" resource,
@@ -843,7 +846,7 @@ as defined in ^errors-media-type^.
 
 *** Encoding Operation Input Parameters @example-ops-mod@
 
-If the "rpc" statement has an "input" section, then
+If the "action" or "rpc" statement has an "input" section, then
 the "input" node is provided in the message-body,
 corresponding to the YANG data definition statements
 within the "input" section.
@@ -902,7 +905,7 @@ The server might respond:
 
 *** Encoding Operation Output Parameters
 
-If the "rpc" statement has an "output" section, then
+If the "action" or "rpc" statement has an "output" section, then
 the "output" node is provided in the message-body,
 corresponding to the YANG data definition statements
 within the "output" section.
@@ -1848,7 +1851,7 @@ RESTCONF message content is sent in the HTTP message-body.
 
 Content is encoded in either JSON or XML format.
 A server MUST support XML or JSON encoding.
-XML encoding rules for data nodes are defined in ^RFC6020^.
+XML encoding rules for data nodes are defined in ^I-D.ietf-netmod-rfc6020bis^.
 The same encoding rules are used for all XML content.
 JSON encoding rules are defined in ^I-D.ietf-netmod-yang-json^.
 JSON encoding of meta-data is defined in ^I-D.ietf-netmod-yang-metadata^.
@@ -2216,12 +2219,12 @@ used specifically by RESTCONF operations:
 !! row  ! 501 Not Implemented ! unknown-operation
 !! row  ! 503 Service Unavailable ! Recoverable server error
 
-Since an operation resource is defined with a YANG "rpc"
+Since an operation resource is defined with a YANG "action" or "rpc"
 statement, a mapping between the NETCONF <error-tag> value
 and the HTTP status code is needed.   The specific error
 condition and response code to use are data-model specific
 and might be contained in the YANG "description" statement
-for the "rpc" statement.
+for the "action" or "rpc" statement.
 
 !! table Mapping from error-tag to status code
 !! head ! <error-tag> ! status code
@@ -2958,9 +2961,12 @@ The server might respond as follows:
 
    {
      "ietf-restconf:restconf": {
-       "data" : [ null ],
+       "data" : {
+          "ietf-yang-library:modules": [ null ],
+          "example-jukebox:jukebox" : [ null ]
+       },
        "operations" : {
-          "play" : [ null ]
+          "example-jukebox:play" : [ null ]
        }
      }
    }
@@ -2984,7 +2990,10 @@ which might be as follows :
    Content-Type: application/yang.api+xml
 
    <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
-     <data/>
+     <data>
+       <modules xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library"/>
+       <jukebox xmlns="https://example.com/ns/example-jukebox"/>
+     </data>
      <operations>
        <play xmlns="https://example.com/ns/example-jukebox"/>
      </operations>
