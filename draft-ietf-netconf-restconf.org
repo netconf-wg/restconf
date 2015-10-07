@@ -815,18 +815,34 @@ with its reported default handing mode and query parameters passed by the client
 
 An operation resource represents a protocol operation
 defined with one of the YANG "action" or "rpc" statements.
-It is invoked using a POST method on the operation resource.  An
-RPC operation is invoked as:
+It is invoked using a POST method on the operation resource.
+
+An RPC operation is invoked as:
 
    POST {+restconf}/operations/<operation>
 
-The <operation> field identifies the module name and
-rpc identifier string for the desired operation.
+The <operation> field identifies the module name and rpc identifier
+string for the desired operation.
 
 For example, if "module-A" defined a "reset" rpc operation, then
 invoking the operation from "module-A" would be requested as follows:
 
    POST /restconf/operations/module-A:reset HTTP/1.1
+   Server example.com
+
+An action is invoked as:
+
+   POST {+restconf}/data/<data-resource-identifier>/<operation>
+
+where <data-resource-identifier> contains the path to the data node
+where the action is defined, and <operation> is the name of the
+action.
+
+For example, if "module-A" defined a "reset-all" action in the
+container "interfaces", then invoking this action would be requested
+as follows:
+
+   POST /restconf/data/module-A:interfaces/reset-all HTTP/1.1
    Server example.com
 
 If the "action" or "rpc" statement has an "input" section, then a
@@ -2739,6 +2755,9 @@ in netconf email 2015-06-22
 Changed to error-path.
 
 - added mention of YANG Patch and informative reference
+
+- added support for YANG 1.1, specifically support for anydata and
+  actions
 
 ** 05 - 06
 
