@@ -1498,9 +1498,10 @@ This query parameter MUST be supported by the server.
 
 The "depth" parameter is used to specify the number of nest levels
 returned in a response for a GET method.  The first nest-level
-consists of the requested data node itself.  Any child nodes which are
-contained within a parent node have a depth value that is 1 greater
-than its parent.
+consists of the requested data node itself.  If the "fields" parameter
+(^fields^) is used to select descendant data nodes, these nodes all
+have a depth value of 1.  Any child nodes which are contained within a
+parent node have a depth value that is 1 greater than its parent.
 
 The value of the "depth" parameter is either an integer between 1 and
 65535, or the string "unbounded".  "unbounded" is the default.
@@ -1528,7 +1529,7 @@ a subset of all nodes in a resource.
 A value of the "fields" query parameter matches the
 following rule:
 
-  fields-expr = path '(' fields-expr / '*' ')' /
+  fields-expr = path '(' fields-expr ')' /
                 path ';' fields-expr /
                 path
   path = api-identifier [ '/' path ]
@@ -1549,10 +1550,6 @@ To retrieve only the "label" and
 "/" is used in a path to retrieve a child node of a node.
 For example, to retrieve only the "label" of an album, use:
 "fields=admin/label".
-
-"*" is used to select all child nodes of a node.
-For example, to retrieve all the child nodes of the 'admin' container,
- use: "fields=admin(*)".
 
 This parameter is only allowed for GET methods on api,
 datastore, and data resources.  A 400 Bad Request error
@@ -2758,6 +2755,8 @@ Changed to error-path.
 
 - added support for YANG 1.1, specifically support for anydata and
   actions
+
+- removed the special field value "*", since it is no longer needed
 
 ** 05 - 06
 
