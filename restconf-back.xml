@@ -576,12 +576,12 @@ specifications of each URI scheme.
       <author initials="L." surname="Lhotka" fullname="L. Lhotka">
 	<organization>CZ.NIC</organization>
       </author>
-      <date year="2015" month="June"/>
+      <date year="2015" month="October"/>
     </front>
     <seriesInfo name="Internet-Draft"
-                value="draft-ietf-netmod-yang-json-04"/>
+                value="draft-ietf-netmod-yang-json-06"/>
     <format type='TXT'
-    target='http://www.ietf.org/id/draft-ietf-netmod-yang-json-04.txt'/>
+    target='http://www.ietf.org/id/draft-ietf-netmod-yang-json-06.txt'/>
   </reference>
 
 
@@ -591,12 +591,12 @@ specifications of each URI scheme.
       <author initials="L." surname="Lhotka" fullname="L. Lhotka">
 	<organization>CZ.NIC</organization>
       </author>
-      <date year="2015" month="June"/>
+      <date year="2015" month="September"/>
     </front>
     <seriesInfo name="Internet-Draft"
-                value="draft-ietf-netmod-yang-metadata-01"/>
+                value="draft-ietf-netmod-yang-metadata-02"/>
     <format type='TXT'
-    target='http://www.ietf.org/id/draft-ietf-netmod-yang-metadata-01.txt'/>
+    target='http://www.ietf.org/id/draft-ietf-netmod-yang-metadata-02.txt'/>
   </reference>
 
 <reference anchor="RFC6415">
