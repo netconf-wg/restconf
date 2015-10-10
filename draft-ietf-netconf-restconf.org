@@ -1897,6 +1897,74 @@ datastore, and is common across all data nodes.
 This information is encoded as attributes in XML.
 JSON encoding of meta-data is defined in ^I-D.ietf-netmod-yang-metadata^.
 
+The following examples are based on the example in ^with-defaults-example^.
+The "report-all-tagged" mode for the "with-defaults" query parameter
+requires that a "default" attribute be returned for default nodes.
+This example shows that attribute for the "mtu" leaf .
+
+
+*** XML MetaData Encoding Example
+
+
+   GET /restconf/data/interfaces/interface=eth1
+      ?with-defaults=report-all-tagged HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+xml
+
+
+The server might respond as follows.
+
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Content-Type: application/yang.data+xml
+
+   <interface
+     xmlns="urn:example.com:params:xml:ns:yang:example-interface">
+     <name>eth1</name>
+     <mtu xmlns:wd="urn:ietf:params:xml:ns:netconf:default:1.0"
+       wd:default="true">1500</mtu>
+     <status>up</status>
+   </interface>
+
+
+*** JSON MetaData Encoding Example
+
+Note that RFC 6243 defines the "default" attribute with XSD, not YANG,
+so the YANG module name has to be assigned manually.
+The value "ietf-netconf-with-defaults" is assigned for JSON meta-data
+encoding.
+
+
+   GET /restconf/data/interfaces/interface=eth1
+      ?with-defaults=report-all-tagged HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+json
+
+
+The server might respond as follows.
+
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Server: example-server
+   Content-Type: application/yang.data+json
+
+   {
+     "example:interface": [
+       {
+         "name" : "eth1",
+         "mtu" : 1500,
+         "@mtu": {
+            "ietf-netconf-with-defaults:default" : true
+         },
+         "status" : "up"
+       }
+     ]
+   }
+
+
 ** Return Status
 
 Each message represents some sort of resource access.
@@ -2742,6 +2810,14 @@ and Jonathan Hansford.
 
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
+
+** 07 - 08
+
+- add support for YANG 1.1 action statement
+- changed mandatory encoding frm XML to XML or JSON
+- fix syntax in fields parameter definition
+- add meta-data encoding examples for XML and JSON
+
 
 ** 06 - 07
 
@@ -3686,8 +3762,32 @@ specifications (lines wrapped for display purposes only):
    // stop-time = 2014-10-25T12:31:00Z
    GET /mystreams/NETCONF?stop-time=2014-10-25T12%3A31%3A00Z
 
-*** "with-defaults" Parameter
+*** "with-defaults" Parameter @with-defaults-example@
 
+The following YANG module is assumed for this example.
+
+  module example-interface {
+    prefix "exif";
+    namespace "urn:example.com:params:xml:ns:yang:example-interface";
+
+    container interfaces {
+      list interface {
+        key name;
+        leaf name { type string; }
+        leaf mtu { type uint32; }
+        leaf status {
+          config false;
+          type enumeration {
+            enum up;
+            enum down;
+            enum testing;
+          }
+        }
+      }
+    }
+  }
+ 
+   
 Assume the same data model as defined in Appendix A.1 of ^RFC6243^.
 Assume the same data set as defined in Appendix A.2 of ^RFC6243^.
 If the server defaults-uri basic-mode is "trim", the the
