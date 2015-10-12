@@ -551,7 +551,7 @@ that exist within the "library" resource, using the "content"
 query parameter (see ^content^).
 
    GET /restconf/data/example-jukebox:jukebox/library
-      ?content=nonconfig  HTTP/1.1
+       ?content=nonconfig  HTTP/1.1
    Host: example.com
    Accept: application/yang.data+xml
 
@@ -700,12 +700,14 @@ is important, since applications will code to the YANG
 data model module, which uses static naming and defines an
 absolute path location for all data nodes.
 
-A RESTCONF data resource identifier is not an XPath expression.
-It is encoded from left to right, starting with the top-level
-data node, according to the "api-path" rule in ^path-abnf^.
-The node name of each ancestor of the target resource node
-is encoded in order, ending with the node name for the
-target resource.
+A RESTCONF data resource identifier is not an XPath expression.  It is
+encoded from left to right, starting with the top-level data node,
+according to the "api-path" rule in ^path-abnf^.  The node name of
+each ancestor of the target resource node is encoded in order, ending
+with the node name for the target resource.  If a node in the path is
+defined in another module than its parent node, then module name
+followed by a colon character (":") is prepended to the node name in
+the resource identifier.  See ^path-abnf^ for details.
 
 If a data node in the path expression is a YANG list node,
 then the key values for the list (if any) MUST be encoded
@@ -1003,7 +1005,7 @@ the URL for retrieving the schema.
 The client might send the following GET request message:
 
    GET /restconf/data/ietf-yang-library:modules/module=
-      example-jukebox,2014-07-03/schema HTTP/1.1
+       example-jukebox,2014-07-03/schema HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json
 
@@ -1162,7 +1164,7 @@ The client might request the response headers for an
 XML representation of the "library" resource:
 
    GET /restconf/data/example-jukebox:jukebox/
-     library/artist=Foo%20Fighters/album  HTTP/1.1
+       library/artist=Foo%20Fighters/album  HTTP/1.1
    Host: example.com
    Accept: application/yang.data+xml
 
@@ -1324,7 +1326,7 @@ Note that the request-line is wrapped
 for display purposes only:
 
    PUT /restconf/data/example-jukebox:jukebox/
-      library/artist=Foo%20Fighters/album=Wasting%20Light   HTTP/1.1
+       library/artist=Foo%20Fighters/album=Wasting%20Light   HTTP/1.1
    Host: example.com
    Content-Type: application/yang.data+json
 
@@ -1395,7 +1397,7 @@ Note that the request-line is wrapped
 for display purposes only:
 
    PATCH /restconf/data/example-jukebox:jukebox/
-      library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
+       library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
    If-Match: b8389233a4c
    Content-Type: application/yang.data+xml
@@ -1431,7 +1433,7 @@ To delete a resource such as the "album" resource,
 the client might send:
 
    DELETE /restconf/data/example-jukebox:jukebox/
-      library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
+       library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
 
 If the resource is deleted, the server might respond:
@@ -1907,7 +1909,7 @@ This example shows that attribute for the "mtu" leaf .
 
 
    GET /restconf/data/interfaces/interface=eth1
-      ?with-defaults=report-all-tagged HTTP/1.1
+       ?with-defaults=report-all-tagged HTTP/1.1
    Host: example.com
    Accept: application/yang.data+xml
 
@@ -1938,7 +1940,7 @@ encoding.
 
 
    GET /restconf/data/interfaces/interface=eth1
-      ?with-defaults=report-all-tagged HTTP/1.1
+       ?with-defaults=report-all-tagged HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json
 
@@ -2028,7 +2030,7 @@ The client might send the following request:
 
 
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
-      streams HTTP/1.1
+       streams HTTP/1.1
    Host: example.com
    Accept: application/yang.data+xml
 
@@ -2109,7 +2111,7 @@ The client might send the following request:
 
 
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
-      streams/stream=NETCONF/access=xml/location HTTP/1.1
+       streams/stream=NETCONF/access=xml/location HTTP/1.1
    Host: example.com
    Accept: application/yang.data+xml
 
@@ -3245,7 +3247,7 @@ Note that the request URI header line is wrapped
 for display purposes only:
 
    POST /restconf/data/example-jukebox:jukebox/
-      library/artist=Foo%20Fighters  HTTP/1.1
+       library/artist=Foo%20Fighters  HTTP/1.1
    Host: example.com
    Content-Type: application/yang.data+json
 
@@ -3281,8 +3283,8 @@ with key value "Wasting Light". Only the "year" field is being
 updated.
 
    PATCH /restconf/data/example-jukebox:jukebox/
-     library/artist=Foo%20Fighters/album=Wasting%20Light/year
-     HTTP/1.1
+       library/artist=Foo%20Fighters/album=Wasting%20Light/year
+       HTTP/1.1
    Host: example.com
    If-Unmodified-Since: Mon, 23 Apr 2012 17:01:00 GMT
    Content-Type: application/yang.data+json
@@ -3396,7 +3398,7 @@ and "Last-Modified" headers are only returned if
 the content parameter value is "config".
 
    GET /restconf/data/example-events:events?content=config
-      HTTP/1.1
+       HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json
 
@@ -3434,7 +3436,7 @@ that configuration ancestors (if any) and list key leafs
 (if any) are also returned.  The client might send:
 
    GET /restconf/data/example-events:events?content=nonconfig
-      HTTP/1.1
+       HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json
 
@@ -3485,7 +3487,7 @@ is not present or set to the default value "unbounded".
 Note that some strings are wrapped for display purposes only.
 
    GET /restconf/data/example-jukebox:jukebox?depth=unbounded
-      HTTP/1.1
+       HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json
 
@@ -3621,7 +3623,8 @@ In this example the client is retrieving the API resource, but
 retrieving only the "name" and "revision" nodes
 from each module, in JSON format:
 
-   GET /restconf/data?fields=modules/module(name;revision) HTTP/1.1
+   GET /restconf/data?fields=ietf-yang-library:modules/
+       module(name;revision) HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json
 
@@ -3668,7 +3671,7 @@ is being created.
 Request from client:
 
    POST /restconf/data/example-jukebox:jukebox/
-     playlist=Foo-One?insert=first HTTP/1.1
+       playlist=Foo-One?insert=first HTTP/1.1
    Host: example.com
    Content-Type: application/yang.data+json
 
@@ -3687,7 +3690,7 @@ Response from server:
    Server: example-server
    Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
    Location: https://example.com/restconf/data/
-      example-jukebox:jukebox/playlist=Foo-One/song=1
+       example-jukebox:jukebox/playlist=Foo-One/song=1
    ETag: eeeada438af
 
 *** "point" Parameter
@@ -3699,10 +3702,10 @@ The request URI is split for display purposes only.
 Request from client:
 
    POST /restconf/data/example-jukebox:jukebox/
-      library/artist=Foo%20Fighters/album=Wasting%20Light?
-      insert=after&point=%2Fexample-jukebox%3Ajukebox%2F
-      library%2Fartist%2FFoo%20Fighters%2Falbum%2F
-      Wasting%20Light%2Fsong%2FBridge%20Burning   HTTP/1.1
+       library/artist=Foo%20Fighters/album=Wasting%20Light?
+       insert=after&point=%2Fexample-jukebox%3Ajukebox%2F
+       library%2Fartist%2FFoo%20Fighters%2Falbum%2F
+       Wasting%20Light%2Fsong%2FBridge%20Burning   HTTP/1.1
    Host: example.com
    Content-Type: application/yang.data+json
 
@@ -3786,8 +3789,7 @@ The following YANG module is assumed for this example.
       }
     }
   }
- 
-   
+
 Assume the same data model as defined in Appendix A.1 of ^RFC6243^.
 Assume the same data set as defined in Appendix A.2 of ^RFC6243^.
 If the server defaults-uri basic-mode is "trim", the the
@@ -3795,7 +3797,7 @@ following request for interface "eth1" might be as follows:
 
 Without query parameter:
 
-   GET /restconf/data/interfaces/interface=eth1 HTTP/1.1
+   GET /restconf/data/example:interfaces/interface=eth1 HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json
 
@@ -3821,8 +3823,8 @@ basic-mode is "trim".
 
 With query parameter:
 
-   GET /restconf/data/interfaces/interface=eth1
-      ?with-defaults=report-all HTTP/1.1
+   GET /restconf/data/example:interfaces/interface=eth1
+       ?with-defaults=report-all HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json
 
