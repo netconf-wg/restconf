@@ -3057,18 +3057,10 @@ The server might respond as follows:
 
    {
      "ietf-restconf:restconf": {
-       "data" : {
-          "ietf-yang-library:modules": [ null ],
-          "example-jukebox:jukebox" : [ null ]
-       },
-       "operations" : [
-         {
-          "example-jukebox:play" : [ null ]
-         }
-       ]
+       "data" : [ null ],
+       "operations" : [ null ]
      }
    }
-
 
 To request that the response content to be encoded in XML,
 the "Accept" header can be used, as in this example request:
@@ -3088,15 +3080,9 @@ which might be as follows :
    Content-Type: application/yang.api+xml
 
    <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
-     <data>
-       <modules xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library"/>
-       <jukebox xmlns="https://example.com/ns/example-jukebox"/>
-     </data>
-     <operations>
-       <play xmlns="https://example.com/ns/example-jukebox"/>
-     </operations>
+     <data/>
+     <operations/>
    </restconf>
-
 
 *** Retrieve The Server Module Information
 
@@ -3164,7 +3150,6 @@ The server might respond as follows.
      }
    }
 
-
 *** Retrieve The Server Capability Information
 
 In this example the client is retrieving the capability information
@@ -3209,7 +3194,6 @@ for display purposes only.
      http://example.com/capabilities/myparam
     </capability>
    </capabilities>
-
 
 ** Edit Resource Examples
 
