@@ -839,10 +839,10 @@ the Design of Network-based Software Architectures</title>
         <author initials="K.W." surname="Watsen" fullname="Kent Watsen">
           <organization />
         </author>
-        <date year="2015" month="July"/>
+        <date year="2015" month="October"/>
       </front>
-      <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-patch-05" />
-      <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-patch-05"/>
+      <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-patch-06" />
+      <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-patch-06"/>
 </reference>
 
 

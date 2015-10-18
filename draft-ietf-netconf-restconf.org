@@ -2458,7 +2458,7 @@ as a top-level data node (under the "/restconf/data" entry point).
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-06-04.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-10-18.yang"
 
 * RESTCONF Monitoring
 
@@ -2815,6 +2815,13 @@ The authors would like to thank the following people for
 their contributions to this document: Ladislav Lhotka,
 Juergen Schoenwaelder, Rex Fernando, Robert Wilton,
 and Jonathan Hansford.
+
+Contributions to this material by Andy Bierman are based upon work
+supported by the The Space & Terrestrial Communications Directorate
+(S&TCD) under Contract No. W15P7T-13-C-A616. Any opinions, findings
+and conclusions or recommendations expressed in this material are
+those of the author(s) and do not necessarily reflect the views of
+The Space & Terrestrial Communications Directorate (S&TCD).
 
 
 *! start-appendix
