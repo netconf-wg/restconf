@@ -727,15 +727,15 @@ comma separating them.
 
 - The key value is specified as a string, using the
 canonical representation for the YANG data type.
-Any reserved characters MUST be encoded with
-escape sequences, according to ^RFC2396^, Section 2.4.
+Any reserved characters MUST be
+percent-encoded, according to ^RFC3986^, section 2.1.
 
 - All the components in the "key" statement MUST be encoded.
 Partial instance identifiers are not supported.
 
-- Quoted strings are supported in the key leaf values. Quoted
-strings MUST be used to express empty strings.
-(example: list=foo,'',baz).
+- Quoted strings are not allowed in the key leaf values.
+A missing key value is interpreted a zero-length string.
+(example: list=foo,,baz).
 
 - The "list-instance" ABNF rule defined in ^path-abnf^
 represents the syntax of a list instance identifier.
@@ -766,6 +766,20 @@ encoded as follows (line wrapped for display purposes only):
 
     /restconf/data/example-top:top/list1=key1val,key2val,key3val3/
        list2=key4val,key5val/X
+
+The following example shows how reserved characters are percent-encoded
+within a key value. The value of 'key1'
+contains a comma, single-quote, double-quote, colon, space,
+and forward slash. (,'": /).  Note that the angle brackets ('<', '>'),
+and double-quote ('"') are not reserved characters and do not
+need to be percent-encoded.
+
+Example URL:
+
+   /restconf/data/example-top:top/list2=key1/X
+
+   /restconf/data/example-top:top/list2=%2C%27"%3A%20%2F/X
+
 
 **** ABNF For Data Resource Identifiers @path-abnf@
 
@@ -1805,9 +1819,8 @@ There is a specific set of parameters defined,
 although the server MAY choose to support query
 parameters not defined in this document.
 The contents of the any query parameter value MUST be encoded
-according to ^RFC2396^, Section 3.4. Any reserved characters
-MUST be encoded with escape sequences, according to ^RFC2396^,
-Section 2.4.
+according to ^RFC3986^, Section 3.4. Any reserved characters
+MUST be percent-encoded, according to ^RFC3986^, section 2.1.
 
 - fragment: This field is not used by the RESTCONF protocol.
 
@@ -2816,10 +2829,14 @@ https://github.com/netconf-wg/restconf/issues
 ** 07 - 08
 
 - add support for YANG 1.1 action statement
-- changed mandatory encoding frm XML to XML or JSON
+- changed mandatory encoding from XML to XML or JSON
 - fix syntax in fields parameter definition
 - add meta-data encoding examples for XML and JSON
-
+- remove RFC 2396 references and update with 3986
+- change encoding of a key so quoted string are not used, since
+they are already percent-encoded. A zero-length string is
+not encoded (/list=foo,,baz)
+- Add example of percent-encoded key value
 
 ** 06 - 07
 
@@ -3110,7 +3127,7 @@ The server might respond as follows.
          {
            "name" : "foo",
            "revision" : "2012-01-02",
-           "schema" : "https://example.com/mymodules/foo/2012-01-02",
+           "schema" : "https://example.com/modules/foo/2012-01-02",
            "namespace" : "http://example.com/ns/foo",
            "feature" : [ "feature1", "feature2" ],
            "conformance" : "implement"
@@ -3119,7 +3136,7 @@ The server might respond as follows.
            "name" : "foo-types",
            "revision" : "2012-01-05",
            "schema" :
-             "https://example.com/mymodules/foo-types/2012-01-05",
+             "https://example.com/modules/foo-types/2012-01-05",
            "schema" : [null],
            "namespace" : "http://example.com/ns/foo-types",
            "conformance" : "import"
@@ -3127,7 +3144,7 @@ The server might respond as follows.
          {
            "name" : "bar",
            "revision" : "2012-11-05",
-           "schema" : "https://example.com/mymodules/bar/2012-11-05",
+           "schema" : "https://example.com/modules/bar/2012-11-05",
            "namespace" : "http://example.com/ns/bar",
            "feature" : [ "bar-ext" ],
            "conformance" : "implement",
@@ -3136,13 +3153,13 @@ The server might respond as follows.
                "name" : "bar-submod1",
                "revision" : "2012-11-05",
                "schema" :
-                "https://example.com/mymodules/bar-submod1/2012-11-05"
+                "https://example.com/modules/bar-submod1/2012-11-05"
              },
              {
                "name" : "bar-submod2",
                "revision" : "2012-11-05",
                "schema" :
-                "https://example.com/mymodules/bar-submod2/2012-11-05"
+                "https://example.com/modules/bar-submod2/2012-11-05"
              }
            ]
          }

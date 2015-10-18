@@ -55,6 +55,7 @@
   </reference>
  -->
 
+<!--
 <reference anchor='RFC2396'>
 
 <front>
@@ -126,9 +127,8 @@
 <format type='HTML' octets='130638' target='http://xml.resource.org/public/rfc/html/rfc2396.html' />
 <format type='XML' octets='104983' target='http://xml.resource.org/public/rfc/xml/rfc2396.xml' />
 </reference>
+  -->
 <!-- end RFC 2396 -->
-
-
 
 
 <reference anchor='RFC4252'>
