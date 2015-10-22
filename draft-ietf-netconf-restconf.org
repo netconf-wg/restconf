@@ -33,7 +33,7 @@ can be modified with the DELETE, PATCH, POST, and PUT methods.
 Data is encoded with either XML ^W3C.REC-xml-20081126^
 or JSON ^RFC7158^.
 
-Data-model specific protocol operations defined with the YANG "rpc" or
+Data-model specific operations defined with the YANG "rpc" or
 "action" statements can be invoked with the POST method.  Data-model
 specific event notifications defined with the YANG "notification"
 statement can be accessed.
@@ -2122,7 +2122,6 @@ For example:
 
 The client might send the following request:
 
-
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
        streams/stream=NETCONF/access=xml/location HTTP/1.1
    Host: example.com
@@ -3729,7 +3728,7 @@ Request from client:
 Response from server:
 
    HTTP/1.1 204 No Content
-+   Date: Mon, 23 Apr 2012 13:01:20 GMT
+   Date: Mon, 23 Apr 2012 13:01:20 GMT
    Server: example-server
    Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
    ETag: abcada438af
@@ -3740,33 +3739,33 @@ The following URIs show some examples of notification filter
 specifications (lines wrapped for display purposes only):
 
    // filter = /event/event-class='fault'
-   GET /mystreams/NETCONF?filter=%2Fevent%2Fevent-class%3D'fault'
+   GET /streams/NETCONF?filter=%2Fevent%2Fevent-class%3D'fault'
 
    // filter = /event/severity<=4
-   GET /mystreams/NETCONF?filter=%2Fevent%2Fseverity%3C%3D4
+   GET /streams/NETCONF?filter=%2Fevent%2Fseverity%3C%3D4
 
    // filter = /linkUp|/linkDown
-   GET /mystreams/SNMP?filter=%2FlinkUp%7C%2FlinkDown
+   GET /streams/SNMP?filter=%2FlinkUp%7C%2FlinkDown
 
    // filter = /*/reporting-entity/card!='Ethernet0'
-   GET /mystreams/NETCONF?
+   GET /streams/NETCONF?
       filter=%2F*%2Freporting-entity%2Fcard%21%3D'Ethernet0'
 
    // filter = /*/email-addr[contains(.,'company.com')]
-   GET /mystreams/critical-syslog?
+   GET /streams/critical-syslog?
       filter=%2F*%2Femail-addr[contains(.%2C'company.com')]
 
    // Note: the module name is used as prefix.
    // filter = (/example-mod:event1/name='joe' and
    //           /example-mod:event1/status='online')
-   GET /mystreams/NETCONF?
+   GET /streams/NETCONF?
      filter=(%2Fexample-mod%3Aevent1%2Fname%3D'joe'%20and
              %20%2Fexample-mod%3Aevent1%2Fstatus%3D'online')
 
 *** "start-time" Parameter
 
    // start-time = 2014-10-25T10:02:00Z
-   GET /mystreams/NETCONF?start-time=2014-10-25T10%3A02%3A00Z
+   GET /streams/NETCONF?start-time=2014-10-25T10%3A02%3A00Z
 
 *** "stop-time" Parameter
 
