@@ -128,7 +128,7 @@ the YANG data modeling language.  The server lists each YANG
 module it supports using the "ietf-yang-library"
 YANG module, defined in ^I-D.ietf-netconf-yang-library^.
 The server MUST implement the "ietf-yang-library" module,
-which SHOULD identify all the YANG modules used by the server.
+which MUST identify all the YANG modules used by the server.
 
 The conceptual datastore contents, data-model-specific
 operations and event notifications are identified by this set of
@@ -1175,10 +1175,10 @@ is returned to the client.
 Example:
 
 The client might request the response headers for an
-XML representation of the "library" resource:
+XML representation of the a specific "album" resource:
 
    GET /restconf/data/example-jukebox:jukebox/
-       library/artist=Foo%20Fighters/album  HTTP/1.1
+      library/artist=Foo%20Fighters/album=Wasting%20Light  HTTP/1.1
    Host: example.com
    Accept: application/yang.data+xml
 
@@ -2832,7 +2832,7 @@ The Space & Terrestrial Communications Directorate (S&TCD).
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
 
-** 07 - 08
+** v07 - v08
 
 - add support for YANG 1.1 action statement
 - changed mandatory encoding from XML to XML or JSON
@@ -2844,7 +2844,7 @@ they are already percent-encoded. A zero-length string is
 not encoded (/list=foo,,baz)
 - Add example of percent-encoded key value
 
-** 06 - 07
+** v06 - v07
 
 - fixed all issues identified in email from Jernej Tuljak
 in netconf email 2015-06-22
@@ -2859,11 +2859,11 @@ Changed to error-path.
 
 - removed the special field value "*", since it is no longer needed
 
-** 05 - 06
+** v05 - v06
 
 - fixed RESTCONF issue #23  (ietf-restconf-monitoring bug)
 
-** 04 - 05
+** v04 - v05
 
 - changed term 'notification event' to 'event notification'
 - removed intro text about framework and meta-model
@@ -2883,7 +2883,7 @@ Changed to error-path.
 - changed example-jukebox playlist 'id' from a data-resource-identifier
 to a leafref pointing at the song name
 
-** 03 - 04
+** v03 - v04
 
 - renamed 'select' to 'fields' (#1)
 - moved collection resource and page capability
@@ -2904,7 +2904,7 @@ parameter mandatory (#16)
 - changed NETCONF Capability URI registry usage to new
 RESTCONF Capability URI Registry usage
 
-** 02 - 03
+** v02 - v03
 
 - added collection resource
 - added "page" query parameter capability
@@ -2918,7 +2918,7 @@ different <events> URLs for XML and JSON encoding.
 - re-add JSON notification examples (previously removed)
 - updated JSON references
 
-** 01 - 02
+** v01 - v02
 
 - moved query parameter definitions from the YANG module
 back to the plain text sections
@@ -2954,7 +2954,7 @@ of list keys in a target resource URI.
 
 - moved open issues list to the issue tracker on github
 
-** 00 - 01
+** v00 - v01
 
 - fixed content=nonconfig example (non-config was incorrect)
 
