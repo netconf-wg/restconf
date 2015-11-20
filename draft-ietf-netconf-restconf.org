@@ -451,7 +451,7 @@ using the <Link> element containing the "restconf" attribute :
 
    Request
    -------
-   GET /.well-known/host-meta users HTTP/1.1
+   GET /.well-known/host-meta HTTP/1.1
    Host: example.com
    Accept: application/xrd+xml
 
@@ -2831,6 +2831,13 @@ The Space & Terrestrial Communications Directorate (S&TCD).
 
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
+
+** v08 - v09
+
+- fix introduction text regarding implementation requirements
+for the ietf-yang-library
+
+- fix host-meta example
 
 ** v07 - v08
 
