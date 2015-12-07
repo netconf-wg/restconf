@@ -118,7 +118,7 @@ The URIs for custom protocol operations and datastore content
 are predictable, based on the YANG module definitions.
 
 Operational experience with CLI and SNMP indicates that
-operators learn the 'location' of specific service
+operators learn the location of specific service
 or device related data and do not expect such information
 to be arbitrary and discovered each time the
 client opens a management session to a server.
@@ -733,8 +733,7 @@ percent-encoded, according to ^RFC3986^, section 2.1.
 - All the components in the "key" statement MUST be encoded.
 Partial instance identifiers are not supported.
 
-- Quoted strings are not allowed in the key leaf values.
-A missing key value is interpreted a zero-length string.
+- A missing key value is interpreted a zero-length string.
 (example: list=foo,,baz).
 
 - The "list-instance" ABNF rule defined in ^path-abnf^
@@ -764,22 +763,20 @@ Examples:
 For the above YANG definition, URI with key leaf values will be
 encoded as follows (line wrapped for display purposes only):
 
-    /restconf/data/example-top:top/list1=key1val,key2val,key3val3/
+    /restconf/data/example-top:top/list1=key1val,key2val,key3val/
        list2=key4val,key5val/X
 
-The following example shows how reserved characters are percent-encoded
-within a key value. The value of 'key1'
-contains a comma, single-quote, double-quote, colon, space,
-and forward slash. (,'": /).  Note that the angle brackets ('<', '>'),
-and double-quote ('"') are not reserved characters and do not
-need to be percent-encoded.
+The following example shows how reserved characters are
+percent-encoded within a key value.  The value of "key1" contains a
+comma, single-quote, double-quote, colon, double-quote, space, and
+forward slash. (,'":" /).  Note that double-quote is not a reserved
+characters and does not need to be percent-encoded.  The value of
+"key2" is the empty string, and the value of "key3" is the string
+"foo".
 
 Example URL:
 
-   /restconf/data/example-top:top/list2=key1/X
-
-   /restconf/data/example-top:top/list2=%2C%27"%3A%20%2F/X
-
+   /restconf/data/example-top:top/list1=%2C%27"%3A"%20%2F,,foo
 
 **** ABNF For Data Resource Identifiers @path-abnf@
 
@@ -1558,7 +1555,7 @@ retrieve only the "genre" and "year" of an album, use:
 
 Parentheses are used to specify sub-selectors of a node.
 
-For example, assume the target resource is the 'album' list.
+For example, assume the target resource is the "album" list.
 To retrieve only the "label" and
 "catalogue-number" of the "admin" container within an album, use:
 "fields=admin(label;catalogue-number)".
