@@ -374,15 +374,32 @@ outcome as described in Section 6.6 of ^RFC6125^.
 ** Authenticated Client Identity
 
 The RESTCONF server MUST authenticate client access to any
-protected resource using HTTP Authentication ^RFC7235^.  If the
-RESTCONF client is not authenticated to access a resource, the server
-MUST send a response with status code 401 (Unauthorized) and a
-WWW-Authenticate header field containing at least one challenge
-applicable to the target resource.
+protected resource.   If the RESTCONF client is not authenticated
+to access a resource, the server MUST send an HTTP response with
+status code 401 (Unauthorized), as defined in Section 3.1 of
+^RFC7235^.
 
-The RESTCONF client identity determined from any HTTP authentication
-scheme is hereafter known as the "RESTCONF username" and subject to
-the NETCONF Access Control Module (NACM) ^RFC6536^.
+RESTCONF client authentication MUST either use TLS client
+certificates, like NETCONF over TLS ^RFC7589^, or use
+a standard HTTP Authentication scheme, see Section 5.1
+in ^RFC7235^.  A combination of both client certificates
+and an HTTP Authentication scheme is also allowed, with
+the determination of how to process this combination left
+as an implementation decision.
+
+The RESTCONF client identity derived from the authentication
+mechanism used is hereafter known as the "RESTCONF username" and
+subject to the NETCONF Access Control Module (NACM) ^RFC6536^.
+For when a client certificate is presented, this identity MUST
+be derived using the algorithm defined in Section 7 of ^RFC7589^.
+For all other cases, when HTTP Authentication is used, the
+identity is provided by the HTTP Authentication scheme used.
+
+For HTTP Authentication schemes specifying a "realm" value in
+the WWW-Authenticate header field, as described in Section 2.2
+in ^RFC7235^, the value of the realm SHOULD be ignored by
+RESTCONF clients, as no equivalent concept exists in NETCONF.
+
 
 ### END OF TRANSPORT PROTOCOL REQUIREMENTS
 
