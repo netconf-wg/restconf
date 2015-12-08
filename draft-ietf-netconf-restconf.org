@@ -349,7 +349,7 @@ Given the nearly ubiquitous support for HTTP over TLS ^RFC7230^,
 RESTCONF implementations MUST support the "https" URI scheme, which
 has the IANA assigned default port 443.  Consistent with the exclusive
 use of X.509v3 certificates for NETCONF over TLS
-^draft-ietf-netconf-rfc5539bis-10^, use of certificates in RESTCONF is
+^RFC7589^, use of certificates in RESTCONF is
 also limited to X.509v3 certificates.
 
 ** Certificate Validation
@@ -378,25 +378,7 @@ protected resource using HTTP Authentication ^RFC7235^.  If the
 RESTCONF client is not authenticated to access a resource, the server
 MUST send a response with status code 401 (Unauthorized) and a
 WWW-Authenticate header field containing at least one challenge
-applicable to the target resource.  The RESTCONF server MAY advertise
-support for any number of authentication schemes but, in order to
-ensure interoperability, the RESTCONF server MUST advertise at least
-one of the following authentication schemes:
-
-- Basic                ^draft-ietf-httpauth-basicauth-update-03^
-- Digest               ^draft-ietf-httpauth-digest-09^
-- ClientCertificate    ^draft-thomson-httpbis-cant-01^
-
-These authentication schemes are selected for their similarity to
-the authentication schemes supported by NETCONF.  In particular, the Basic
-and Digest authentication schemes both directly provide an identity
-and verification of a shared secret, much like NETCONF over SSH, when
-using the SSH "password" authentication method ^RFC4252^.  Similarly,
-the ClientCertificate authentication scheme is much like NETCONF over
-TLS's use of X.509 client-certificates.  When using the
-ClientCertificate authentication scheme, the RESTCONF server MUST
-derive the identity of the RESTCONF client using the algorithm defined
-in Section 7 of ^draft-ietf-netconf-rfc5539bis-10^.
+applicable to the target resource.
 
 The RESTCONF client identity determined from any HTTP authentication
 scheme is hereafter known as the "RESTCONF username" and subject to
@@ -3765,6 +3747,12 @@ specifications (lines wrapped for display purposes only):
    GET /streams/NETCONF?
      filter=(%2Fexample-mod%3Aevent1%2Fname%3D'joe'%20and
              %20%2Fexample-mod%3Aevent1%2Fstatus%3D'online')
+
+   // To get notifications from just two modules (e.g., m1 + m2)
+   // filter=(/m1:* or /m2:*)
+   GET /streams/NETCONF?filter=(%2Fm1%3A*%20or%20%2Fm2%3A*)
+
+
 
 *** "start-time" Parameter
 

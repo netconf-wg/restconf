@@ -131,21 +131,6 @@
 <!-- end RFC 2396 -->
 
 
-<reference anchor='RFC4252'>
-<front>
-<title>The Secure Shell (SSH) Authentication Protocol</title>
-<author initials='T.' surname='Ylonen' fullname='T. Ylonen'>
-<organization /></author>
-<author initials='C.' surname='Lonvick' fullname='C. Lonvick'>
-<organization /></author>
-<date year='2006' month='January' />
-<abstract>
-<t>The Secure Shell Protocol (SSH) is a protocol for secure remote login and other secure network services over an insecure network.  This document describes the SSH authentication protocol framework and public key, password, and host-based client authentication methods.  Additional authentication methods are described in separate documents.  The SSH authentication protocol runs on top of the SSH transport layer protocol and provides a single authenticated tunnel for the SSH connection protocol. [STANDARDS-TRACK]</t></abstract></front>
-<seriesInfo name='RFC' value='4252' />
-<format type='TXT' octets='34268' target='http://www.rfc-editor.org/rfc/rfc4252.txt' />
-</reference>
-
-
 <reference anchor='RFC5246'>
 <front>
 <title>The Transport Layer Security (TLS) Protocol Version 1.2</title>
@@ -703,78 +688,18 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
 </reference>
 
 
-<reference anchor="draft-ietf-netconf-rfc5539bis-10">
+
+<reference  anchor='RFC7589' target='http://www.rfc-editor.org/info/rfc7589'>
 <front>
 <title>Using the NETCONF Protocol over Transport Layer Security (TLS) with Mutual X.509 Authentication</title>
-<author initials='M.' surname='Badra' fullname='M. Badra'>
-<organization /></author>
-<author initials='A.L.' surname='Luchuk' fullname='A. Luchuk'>
-<organization /></author>
-<author initials='J.S.' surname='Schoenwaelder' fullname='Juergen Schoenwaelder'>
-<organization /></author>
-<date month="Dec" day="8" year='2014'/>
+<author initials='M.' surname='Badra' fullname='M. Badra'><organization /></author>
+<author initials='A.' surname='Luchuk' fullname='A. Luchuk'><organization /></author>
+<author initials='J.' surname='Schoenwaelder' fullname='J. Schoenwaelder'><organization /></author>
+<date year='2015' month='June' />
+<abstract><t>The Network Configuration Protocol (NETCONF) provides mechanisms to install, manipulate, and delete the configuration of network devices. This document describes how to use the Transport Layer Security (TLS) protocol with mutual X.509 authentication to secure the exchange of NETCONF messages.  This revision of RFC 5539 documents the new message framing used by NETCONF 1.1 and it obsoletes RFC 5539.</t></abstract>
 </front>
-<seriesInfo name='Internet-Draft' value='draft-ietf-netconf-rfc5539bis-10' />
-<format type='TXT' target='https://tools.ietf.org/html/draft-ietf-netconf-rfc5539bis-10' />
-</reference>
-
-
-
-<reference anchor="draft-ietf-httpauth-basicauth-update-03">
-      <front>
-        <title>The 'Basic' HTTP Authentication Scheme</title>
-        <author initials="J.R." surname="Reschke" fullname="Julian Reschke">
-          <organization />
-        </author>
-        <date month="Dec" day="2" year="2014" />
-      </front>
-      <seriesInfo name="Internet-Draft"
-                  value="draft-ietf-httpauth-basicauth-update-03" />
-      <format
-          type="TXT"
-          target="https://tools.ietf.org/html/draft-ietf-httpauth-basicauth-update-03"/>
-</reference>
-
-
-
-<reference anchor="draft-ietf-httpauth-digest-09">
-      <front>
-        <title>HTTP Digest Access Authentication</title>
-        <author initials="R.S." surname="Shekh-Yusef" fullname="Rifaat Shekh-Yusef">
-          <organization />
-        </author>
-        <author initials="D.A." surname="Reschke" fullname="David Ahrens">
-          <organization />
-        </author>
-        <author initials="S.B." surname="Bremer" fullname="Sophie Bremer">
-          <organization />
-        </author>
-        <date month="Dec" day="9" year="2014" />
-      </front>
-      <seriesInfo name="Internet-Draft"
-                  value="draft-ietf-httpauth-digest-09" />
-      <format
-          type="TXT"
-          target="https://tools.ietf.org/html/draft-ietf-httpauth-digest-09"/>
-</reference>
-
-
-
-
-<reference anchor="draft-thomson-httpbis-cant-01">
-      <front>
-        <title>Client Authentication over New TLS Connection</title>
-        <author initials="M.T." surname="Thomson"
-                fullname="Martin Thomson">
-          <organization />
-        </author>
-        <date month="Jul" day="4" year="2014" />
-      </front>
-      <seriesInfo name="Internet-Draft"
-                  value="draft-thomson-httpbis-cant-01" />
-      <format
-          type="TXT"
-          target="https://tools.ietf.org/html/draft-thomson-httpbis-cant-01"/>
+<seriesInfo name='RFC' value='7589'/>
+<seriesInfo name='DOI' value='10.17487/RFC7589'/>
 </reference>
 
   <reference anchor="I-D.ietf-netconf-yang-library">
