@@ -395,11 +395,6 @@ be derived using the algorithm defined in Section 7 of ^RFC7589^.
 For all other cases, when HTTP Authentication is used, the
 identity is provided by the HTTP Authentication scheme used.
 
-For HTTP Authentication schemes specifying a "realm" value in
-the WWW-Authenticate header field, as described in Section 2.2
-in ^RFC7235^, the value of the realm SHOULD be ignored by
-RESTCONF clients, as no equivalent concept exists in NETCONF.
-
 
 ### END OF TRANSPORT PROTOCOL REQUIREMENTS
 
