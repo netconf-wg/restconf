@@ -2827,8 +2827,14 @@ https://github.com/netconf-wg/restconf/issues
 
 - fix introduction text regarding implementation requirements
 for the ietf-yang-library
-
+- clarified HTTP authentication requirements
 - fix host-meta example
+- changed list key encoding to clarify that quoted strings are not allowed.
+Percent-encoded values are used if quotes would be required. A missing
+key is treated as a zero-length string
+- Fixed example of percent-encoded string to match YANG model
+- Changed streams examples to align with naming already used
+
 
 ** v07 - v08
 
