@@ -655,6 +655,39 @@ specifications of each URI scheme.
 <format type='HTML' target='http://www.w3.org/TR/2008/REC-xml-20081126' />
 </reference>
 
+
+
+<reference anchor="W3C.REC-html5-20141028" target="http://www.w3.org/TR/2014/REC-html5-20141028">
+<front>
+<title>HTML5</title>
+<author initials="I." surname="Hickson" fullname="Ian Hickson">
+<organization/>
+</author>
+<author initials="R." surname="Berjon" fullname="Robin Berjon">
+<organization/>
+</author>
+<author initials="S." surname="Faulkner" fullname="Steve Faulkner">
+<organization/>
+</author>
+<author initials="T." surname="Leithead" fullname="Travis Leithead">
+<organization/>
+</author>
+<author initials="E." surname="Navara" fullname="Erika Doyle Navara">
+<organization/>
+</author>
+<author initials="E." surname="O&#039;Connor" fullname="Edward O&#039;Connor">
+<organization/>
+</author>
+<author initials="S." surname="Pfeiffer" fullname="Silvia Pfeiffer">
+<organization/>
+</author>
+<date month="October" day="28" year="2014"/>
+</front>
+<seriesInfo name="World Wide Web Consortium Recommendation" value="REC-html5-20141028"/>
+<format type="HTML" target="http://www.w3.org/TR/2014/REC-html5-20141028"/>
+</reference>
+
+
 <reference anchor="RFC7158">
       <front>
         <title>The JSON Data Interchange Format</title>
