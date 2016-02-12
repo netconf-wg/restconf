@@ -396,7 +396,7 @@ as an implementation decision.
 The RESTCONF client identity derived from the authentication
 mechanism used is hereafter known as the "RESTCONF username" and
 subject to the NETCONF Access Control Module (NACM) ^RFC6536^.
-For when a client certificate is presented, this identity MUST
+When a client certificate is presented, this identity MUST
 be derived using the algorithm defined in Section 7 of ^RFC7589^.
 For all other cases, when HTTP Authentication is used, the
 identity is provided by the HTTP Authentication scheme used.
@@ -435,7 +435,7 @@ top-level data node resources, and event notification messages
 supported by the server.
 
 The RESTCONF protocol does not include a
-resource discovery mechanism.  Instead, the definitions
+data resource discovery mechanism.  Instead, the definitions
 within the YANG modules advertised by the server
 are used to construct a predictable operation or data
 resource identifier.
@@ -617,10 +617,10 @@ since the specified timestamp.
 
 The server MUST maintain a last-modified timestamp for the
 top-level {+restconf}/data resource and SHOULD maintain
-last-modified timestamps for descendant resources.  For all
-resources, the server MUST return the "Last-Modified" header
+last-modified timestamps for descendant data resources.  For all
+data resources, the server MUST return the "Last-Modified" header
 when the resource is retrieved with the GET or HEAD methods.
-If the server does not maintain a timestamp for a resource,
+If the server does not maintain a timestamp for a data resource,
 it MUST return the timestamp of the resource's ancestor, a
 process that may recurse up to the top-level {+restconf}/data resource.
 Only changes to configuration data resources within
@@ -638,10 +638,10 @@ does not match the specified value.
 
 The server MUST maintain an entity tag for the
 top-level {+restconf}/data resource and SHOULD maintain
-entity tags for descendant resources.  For all
-resources, the server MUST return the "ETag" header
+entity tags for descendant data resources.  For all
+data resources, the server MUST return the "ETag" header
 when the resource is retrieved with the GET or HEAD methods.
-If the server does not maintain an entity tag for a resource,
+If the server does not maintain an entity tag for a data resource,
 it MUST return the entity tag of the resource's ancestor, a
 process that may recurse up to the top-level {+restconf}/data resource.
 Only changes to configuration data resources within
@@ -661,7 +661,7 @@ resource affect both the targeted data node and all
 its descendants, if any.
 
 For configuration data resources,
-the server MAY maintain a last-modified timestamp for the
+the server SHOULD maintain a last-modified timestamp for the
 resource, and return the "Last-Modified" header when it
 is retrieved with the GET or HEAD methods.
 If maintained, the resource timestamp MUST be set to the current
@@ -669,7 +669,7 @@ time whenever the resource
 or any configuration resource within the resource is altered.
 
 For configuration data resources,
-the server MAY maintain a resource entity tag for the
+the server SHOULD maintain a resource entity tag for the
 resource, and return the "ETag" header when it
 is retrieved as the target resource with the GET or HEAD methods.
 If maintained, the resource entity tag MUST be updated
@@ -723,13 +723,16 @@ The leaf-list instance value is used as if it were a list key
 (e.g., /restconf/data/top-leaflist=fred).
 
 - If there is only one key leaf value, the path segment is constructed
-by having the list name followed by an "=" followed by the single key
-leaf value.
+by having the list name, followed by an "=" character,
+followed by the single key leaf value.
 
-- If there are multiple key leaf values, the value of each leaf
-identified in the "key" statement is encoded
-in the order specified in the YANG "key" statement, with a
-comma separating them.
+- If there are multiple key leaf values,
+the path segment is constructed by having the list name,
+followed by the value of each leaf
+identified in the "key" statement, encoded
+in the order specified in the YANG "key" statement.
+Each key leaf value except the last one is followed by a comma
+character.
 
 - The key value is specified as a string, using the
 canonical representation for the YANG data type.
@@ -765,13 +768,21 @@ Examples:
                 leaf X { type string; }
             }
         }
+        leaf-list Y {
+          type uint32;
+        }
     }
 
-For the above YANG definition, URI with key leaf values will be
-encoded as follows (line wrapped for display purposes only):
+For the above YANG definition, a target resource URI for leaf "X"
+would be encoded as follows (line wrapped for display purposes only):
 
     /restconf/data/example-top:top/list1=key1val,key2val,key3val/
        list2=key4val,key5val/X
+
+For the above YANG definition, a target resource URI for leaf-list "Y"
+would be encoded as follows:
+
+    /restconf/data/example-top:top/Y=instance-value
 
 The following example shows how reserved characters are
 percent-encoded within a key value.  The value of "key1" contains a
@@ -1015,11 +1026,14 @@ The server might respond with an "invalid-value" error:
 ** Schema Resource @schema-resource@
 
 The server can optionally support retrieval of the YANG modules it
-supports, using the "ietf-yang-library" module,
+supports.  If retrieval is supported, then the "schema"
+leaf MUST be present in the associated "module" list entry,
 defined in ^I-D.ietf-netconf-yang-library^.
 
 To retrieve a YANG module, a client first needs to get
-the URL for retrieving the schema.
+the URL for retrieving the schema, which is stored in the
+"schema" leaf.  Note that there is no required structure
+for this URL. The URL value shown below is just an example.
 
 The client might send the following GET request message:
 
@@ -1097,7 +1111,7 @@ the CRUD operation requested for a particular resource.
 The following table shows how the RESTCONF operations relate to
 NETCONF protocol operations:
 
-!! table CRUD Methods in RESTCONF @table-crud-operations@
+!! table CRUD Methods in RESTCONF
 !! head ! RESTCONF ! NETCONF
 !! row  ! OPTIONS  ! none
 !! row  ! HEAD     ! none
@@ -1111,14 +1125,14 @@ NETCONF protocol operations:
 The NETCONF "remove" operation attribute is not supported
 by the HTTP DELETE method. The resource must exist or
 the DELETE method will fail. The PATCH method is equivalent to
-a "merge" operation when using a plain patch (see ^plain-patch^),
+a "merge" operation when using a plain patch (see ^plain-patch^);
 other media-types may provide more granular control.
 
 Access control mechanisms may be used to limit what operations
 can be used.  In particular, RESTCONF is compatible with the
 NETCONF Access Control Model (NACM) ^RFC6536^, as there is a
 specific mapping between RESTCONF and NETCONF operations,
-defined in ^table-crud-operations^.  The resource path needs
+defined in ^operations^.  The resource path needs
 to be converted internally by the server to the corresponding
 YANG instance-identifier.  Using this information,
 the server can apply the NACM access control rules to RESTCONF
@@ -1243,12 +1257,11 @@ POST is treated as a request to create a top-level resource or child
 resource, respectively.  The message-body is expected to contain the
 content of a child resource to create within the parent (target
 resource).  The message-body MUST NOT contain more than one instance
-of the expected data resource. The data-model for the child tree is the subtree is
-defined by YANG for the child resource.
+of the expected data resource. The data-model for the child tree
+is the subtree as defined by YANG for the child resource.
 
 The "insert" and "point" query parameters are supported
-by the POST method for datastore and data resource types,
-as specified in the "ietf-restconf" module in ^module^.
+by the POST method for datastore and data resources.
 
 If the POST method succeeds,
 a "201 Created" status-line is returned and there is
@@ -1550,10 +1563,11 @@ resources.  A "400 Bad Request" status-line is returned if used for other
 methods or resource types.
 
 The default value is determined by the "config" statement value of the
-target resource node.  If the "config" statement value is "false", then the
-default for the "content" parameter is "nonconfig".  If the "config"
-statement value is "true" then the default for the
-"content" parameter is "config".
+target resource node.  If the target resource represents a
+configuration data node, then the default for the "content"
+parameter is "config". If the target resource does not represent a
+configuration data node, then the default for the "content"
+parameter is "nonconfig".  
 
 This query parameter MUST be supported by the server.
 
@@ -1956,7 +1970,7 @@ input encoding format SHOULD be used, or the server MAY choose
 any supported content encoding format.
 
 If there was no request input, then the default output encoding
-is XML or JSON, depending or server preference.
+is XML or JSON, depending on server preference.
 File extensions encoded in the request are not used to identify
 format encoding.
 
@@ -2922,7 +2936,8 @@ of a leaf-list or list
 - clarified that if no Accept header the server SHOULD return
 the type specified in RESTCONF, but MAY return any media-type,
 according to HTTP rules
-
+- clarified that server SHOULD maintain timestamp and etag for data resources
+- clarified default for content query parameter
 
 ** v08 - v09
 
