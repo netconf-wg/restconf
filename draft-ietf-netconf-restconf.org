@@ -361,7 +361,8 @@ any reliable transport-layer protocol.  RESTCONF is defined on top of
 HTTP, but due to the sensitive nature of the information conveyed,
 RESTCONF requires that the transport-layer protocol provides both data
 integrity and confidentiality. A RESTCONF server MUST support the TLS
-protocol ^RFC5246^.
+protocol ^RFC5246^.  The RESTCONF protocol MUST NOT be used over HTTP
+without using the TLS protocol.
 
 ** HTTPS with X.509v3 Certificates
 
@@ -503,7 +504,7 @@ custom "play" operation is supported:
 
    { "operations" : { "example-jukebox:play" : [ null ] } }
 
-** RESTCONF Resource Types
+** RESTCONF Media Types
 
 The RESTCONF protocol defines a set of application specific media
 types to identify each of the available resource types.  The following
@@ -517,7 +518,7 @@ resource types are defined in RESTCONF:
 !! row  !             ! application/yang.datastore+json
 !! row  ! Data        ! application/yang.data+xml
 !! row  !             ! application/yang.data+json
-!! row  ! Errors      ! application/yang.errors+xml
+!! row  ! [none]      ! application/yang.errors+xml
 !! row  !             ! application/yang.errors+json
 !! row  ! Operation   ! application/yang.operation+xml
 !! row  !             ! application/yang.operation+json
@@ -1225,6 +1226,9 @@ identifies more than one instance, and XML encoding
 is used in the response, then an error response containing
 a "400 Bad Request" status-line MUST be returned by the server.
 
+If the target resource of a retrieval request is for an operation resource
+then a "405 Method Not Allowed" status-line MUST be returned by the server.
+
 
 Example:
 
@@ -1364,7 +1368,9 @@ The server might respond:
 ** PUT @put@
 
 The PUT method is sent by the client to create or replace
-the target resource.
+the target data resource. A request message-body MUST be present,
+representing the new data resource, or the server MUST return
+"400 Bad Request" status-line.
 
 The only target resource media type that supports PUT is the data
 resource. The message-body is expected to contain the
@@ -2864,9 +2870,11 @@ This document registers several capability identifiers in
 
 This section provides security considerations for the resources
 defined by the RESTCONF protocol.  Security considerations for
-HTTPS are defined in ^RFC2818^.  Security considerations for the
-content manipulated by RESTCONF can be found in the documents
-defining data models.
+HTTPS are defined in ^RFC2818^. RESTCONF does not specify
+which YANG modules a server needs to support.
+Security considerations for the
+YANG-defined content manipulated by RESTCONF can be found in the documents
+defining those YANG modules.
 
 This document does not specify an authentication scheme, but
 it does require that an authenticated NETCONF username be
@@ -2960,6 +2968,8 @@ according to HTTP rules
 - clarified intro text wrt/ interactions with NETCONF and access
 to specific datastores
 - Clarified server implementation requirements for YANG defaults
+- Clarified that Errors is not a resource, just a media type
+- Clarified that HTTP without TLS MUST NOT be used
 
 ** v08 - v09
 
