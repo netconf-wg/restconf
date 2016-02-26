@@ -340,7 +340,7 @@ datastore. The URI template "{+restconf}" is defined in ^uri-template^.
 
 Otherwise, if the device supports :candidate, all edits to
 configuration nodes in {+restconf}/data are performed in the candidate
-configuration datastore.  The candidate is automatically committed to
+configuration datastore.  The candidate MUST be automatically committed to
 running after a successful edit. Any edits from other sources that are
 in the candidate datastore will also be committed.  If a confirmed-commit
 procedure is in progress, then this commit will act as the confirming commit.
@@ -409,9 +409,10 @@ fingerprint, the connection MUST be terminated as defined in
 
 ** Authenticated Server Identity
 
-The RESTCONF client MUST carefully examine the certificate presented
-by the RESTCONF server to determine if it meets the client's
-expectations.  The RESTCONF client MUST check the identity of the
+# The RESTCONF client MUST carefully examine the certificate presented
+# by the RESTCONF server to determine if it meets the client's
+# expectations.
+The RESTCONF client MUST check the identity of the
 server according to Section 6 of ^RFC6125^, including processing the
 outcome as described in Section 6.6 of ^RFC6125^.
 
@@ -526,6 +527,9 @@ custom "play" operation is supported:
    Content-Type: application/yang.api+json
 
    { "operations" : { "example-jukebox:play" : [ null ] } }
+
+If the XRD contains more than one link relation, then only the
+relation named "restconf" is relevant to this specification.
 
 ** RESTCONF Media Types
 
@@ -814,8 +818,8 @@ Examples:
 For the above YANG definition, a target resource URI for leaf "X"
 would be encoded as follows (line wrapped for display purposes only):
 
-    /restconf/data/example-top:top/list1=key1val,key2val,key3val/
-       list2=key4val,key5val/X
+    /restconf/data/example-top:top/list1=key1,key2,key3/
+       list2=key4,key5/X
 
 For the above YANG definition, a target resource URI for leaf-list "Y"
 would be encoded as follows:
@@ -1252,6 +1256,13 @@ a "400 Bad Request" status-line MUST be returned by the server.
 If the target resource of a retrieval request is for an operation resource
 then a "405 Method Not Allowed" status-line MUST be returned by the server.
 
+Note that the way that access control is applied to data resources is
+completely incompatible with HTTP caching.  The Last-Modified
+and ETag headers maintained for a data resource are not affected
+by changes to the access control rules for that data resource.  It is possible
+for the representation of a data resource that is visible to
+a particular client to be changed without detection via the Last-Modified
+or ETag values.
 
 Example:
 
@@ -1313,6 +1324,9 @@ a "201 Created" status-line is returned and there is
 no response message-body.  A "Location" header identifying
 the child resource that was created MUST be present
 in the response in this case.
+
+If the data resource already exists, then the POST request MUST
+fail and a "409 Conflict" status-line MUST be returned.
 
 If the user is not authorized to create the target resource,
 an error response containing a "403 Forbidden" status-line SHOULD be
@@ -1943,7 +1957,7 @@ MUST be percent-encoded, according to ^RFC3986^, section 2.1.
 
 When new resources are created by the client, a "Location" header
 is returned, which identifies the path of the newly created resource.
-The client MUST use this exact path identifier to access
+The client uses this exact path identifier to access
 the resource once it has been created.
 
 The "target" of an operation is a resource.
@@ -1952,42 +1966,42 @@ the target resource for the operation.
 
 Refer to ^main-examples^ for examples of RESTCONF Request URIs.
 
-** Message Headers
-
-There are several HTTP header lines utilized in RESTCONF messages.
-Messages are not limited to the HTTP headers listed in this section.
-
-HTTP defines which header lines are required for particular
-circumstances. Refer to each operation definition section
-in ^operations^ for examples on how particular headers are used.
-
-There are some request headers that are used within RESTCONF,
-usually applied to data resources.
-The following tables summarize the headers most relevant
-in RESTCONF message requests:
-
-!! table RESTCONF Request Headers
-!! head ! Name ! Description
-!! row  ! Accept ! Response Content-Types that are acceptable
-!! row  ! Content-Type ! The media type of the request body
-!! row  ! Host ! The host address of the server
-!! row  ! If-Match ! Only perform the action if the entity matches ETag
-!! row  ! If-Modified-Since ! Only perform the action if modified since time
-!! row  ! If-Unmodified-Since ! Only perform the action if un-modified since time
-
-
-The following tables summarize the headers most relevant
-in RESTCONF message responses:
-
-!! table RESTCONF Response Headers
-!! head ! Name ! Description
-!! row  ! Allow ! Valid actions when 405 error returned
-!! row  ! Cache-Control ! The cache control parameters for the response
-!! row  ! Content-Type ! The media type of the response message-body
-!! row  ! Date ! The date and time the message was sent
-!! row  ! ETag ! An identifier for a specific version of a resource
-!! row  ! Last-Modified ! The last modified date and time of a resource
-!! row  ! Location ! The resource identifier for a newly created resource
+# ** Message Headers
+#
+# There are several HTTP header lines utilized in RESTCONF messages.
+# Messages are not limited to the HTTP headers listed in this section.
+#
+# HTTP defines which header lines are required for particular
+# circumstances. Refer to each operation definition section
+# in ^operations^ for examples on how particular headers are used.
+#
+# There are some request headers that are used within RESTCONF,
+# usually applied to data resources.
+# The following tables summarize the headers most relevant
+# in RESTCONF message requests:
+#
+# !! table RESTCONF Request Headers
+# !! head ! Name ! Description
+# !! row  ! Accept ! Response Content-Types that are acceptable
+# !! row  ! Content-Type ! The media type of the request body
+# !! row  ! Host ! The host address of the server
+# !! row  ! If-Match ! Only perform the action if the entity matches ETag
+# !! row  ! If-Modified-Since ! Only perform the action if modified since time
+# !! row  ! If-Unmodified-Since ! Only perform the action if un-modified since time
+#
+#
+# The following tables summarize the headers most relevant
+# in RESTCONF message responses:
+#
+# !! table RESTCONF Response Headers
+# !! head ! Name ! Description
+# !! row  ! Allow ! Valid actions when 405 error returned
+# !! row  ! Cache-Control ! The cache control parameters for the response
+# !! row  ! Content-Type ! The media type of the response message-body
+# !! row  ! Date ! The date and time the message was sent
+# !! row  ! ETag ! An identifier for a specific version of a resource
+# !! row  ! Last-Modified ! The last modified date and time of a resource
+# !! row  ! Location ! The resource identifier for a newly created resource
 
 ** Message Encoding
 
@@ -2119,7 +2133,7 @@ that specifies whether the response should be cached.  A "Pragma"
 header specifying "no-cache" MAY also be sent in case the
 "Cache-Control" header is not supported.
 
-Instead of using HTTP caching, the client SHOULD track the "ETag"
+Instead of relying on HTTP caching, the client SHOULD track the "ETag"
 and/or "Last-Modified" headers returned by the server for the
 datastore resource (or data resource if the server supports it).
 A retrieval request for a resource can include
@@ -2469,7 +2483,7 @@ for the "action" or "rpc" statement.
 
 When an error occurs for a request message on a data resource
 or an operation resource, and a "4xx" class of status codes
-(except for status code "403 Forbidden"),
+will be returned (except for status code "403 Forbidden"),
 then the server SHOULD send a response message-body containing
 the information described by the "errors" container definition
 within the YANG module ^module^.  The Content-Type of this
@@ -2995,6 +3009,8 @@ to specific datastores
 - Clarified that HTTP without TLS MUST NOT be used
 - add RESTCONF Extensibility section to make it clear how
 RESTCONF will be extended in the future
+- add text warning that NACM does not work with HTTP caching
+- remove sec. 5.2 Message Headers
 
 ** v08 - v09
 
