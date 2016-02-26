@@ -141,6 +141,8 @@ It contains a conceptual system or data-model specific event
 that is delivered within an event notification stream.
 Also called a "stream resource".
 
+- HATEOAS: Hypermedia as the Engine of Application State
+
 - media-type: HTTP uses Internet media types ^RFC2046^ in the Content-Type
 and Accept header fields in order to provide open and extensible
 data typing and type negotiation.
@@ -162,6 +164,10 @@ the patch type in use.
 
 - query parameter: a parameter (and its value if any),
 encoded within the query component of the request URI.
+
+- REST: Representational state transfer
+
+- RESTCONF: REST-like Configuration Management
 
 - RESTCONF capability: An optional RESTCONF protocol feature
 supported by the server, which is identified by an IANA registered
@@ -227,8 +233,6 @@ edit data resources represented by YANG data models.
 These basic edit operations allow the running configuration
 to be altered in an all-or-none fashion.
 
-The base RESTCONF protocol is intentionally simple to allow
-deployment for as many use cases as possible.
 RESTCONF is not intended to replace the full functionality of NETCONF,
 but rather provide
 an additional simplified interface that follows REST principles and
@@ -260,51 +264,51 @@ is implemented in a device that does not have a NETCONF server:
 
 RESTCONF combines the simplicity of the HTTP protocol with the
 predictability and automation potential of a schema-driven API.
-Using YANG, a client can predict all resource endpoints, much
+Using YANG, a client can predict all management resources, much
 like using URI Templates ^RFC6570^, but in a more holistic
 manner.   This strategy obviates the need for responses provided
 by the server to contain Hypermedia as the Engine of Application State
 (HATEOAS) links, originally described in
 Roy Fielding's doctoral dissertation ^rest-dissertation^.
 
-In contrast, a REST client using HATEOAS principles would not use any
-data modeling language to define the application-specific content of
-the API.  The client would need to discover each new child resource as
-it traverses the URIs to discover the server capabilities.  This
-approach has the following significant weaknesses with regards to
-control of complex networking devices:
+# In contrast, a REST client using HATEOAS principles would not use any
+# data modeling language to define the application-specific content of
+# the API.  The client would need to discover each new child resource as
+# it traverses the URIs to discover the server capabilities.  This
+# approach has the following significant weaknesses with regards to
+# control of complex networking devices:
+# 
+# - inefficient performance: configuration APIs will be quite
+# complex and may require thousands of protocol messages to
+# discover all the schema information.  Typically the
+# data type information has to be passed in the protocol messages,
+# which is also wasteful overhead.
+#
+# - no data model richness: without a data model, the schema-level
+# semantics and validation constraints are not available to the
+# application.
+#
+# - no tool automation: API automation tools need some sort of
+# content schema to function.  Such tools can automate
+# various programming and documentation tasks related
+# to specific data models.
 
-- inefficient performance: configuration APIs will be quite
-complex and may require thousands of protocol messages to
-discover all the schema information.  Typically the
-data type information has to be passed in the protocol messages,
-which is also wasteful overhead.
-
-- no data model richness: without a data model, the schema-level
-semantics and validation constraints are not available to the
-application.
-
-- no tool automation: API automation tools need some sort of
-content schema to function.  Such tools can automate
-various programming and documentation tasks related
-to specific data models.
-
-Data models such as YANG modules serve as an "API contract"
-that will be honored by the server.  An application designer
-can code to the data model, knowing in advance important details
-about the exact protocol operations and datastore content
-a conforming server implementation will support.
+# Data models such as YANG modules serve as an "API contract"
+# that will be honored by the server.  An application designer
+# can code to the data model, knowing in advance important details
+# about the exact protocol operations and datastore content
+# a conforming server implementation will support.
 
 RESTCONF provides the YANG module capability information
 supported by the server, in case the client wants to use it.
 The URIs for custom protocol operations and datastore content
 are predictable, based on the YANG module definitions.
 
-Operational experience with CLI and SNMP indicates that
-operators learn the location of specific service
-or device related data and do not expect such information
-to be arbitrary and discovered each time the
-client opens a management session to a server.
+# Operational experience with CLI and SNMP indicates that
+# operators learn the location of specific service
+# or device related data and do not expect such information
+# to be arbitrary and discovered each time the
+# client opens a management session to a server.
 
 The RESTCONF protocol operates on a conceptual datastore defined with
 the YANG data modeling language.  The server lists each YANG
@@ -341,7 +345,7 @@ datastore. The URI template "{+restconf}" is defined in ^uri-template^.
 Otherwise, if the device supports :candidate, all edits to
 configuration nodes in {+restconf}/data are performed in the candidate
 configuration datastore.  The candidate MUST be automatically committed to
-running after a successful edit. Any edits from other sources that are
+running immediately after each successful edit. Any edits from other sources that are
 in the candidate datastore will also be committed.  If a confirmed-commit
 procedure is in progress, then this commit will act as the confirming commit.
 If the server is expecting a "persist-id" parameter to complete the confirmed
@@ -450,18 +454,18 @@ with the top-level API resource itself
 (^root-resource-discovery^). Each resource represents a manageable
 component within the device.
 
-A resource can be considered a collection of conceptual data and the
+A resource can be considered a collection of data and the
 set of allowed methods on that data.  It can contain nested child
 resources.  The child resource types and methods allowed on them are
 data-model specific.
 
-A resource has its own media type identifier, represented
+A resource has a media type identifier, represented
 by the "Content-Type" header in the HTTP response message.
 A resource can contain zero or more nested resources.
 A resource can be created and deleted independently of its
 parent resource, as long as the parent resource exists.
 
-All RESTCONF resources are defined in this document except
+All RESTCONF resource types are defined in this document except
 specific datastore contents, protocol operations, and event notifications.
 The syntax and semantics for these resource types are
 defined in YANG modules.
@@ -504,7 +508,7 @@ using the <Link> element containing the "restconf" attribute :
        <Link rel='restconf' href='/restconf'/>
    </XRD>
 
-Once discovering the RESTCONF API root, the client MUST prepend it to
+After discovering the RESTCONF API root, the client MUST prepend it to
 any subsequent request to a RESTCONF resource.  For instance, using
 the "/restconf" path discovered above, the client can now determine
 the operations supported by the the server.   In this example a
@@ -620,7 +624,7 @@ The server MAY omit this resource if no data-model specific
 operations are advertised.
 
 Any data-model specific protocol operations defined in the YANG
-modules advertised by the server MAY be available as child nodes of
+modules advertised by the server MUST be available as child nodes of
 this resource.
 
 Operation resources are defined in ^operation-resource^.
@@ -658,15 +662,17 @@ to reject the request if the resource has been modified
 since the specified timestamp.
 
 The server MUST maintain a last-modified timestamp for the
-top-level {+restconf}/data resource and SHOULD maintain
-last-modified timestamps for descendant data resources.  For all
-data resources, the server MUST return the "Last-Modified" header
-when the resource is retrieved with the GET or HEAD methods.
-If the server does not maintain a timestamp for a data resource,
-it MUST return the timestamp of the resource's ancestor, a
-process that may recurse up to the top-level {+restconf}/data resource.
-Only changes to configuration data resources within
-the datastore affect the timestamp.
+top-level {+restconf}/data resource.
+
+# and SHOULD maintain
+# last-modified timestamps for descendant data resources.  For all
+# data resources, the server MUST return the "Last-Modified" header
+# when the resource is retrieved with the GET or HEAD methods.
+# If the server does not maintain a timestamp for a data resource,
+# it MUST return the timestamp of the resource's ancestor, a
+# process that may recurse up to the top-level {+restconf}/data resource.
+# Only changes to configuration data resources within
+# the datastore affect the timestamp.
 
 **** Entity tag
 
@@ -679,15 +685,17 @@ to reject the request if the resource entity tag
 does not match the specified value.
 
 The server MUST maintain an entity tag for the
-top-level {+restconf}/data resource and SHOULD maintain
-entity tags for descendant data resources.  For all
-data resources, the server MUST return the "ETag" header
-when the resource is retrieved with the GET or HEAD methods.
-If the server does not maintain an entity tag for a data resource,
-it MUST return the entity tag of the resource's ancestor, a
-process that may recurse up to the top-level {+restconf}/data resource.
-Only changes to configuration data resources within
-the datastore affect the entity tag.
+top-level {+restconf}/data resource.
+
+# and SHOULD maintain
+# entity tags for descendant data resources.  For all
+# data resources, the server MUST return the "ETag" header
+# when the resource is retrieved with the GET or HEAD methods.
+# If the server does not maintain an entity tag for a data resource,
+# it MUST return the entity tag of the resource's ancestor, a
+# process that may recurse up to the top-level {+restconf}/data resource.
+# Only changes to configuration data resources within
+# the datastore affect the entity tag.
 
 ** Data Resource  @data-resource@
 
@@ -924,7 +932,8 @@ as follows:
 
 If the "action" or "rpc" statement has an "input" section, then a
 message-body MAY be sent by the client in the request, otherwise the
-request message MUST NOT include a message-body.
+request message MUST NOT include a message-body. If the "input" section contains
+mandatory parameters, then a message-body MUST be sent by the client.
 
 If the operation is invoked without errors, and if the "action" or "rpc"
 statement has an "output" section, then a message-body MAY be sent by
@@ -934,7 +943,7 @@ No Content" status-line instead.
 
 If the operation input is not valid, or the operation is invoked but
 errors occur, then a message-body
-SHOULD be sent by the server, containing an "errors" resource,
+MUST be sent by the server, containing an "errors" resource,
 as defined in ^errors-media-type^.
 
 *** Encoding Operation Input Parameters @example-ops-mod@
@@ -1033,7 +1042,7 @@ The server might respond:
 *** Encoding Operation Errors
 
 If any errors occur while attempting to invoke the operation,
-then an "errors" data structure is returned with the
+then an "errors" media type is returned with the
 appropriate error status.
 
 Using the "reset" operation example above,
@@ -1174,7 +1183,7 @@ the DELETE method will fail. The PATCH method is equivalent to
 a "merge" operation when using a plain patch (see ^plain-patch^);
 other media-types may provide more granular control.
 
-Access control mechanisms may be used to limit what operations
+Access control mechanisms MUST be used to limit what operations
 can be used.  In particular, RESTCONF is compatible with the
 NETCONF Access Control Model (NACM) ^RFC6536^, as there is a
 specific mapping between RESTCONF and NETCONF operations,
@@ -1196,10 +1205,11 @@ each HTTP method.
 The OPTIONS method is sent by the client to
 discover which methods are supported by the server
 for a specific resource (e.g., GET, POST, DELETE, etc.).
+The server MUST implement this method.
 
-The server SHOULD implement this method, however the same information
-could be extracted from the YANG modules and the RESTCONF
-protocol specification.
+# , however the same information
+# could be extracted from the YANG modules and the RESTCONF
+# protocol specification.
 
 If the PATCH method is supported, then the "Accept-Patch" header MUST
 be supported and returned in the response to the OPTIONS request, as
@@ -1418,7 +1428,7 @@ supported by the PUT method for data resources.
 
 Consistent with ^RFC7231^, if the PUT request creates a new resource,
 a "201 Created" status-line is returned.   If an existing resource
-is modified, either "200 OK" or "204 No Content" are returned.
+is modified, a "204 No Content" status-line is returned.
 
 If the user is not authorized to create or replace the target resource
 an error response containing a "403 Forbidden" status-line SHOULD be
@@ -2433,7 +2443,6 @@ used specifically by RESTCONF operations:
 !! row  ! 100 Continue ! POST accepted, 201 should follow
 !! row  ! 200 OK ! Success with response message-body
 !! row  ! 201 Created ! POST to create a resource success
-!! row  ! 202 Accepted ! POST to create a resource accepted
 !! row  ! 204 No Content ! Success without response message-body
 !! row  ! 304 Not Modified ! Conditional operation not done
 !! row  ! 400 Bad Request ! Invalid request message
@@ -2757,25 +2766,28 @@ YANG module that is used by the server.
 The contents of this list are defined in
 the "module" YANG list statement in ^I-D.ietf-netconf-yang-library^.
 
-The server MAY maintain a last-modified timestamp for
+The server SHOULD maintain a last-modified timestamp for
 each instance of this list entry, and return the
 "Last-Modified" header when this data node is retrieved
-with the GET or HEAD methods.  If not supported
-then the timestamp for the parent "modules" container
-MAY be used instead.
+with the GET or HEAD methods.
 
-The server MAY maintain an entity-tag for each instance
+#  If not supported
+# then the timestamp for the parent "modules" container
+# SHOULD be used instead.
+
+The server SHOULD maintain an entity-tag for each instance
 of this list entry, and return the "ETag" header when this
 data node is retrieved with the GET or HEAD methods.
-If not supported then the timestamp for the
-parent "modules" container MAY be used instead.
+
+# If not supported then the timestamp for the
+# parent "modules" container SHOULD be used instead.
 
 * IANA Considerations @iana@
 
 #** Well-Known URI
 #
-#This memo registers the 'restconf' well-known URI
-#in the Well-Known URIs registry as defined by ^RFC5785^.
+# This memo registers the 'restconf' well-known URI
+# in the Well-Known URIs registry as defined by ^RFC5785^.
 #
 #   URI suffix: restconf
 #
@@ -2799,7 +2811,7 @@ Relation Type Registry defined by ^RFC5988^:
                  Subsequent revisions of RESTCONF will use alternate
                  relation values to support protocol versioning.
 
-   Reference:  RFC XXXX
+   Reference:  RFCXXXX
 
 `
 ** YANG Module Registry
@@ -2823,13 +2835,13 @@ registry ^RFC6020^.
   namespace:    urn:ietf:params:xml:ns:yang:ietf-restconf
   prefix:       rc
   // RFC Ed.: replace XXXX with RFC number and remove this note
-  reference:    RFC XXXX
+  reference:    RFCXXXX
 
   name:         ietf-restconf-monitoring
   namespace:    urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring
   prefix:       rcmon
   // RFC Ed.: replace XXXX with RFC number and remove this note
-  reference:    RFC XXXX
+  reference:    RFCXXXX
 
 ** application/yang Media Sub Types
 
@@ -2846,7 +2858,8 @@ sub-types for this media type.
 
    Type name: application
 
-   Subtype name: yang.xxx
+   Subtype name: yang.xxx, where "xxx" is 1 of "api", "data", "datastore",
+   "errors", "operation", or "stream"
 
    Required parameters: none
 
@@ -3011,6 +3024,10 @@ to specific datastores
 RESTCONF will be extended in the future
 - add text warning that NACM does not work with HTTP caching
 - remove sec. 5.2 Message Headers
+- remove 202 Accepted from list of used status-lines -- not allowed
+- made implementation of OPTIONS MUST instead of SHOULD
+- made implementation of NACM mandatory
+- Clarified that successful PUT for altering data returns 204
 
 ** v08 - v09
 
