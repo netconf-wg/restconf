@@ -225,20 +225,17 @@ of the NETCONF protocol.
 The HTTP POST, PUT, PATCH, and DELETE methods are used to
 edit data resources represented by YANG data models.
 These basic edit operations allow the running configuration
-to be altered in an all-or-none fashion.  This is similar
-to the "rollback-on-error" capability in NETCONF. Edits are
-usually applied to one data resource instance at a time.
+to be altered in an all-or-none fashion.
 
 The base RESTCONF protocol is intentionally simple to allow
-deployment for as many use cases as possible.  Additional
-functionality can be defined in external documents, outside the
-scope of this document.
-
-RESTCONF is not intended to replace NETCONF, but rather provide
+deployment for as many use cases as possible.
+RESTCONF is not intended to replace the full functionality of NETCONF,
+but rather provide
 an additional simplified interface that follows REST principles and
 is compatible with a resource-oriented device abstraction.
 
-The following figure shows the system components:
+The following figure shows the system components if a RESTCONF server
+is co-located with a NETCONF server:
 
       +-----------+           +-----------------+
       |  Web app  | <-------> |                 |
@@ -247,6 +244,16 @@ The following figure shows the system components:
       +-----------+           |   +-----------+ |
       |  NMS app  | <-------> |   | datastore | |
       +-----------+  NETCONF  |   +-----------+ |
+                              +-----------------+
+
+
+The following figure shows the system components if a RESTCONF server
+is implemented in a device that does not have a NETCONF server:
+
+      +-----------+           +-----------------+
+      |  Web app  | <-------> |                 |
+      +-----------+   HTTP    | network device  |
+                              |                 |
                               +-----------------+
 
 ** Data Model Driven API
@@ -349,6 +356,22 @@ If a datastore that would be modified by a RESTCONF operation has an
 active lock, the RESTCONF edit operation MUST fail with a
 "409 Conflict" status-line.
 
+** RESTCONF Extensibility
+
+There are two extensibility mechanisms built into RESTCONF:
+
+- protocol version
+- optional capabilities
+
+This document defines version 1 of the RESTCONF protocol.
+If a future version of this protocol is defined, then that document
+will specify how the new version of RESTCONF is identified.
+For example, a different entry point {+restconf2} could be defined.
+
+RESTCONF also supports a server-defined list of optional capabilities,
+which are listed by a server using the "ietf-restconf-monitoring" module
+defined in ^mon-mod^. The "capabilities" list can identify any
+sort of server extension.
 
 ### END OF INTRODUCTION
 
@@ -611,8 +634,8 @@ that is present on the device.
 
 Configuration edit transaction management and configuration persistence
 are handled by the server and not controlled by the client.
-A datastore resource can only be written directly with
-the PATCH method. Each RESTCONF edit of a datastore resource is
+A datastore resource can be written directly with
+the POST and PATCH methods. Each RESTCONF edit of a datastore resource is
 saved to non-volatile storage by the server.
 
 *** Edit Collision Detection @edit-collision@
@@ -2970,6 +2993,8 @@ to specific datastores
 - Clarified server implementation requirements for YANG defaults
 - Clarified that Errors is not a resource, just a media type
 - Clarified that HTTP without TLS MUST NOT be used
+- add RESTCONF Extensibility section to make it clear how
+RESTCONF will be extended in the future
 
 ** v08 - v09
 
