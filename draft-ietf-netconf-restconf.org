@@ -217,8 +217,6 @@ marked with a colon (":").
 - Ellipsis ("...") stands for contents of subtrees that are not shown.
 
 
-
-
 ** Simple Subset of NETCONF Functionality
 
 An HTTP-based management protocol does not need to mirror the functionality
@@ -390,6 +388,10 @@ RESTCONF requires that the transport-layer protocol provides both data
 integrity and confidentiality. A RESTCONF server MUST support the TLS
 protocol ^RFC5246^.  The RESTCONF protocol MUST NOT be used over HTTP
 without using the TLS protocol.
+
+HTTP/1.1 pipelining MUST be supported by the server.
+Responses MUST be sent in the same order that requests are received.
+No other versions of HTTP are supported for use with RESTCONF.
 
 ** HTTPS with X.509v3 Certificates
 
@@ -662,7 +664,10 @@ to reject the request if the resource has been modified
 since the specified timestamp.
 
 The server MUST maintain a last-modified timestamp for the
-top-level {+restconf}/data resource.
+top-level {+restconf}/data resource.  This timestamp is only
+affected by configuration data resources, and MUST NOT be updated
+for changes to non-configuration data.
+
 
 # and SHOULD maintain
 # last-modified timestamps for descendant data resources.  For all
@@ -686,6 +691,9 @@ does not match the specified value.
 
 The server MUST maintain an entity tag for the
 top-level {+restconf}/data resource.
+This entity tag is only
+affected by configuration data resources, and MUST NOT be updated
+for changes to non-configuration data.
 
 # and SHOULD maintain
 # entity tags for descendant data resources.  For all
@@ -717,6 +725,12 @@ is retrieved with the GET or HEAD methods.
 If maintained, the resource timestamp MUST be set to the current
 time whenever the resource
 or any configuration resource within the resource is altered.
+If not maintained, then the resource timestamp for the datastore
+MUST be used instead.
+
+This timestamp is only
+affected by configuration data resources, and MUST NOT be updated
+for changes to non-configuration data.
 
 For configuration data resources,
 the server SHOULD maintain a resource entity tag for the
@@ -725,6 +739,12 @@ is retrieved as the target resource with the GET or HEAD methods.
 If maintained, the resource entity tag MUST be updated
 whenever the resource
 or any configuration resource within the resource is altered.
+If not maintained, then the resource entity tag for the datastore
+MUST be used instead.
+
+This entity tag is only
+affected by configuration data resources, and MUST NOT be updated
+for changes to non-configuration data.
 
 A data resource can be retrieved with the GET method.
 Data resources are accessed via the "{+restconf}/data" entry point.
@@ -848,7 +868,8 @@ Example URL:
 
 **** ABNF For Data Resource Identifiers @path-abnf@
 
-The "api-path" ABNF syntax is used to construct RESTCONF
+The "api-path" Augmented Backus-Naur Form (ABNF) syntax
+is used to construct RESTCONF
 path identifiers:
 
     api-path = "/"  |
@@ -1045,7 +1066,8 @@ If any errors occur while attempting to invoke the operation,
 then an "errors" media type is returned with the
 appropriate error status.
 
-Using the "reset" operation example above,
+Using the "reboot" operation from the example in 
+^example-ops-mod^,
 the client might send the following POST request message:
 
    POST /restconf/operations/example-ops:reboot HTTP/1.1
@@ -1196,6 +1218,10 @@ messages.
 The server MUST NOT allow any operation to any resources that
 the client is not authorized to access.
 
+Operations are applied to a single data resource instance at once.
+The server MUST NOT allow any operation to be applied
+to multiple instances of a YANG list or leaf-list.
+
 Implementation of all methods (except PATCH) are defined in ^RFC7231^.
 This section defines the RESTCONF protocol usage for
 each HTTP method.
@@ -1328,6 +1354,10 @@ is the subtree as defined by YANG for the child resource.
 
 The "insert" and "point" query parameters are supported
 by the POST method for datastore and data resources.
+If the server implements any YANG module that contains a
+configuration data node that is "ordered-by" user, then
+the "insert" and "point" query parameters MUST be supported.
+If not, then these parameters are not applicable.
 
 If the POST method succeeds,
 a "201 Created" status-line is returned and there is
@@ -1443,6 +1473,11 @@ PUT method MUST not change the value of the leaf-list instance.
 If the target resource represents a YANG list instance, then
 the PUT method MUST NOT change any key leaf values
 in the message-body representation.
+
+If the server implements any YANG module that contains a
+configuration data node that is "ordered-by" user, then
+the "insert" and "point" query parameters MUST be supported.
+If not, then these parameters are not applicable.
 
 Example:
 
@@ -1661,6 +1696,10 @@ This parameter is only allowed for GET methods on API, datastore, and
 data resources.  A "400 Bad Request" status-line is returned if it used for
 other methods or resource types.
 
+More than one "depth" query parameter MUST NOT appear in a request.
+If more than one instance is present, then a "400 Bad Request"
+status-line MUST be returned by the server.
+
 By default, the server will include all sub-resources within a
 retrieved resource, which have the same resource type as the requested
 resource.  Only one level of sub-resources with a different media type
@@ -1706,6 +1745,10 @@ This parameter is only allowed for GET methods on api,
 datastore, and data resources.  A "400 Bad Request" status-line
 is returned if used for other methods or resource types.
 
+More than one "fields" query parameter MUST NOT appear in a request.
+If more than one instance is present, then a "400 Bad Request"
+status-line MUST be returned by the server.
+
 If the "fields" query parameter URI is listed in the
 "capability" leaf-list in ^mon-mod^, then the server
 supports the "fields" parameter.
@@ -1730,6 +1773,10 @@ This parameter is only supported for the POST and PUT
 methods. It is also only supported if the target
 resource is a data resource, and that data represents
 a YANG list or leaf-list that is ordered by the user.
+
+More than one "insert" query parameter MUST NOT appear in a request.
+If more than one instance is present, then a "400 Bad Request"
+status-line MUST be returned by the server.
 
 If the values "before" or "after" are used,
 then a "point" query parameter for the insertion
@@ -1756,6 +1803,10 @@ a YANG list or leaf-list that is ordered by the user.
 If the "insert" query parameter is not present, or has
 a value other than "before" or "after", then a "400 Bad Request"
 status-line is returned.
+
+More than one "point" query parameter MUST NOT appear in a request.
+If more than one instance is present, then a "400 Bad Request"
+status-line MUST be returned by the server.
 
 This parameter contains the instance identifier of the
 resource to be used as the insertion point for a
@@ -1786,6 +1837,10 @@ evaluated in the following context:
 -  The set of variable bindings is empty.
 -  The context node is the root node.
 
+More than one "filter" query parameter MUST NOT appear in a request.
+If more than one instance is present, then a "400 Bad Request"
+status-line MUST be returned by the server.
+
 The filter is used as defined in ^RFC5277^, Section 3.6.
 If the boolean result of the expression is true when applied
 to the conceptual "notification" document root, then the
@@ -1811,6 +1866,10 @@ The value of the "start-time" parameter is of type
 This parameter is only allowed for GET methods on a
 text/event-stream data resource.  A "400 Bad Request" status-line
 is returned if used for other methods or resource types.
+
+More than one "start-time" query parameter MUST NOT appear in a request.
+If more than one instance is present, then a "400 Bad Request"
+status-line MUST be returned by the server.
 
 If this parameter is not present, then a replay subscription
 is not being requested.  It is not valid to specify start
@@ -1841,6 +1900,10 @@ The value of the "stop-time" parameter is of type
 This parameter is only allowed for GET methods on a
 text/event-stream data resource.  A "400 Bad Request" status-line
 is returned if used for other methods or resource types.
+
+More than one "stop-time" query parameter MUST NOT appear in a request.
+If more than one instance is present, then a "400 Bad Request"
+status-line MUST be returned by the server.
 
 If this parameter is not present, the notifications will
 continue until the subscription is terminated.
@@ -1888,6 +1951,10 @@ Section 3.3 of ^RFC6243^.
 If the "with-defaults" parameter is set to "report-all-tagged"
 then the server MUST adhere to the defaults reporting behavior defined in
 Section 3.4 of ^RFC6243^.
+
+More than one "with-defaults" query parameter MUST NOT appear in a request.
+If more than one instance is present, then a "400 Bad Request"
+status-line MUST be returned by the server.
 
 If the "with-defaults" parameter is not present
 then the server MUST adhere to the defaults reporting behavior defined in
