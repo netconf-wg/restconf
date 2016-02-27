@@ -1668,7 +1668,10 @@ This parameter is only allowed for GET methods on datastore and data
 resources.  A "400 Bad Request" status-line is returned if used for other
 methods or resource types.
 
-The default value is determined by the "config" statement value of the
+If the target resource identifies a datastore resource,
+then the default value is "all".
+If the target resource identifies a data resource,
+then the default value is determined by the "config" statement value of the
 target resource node.  If the target resource represents a
 configuration data node, then the default for the "content"
 parameter is "config". If the target resource does not represent a
@@ -3095,6 +3098,7 @@ RESTCONF will be extended in the future
 - made implementation of OPTIONS MUST instead of SHOULD
 - made implementation of NACM mandatory
 - Clarified that successful PUT for altering data returns 204
+- Fixed "point" parameter example
 
 ** v08 - v09
 
@@ -3987,8 +3991,8 @@ Request from client:
    POST /restconf/data/example-jukebox:jukebox/
        library/artist=Foo%20Fighters/album=Wasting%20Light?
        insert=after&point=%2Fexample-jukebox%3Ajukebox%2F
-       library%2Fartist%2FFoo%20Fighters%2Falbum%2F
-       Wasting%20Light%2Fsong%2FBridge%20Burning   HTTP/1.1
+       library%2Fartist%3DFoo%20Fighters%2Falbum%3D
+       Wasting%20Light%2Fsong%3DBridge%20Burning   HTTP/1.1
    Host: example.com
    Content-Type: application/yang.data+json
 
