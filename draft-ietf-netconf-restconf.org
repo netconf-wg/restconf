@@ -2928,8 +2928,8 @@ sub-types for this media type.
 
    Type name: application
 
-   Subtype name: yang.xxx, where "xxx" is 1 of "api", "data", "datastore",
-   "errors", "operation", or "stream"
+   Subtype name: yang.xxx, where "xxx" is 1 of "api", "data",
+   "datastore", "errors", "operation", or "stream"
 
    Required parameters: none
 
