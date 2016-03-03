@@ -38,6 +38,8 @@ Resources representing configuration data
 can be modified with the DELETE, PATCH, POST, and PUT methods.
 Data is encoded with either XML ^W3C.REC-xml-20081126^
 or JSON ^RFC7159^.
+The server MAY provide access to specific data-specific actions using
+action resources, as described in ^action-resource^.
 
 Data-model specific operations defined with the YANG "rpc" or
 "action" statements can be invoked with the POST method.  Data-model
@@ -118,6 +120,10 @@ The following terms are used within this document:
 
 - API resource: a resource with the media type
 "application/yang.api+xml" or "application/yang.api+json".
+
+- action resource: a resource with the media type
+"application/yang.action+xml" or
+"application/yang.action+json".
 
 - data resource: a resource with the media type
 "application/yang.data+xml" or "application/yang.data+json".
@@ -317,9 +323,7 @@ which MUST identify all the YANG modules used by the server.
 
 The conceptual datastore contents, data-model-specific
 operations and event notifications are identified by this set of
-YANG modules.  All RESTCONF content identified
-as either a data resource, operation resource, or event stream resource
-is defined with the YANG language.
+YANG modules.
 
 The classification of data as configuration or
 non-configuration is derived from the YANG "config" statement.
@@ -368,12 +372,46 @@ There are two extensibility mechanisms built into RESTCONF:
 This document defines version 1 of the RESTCONF protocol.
 If a future version of this protocol is defined, then that document
 will specify how the new version of RESTCONF is identified.
-For example, a different entry point {+restconf2} could be defined.
+It is expected that a different entry point {+restconf2} would be defined.
+The server will advertise all protocol versions that it supports
+in its host-meta data.
+
+In this example, the server supports both RESTCONF 1 and RESTCONF 2.
+
+   Request
+   -------
+   GET /.well-known/host-meta HTTP/1.1
+   Host: example.com
+   Accept: application/xrd+xml
+
+   Response
+   --------
+   HTTP/1.1 200 OK
+   Content-Type: application/xrd+xml
+   Content-Length: nnn
+
+   <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
+       <Link rel='restconf' href='/restconf'/>
+       <Link rel='restconf2' href='/restconf2'/>
+   </XRD>
+
 
 RESTCONF also supports a server-defined list of optional capabilities,
 which are listed by a server using the "ietf-restconf-monitoring" module
-defined in ^mon-mod^. The "capabilities" list can identify any
-sort of server extension.
+defined in ^mon-mod^. For example, this document defines
+several query parameters in ^query-parameters^.  Each optional parameter
+has a corresponding capability URI defined in ^query-parameter-uri^
+that is advertised by the server if supported.
+
+The "capabilities" list can identify any
+sort of server extension. Typically this extension mechanism is used
+to identify optional query parameters but it is not limited to that
+purpose. For example, the "defaults" URI defined in ^defaults-uri^
+specifies a mandatory URI identifying server defaults handling behavior.
+
+A new sub-resource type could be identified with a capability if
+it is optional to implement.  Mandatory protocol features and
+new resource types require a new revision of the RESTCONF protocol.
 
 ### END OF INTRODUCTION
 
@@ -494,6 +532,8 @@ determine the root of the RESTCONF API.  The client discovers this
 by getting the "/.well-known/host-meta" resource (^RFC6415^) and
 using the <Link> element containing the "restconf" attribute :
 
+Example returning /restconf:
+
    Request
    -------
    GET /.well-known/host-meta HTTP/1.1
@@ -511,10 +551,34 @@ using the <Link> element containing the "restconf" attribute :
    </XRD>
 
 After discovering the RESTCONF API root, the client MUST prepend it to
-any subsequent request to a RESTCONF resource.  For instance, using
-the "/restconf" path discovered above, the client can now determine
-the operations supported by the the server.   In this example a
-custom "play" operation is supported:
+any subsequent request to a RESTCONF resource.  
+In this example, the client would use the path "/restconf"
+as the RESTCONF entry point.
+
+Example returning /moved/restconf:
+
+   Request
+   -------
+   GET /.well-known/host-meta HTTP/1.1
+   Host: example.com
+   Accept: application/xrd+xml
+
+   Response
+   --------
+   HTTP/1.1 200 OK
+   Content-Type: application/xrd+xml
+   Content-Length: nnn
+
+   <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
+       <Link rel='restconf' href='/moved/restconf'/>
+   </XRD>
+
+In this example, the client would use the path "/moved/restconf"
+as the RESTCONF entry point.
+
+The client can now determine the
+operation resources supported by the the server.
+In this example a custom "play" operation is supported:
 
    Request
    -------
@@ -555,6 +619,8 @@ resource types are defined in RESTCONF:
 !! row  !             ! application/yang.errors+json
 !! row  ! Operation   ! application/yang.operation+xml
 !! row  !             ! application/yang.operation+json
+!! row  ! Action      ! application/yang.action+xml
+!! row  !             ! application/yang.action+json
 !! row  ! Schema      ! application/yang
 
 ** API Resource @api-resource@
@@ -618,7 +684,7 @@ The server might respond:
      <song-count>374</song-count>
    </library>
 
-*** {+restconf}/operations
+*** {+restconf}/operations  @restconf-operations@
 
 This optional resource is a container that provides access to the
 data-model specific protocol operations supported by the server.
@@ -920,7 +986,7 @@ with its reported default handing mode and query parameters passed by the client
 ** Operation Resource @operation-resource@
 
 An operation resource represents a protocol operation
-defined with one of the YANG "action" or "rpc" statements.
+defined with the YANG "rpc" statement.
 It is invoked using a POST method on the operation resource.
 
 An RPC operation is invoked as:
@@ -936,27 +1002,12 @@ invoking the operation from "module-A" would be requested as follows:
    POST /restconf/operations/module-A:reset HTTP/1.1
    Server example.com
 
-An action is invoked as:
-
-   POST {+restconf}/data/<data-resource-identifier>/<operation>
-
-where <data-resource-identifier> contains the path to the data node
-where the action is defined, and <operation> is the name of the
-action.
-
-For example, if "module-A" defined a "reset-all" action in the
-container "interfaces", then invoking this action would be requested
-as follows:
-
-   POST /restconf/data/module-A:interfaces/reset-all HTTP/1.1
-   Server example.com
-
-If the "action" or "rpc" statement has an "input" section, then a
+If the "rpc" statement has an "input" section, then a
 message-body MAY be sent by the client in the request, otherwise the
 request message MUST NOT include a message-body. If the "input" section contains
 mandatory parameters, then a message-body MUST be sent by the client.
 
-If the operation is invoked without errors, and if the "action" or "rpc"
+If the operation is invoked without errors, and if the "rpc"
 statement has an "output" section, then a message-body MAY be sent by
 the server in the response, otherwise the response message MUST NOT
 include a message-body in the response message, and MUST send a "204
@@ -967,9 +1018,12 @@ errors occur, then a message-body
 MUST be sent by the server, containing an "errors" resource,
 as defined in ^errors-media-type^.
 
+All operation resources supported by the server MUST be identified
+in the {+restconf}/operations subtree defined in ^restconf-operations^.
+
 *** Encoding Operation Input Parameters @example-ops-mod@
 
-If the "action" or "rpc" statement has an "input" section, then
+If the "rpc" statement has an "input" section, then
 the "input" node is provided in the message-body,
 corresponding to the YANG data definition statements
 within the "input" section.
@@ -1026,9 +1080,23 @@ The server might respond:
    Date: Mon, 25 Apr 2012 11:01:00 GMT
    Server: example-server
 
+The same example request message is shown here using JSON encoding:
+
+   POST /restconf/operations/example-ops:reboot HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.operation+json
+
+   { "example-ops:input" : {
+       "delay" : 600,
+       "message" : "Going down for system maintenance",
+       "language" : "en-US"
+     }
+   }
+
+
 *** Encoding Operation Output Parameters
 
-If the "action" or "rpc" statement has an "output" section, then
+If the "rpc" statement has an "output" section, then
 the "output" node is provided in the message-body,
 corresponding to the YANG data definition statements
 within the "output" section.
@@ -1060,6 +1128,20 @@ The server might respond:
      }
    }
 
+The same response is shown here using XML encoding:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 25 Apr 2012 11:10:30 GMT
+   Server: example-server
+   Content-Type: application/yang.operation+xml
+
+   <output xmlns="https://example.com/ns/example-ops">
+     <reboot-time>30</reboot-time>
+     <message>Going down for system maintenance</message>
+     <language>en-US</language>
+   </output>
+
+
 *** Encoding Operation Errors
 
 If any errors occur while attempting to invoke the operation,
@@ -1083,7 +1165,6 @@ the client might send the following POST request message:
 
 The server might respond with an "invalid-value" error:
 
-
    HTTP/1.1 400 Bad Request
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
@@ -1094,11 +1175,206 @@ The server might respond with an "invalid-value" error:
      <error-type>protocol</error-type>
      <error-tag>invalid-value</error-tag>
      <error-path xmlns:err="https://example.com/ns/example-ops">
-       err:input/err:delay
+       /err:input/err:delay
      </error-path>
      <error-message>Invalid input parameter</error-message>
     </error>
    </errors>
+
+
+** Action Resource @action-resource@
+
+An action resource represents a data-model specific protocol operation
+defined with the YANG "action" statement.
+It is invoked using a POST method on the action resource.
+
+An action is invoked as:
+
+   POST {+restconf}/data/<data-resource-identifier>/<action>
+
+where <data-resource-identifier> contains the path to the data node
+where the action is defined, and <action> is the name of the
+action.
+
+For example, if "module-A" defined a "reset-all" action in the
+container "interfaces", then invoking this action would be requested
+as follows:
+
+   POST /restconf/data/module-A:interfaces/reset-all HTTP/1.1
+   Server example.com
+
+If the "action" statement has an "input" section, then a
+message-body MAY be sent by the client in the request, otherwise the
+request message MUST NOT include a message-body. If the "input" section contains
+mandatory parameters, then a message-body MUST be sent by the client.
+The message-body represents the input parameter section only,
+and does not contain any ancestor data nodes.  The full path
+to the action resource is specified in the target resource URI and there
+is no reason to duplicate this ancestor data in the message-body.
+
+If the action is invoked without errors, and if the "action"
+statement has an "output" section, then a message-body MAY be sent by
+the server in the response, otherwise the response message MUST NOT
+include a message-body in the response message, and MUST send a "204
+No Content" status-line instead.
+
+If the action input is not valid, or the action is invoked but
+errors occur, then a message-body
+MUST be sent by the server, containing an "errors" resource,
+as defined in ^errors-media-type^.
+
+The client MUST have proper authorization in order for the
+server to invoke an action on its behalf. The client MUST have
+at least read premission for all the ancestor data of the action statement.
+
+
+*** Encoding Action Input Parameters @example-action-mod@
+
+If the "action" statement has an "input" section, then
+the "input" node is provided in the message-body,
+corresponding to the YANG data definition statements
+within the "input" section.
+
+Example:
+
+The following YANG definition is used for the examples in this
+section.
+
+  module example-action {
+   namespace "https://example.com/ns/example-action";
+   prefix "act";
+
+   container interfaces {
+     list interface {
+       key name;
+       leaf name { type string; }
+
+       action reset {
+         input {
+           leaf delay {
+             units seconds;
+             type uint32;
+             default 0;
+           }
+         }
+       }
+
+       action get-last-reset-time {
+         output {
+           leaf last-reset {
+             type yang:date-and-time;
+             mandatory true;
+           }
+         }
+       }
+     }
+   }
+
+ }
+
+The client might send the following POST request message
+(text wrap for display purposes):
+
+   POST /restconf/data/example-action:interfaces/interface=eth0
+     /reset HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.action+xml
+
+   <reset xmlns="https://example.com/ns/example-action">
+     <delay>600</delay>
+   </reset>
+
+The server might respond:
+
+   HTTP/1.1 204 No Content
+   Date: Mon, 25 Apr 2012 11:01:00 GMT
+   Server: example-server
+
+The same example request message is shown here using JSON encoding
+(text wrap for display purposes):
+
+   POST /restconf/data/example-action:interfaces/interface=eth0
+     /reset HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.action+json
+
+   { "example-action:reset" : {
+       "delay" : 600
+     }
+   }
+
+
+*** Encoding Action Output Parameters
+
+If the "action" statement has an "output" section, then
+the "output" node is provided in the message-body,
+corresponding to the YANG data definition statements
+within the "output" section.
+
+Example:
+
+The "example-action" YANG module defined in ^example-action-mod^
+is used for the examples in this section.
+
+The client might send the following POST request message:
+
+   POST /restconf/data/example-action:interfaces/interface=eth0
+      /get-last-reset-time HTTP/1.1
+   Host: example.com
+   Accept: application/yang.action+json
+
+The server might respond:
+
+   HTTP/1.1 200 OK
+   Date: Mon, 25 Apr 2012 11:10:30 GMT
+   Server: example-server
+   Content-Type: application/yang.action+json
+
+   {
+     "example-action:get-last-reset-time" : {
+       "last-reset" : "2015-10-10T02:14:11Z"
+     }
+   }
+
+*** Encoding Action Errors
+
+If any errors occur while attempting to invoke the operation,
+then an "errors" media type is returned with the
+appropriate error status.
+
+Using the "reset" action from the example in 
+^example-action-mod^,
+the client might send the following POST request message
+(wrapped for display purposes):
+
+   POST /restconf/data/example-action:interfaces/interface=eth0
+     /reset HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.operation+xml
+
+   <reset xmlns="https://example.com/ns/example-action">
+    <delay>-33</delay>
+   </reset>
+
+
+The server might respond with an "invalid-value" error:
+
+   HTTP/1.1 400 Bad Request
+   Date: Mon, 25 Apr 2012 11:10:30 GMT
+   Server: example-server
+   Content-Type: application/yang.errors+xml
+
+   <errors xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
+    <error>
+     <error-type>protocol</error-type>
+     <error-tag>invalid-value</error-tag>
+     <error-path xmlns:err="https://example.com/ns/example-action">
+       /err:interfaces/err:interface[err:name="eth0"]/err:delay
+     </error-path>
+     <error-message>Invalid input parameter</error-message>
+    </error>
+   </errors>
+
 
 ** Schema Resource @schema-resource@
 
@@ -1246,7 +1522,8 @@ defined in ^RFC5789^.
 The HEAD method is sent by the client to
 retrieve just the headers that would be returned
 for the comparable GET method, without the response message-body.
-It is supported for all resource types, except operation resources.
+It is supported for all resource types, except operation and
+action resources.
 
 The request MUST contain a request URI
 that contains at least the entry point.
@@ -1263,7 +1540,8 @@ response message-body is included.
 
 The GET method is sent by the client to
 retrieve data and meta-data for a resource.
-It is supported for all resource types, except operation resources.
+It is supported for all resource types, except operation and
+action resources.
 The request MUST contain a request URI
 that contains at least the entry point.
 
@@ -1289,7 +1567,8 @@ identifies more than one instance, and XML encoding
 is used in the response, then an error response containing
 a "400 Bad Request" status-line MUST be returned by the server.
 
-If the target resource of a retrieval request is for an operation resource
+If the target resource of a retrieval request is for an operation
+or action resource
 then a "405 Method Not Allowed" status-line MUST be returned by the server.
 
 Note that the way that access control is applied to data resources is
@@ -1332,7 +1611,7 @@ The server might respond:
 ** POST @post@
 
 The POST method is sent by the client to create a data resource
-or invoke an operation resource.
+or invoke an operation or action resource.
 The server uses the target resource media type
 to determine how to process the request.
 
@@ -1401,11 +1680,13 @@ Refer to ^ex-create^ for more resource creation examples.
 
 *** Invoke Operation Mode
 
-If the target resource type is an operation resource,
-then the POST method is treated as a request to invoke that operation.
+If the target resource type is an operation or action resource,
+then the POST method is treated as a request to invoke that operation
+or action.
 The message-body (if any) is processed as the operation input
 parameters.  Refer to ^operation-resource^ for details
-on operation resources.
+on operation resources.  Refer to ^action-resource^ for details
+on action resources.
 
 If the POST request succeeds, a "200 OK" status-line
 is returned if there is a response message-body, and
@@ -2529,8 +2810,9 @@ used specifically by RESTCONF operations:
 !! row  ! 501 Not Implemented ! unknown-operation
 !! row  ! 503 Service Unavailable ! Recoverable server error
 
-Since an operation resource is defined with a YANG "action" or "rpc"
-statement, a mapping between the NETCONF <error-tag> value
+Since an operation resource is defined with a YANG "rpc"
+statement, and an action is defined with a YANG "action" statement,
+a mapping between the NETCONF <error-tag> value
 and the HTTP status code is needed.   The specific error
 condition and response code to use are data-model specific
 and might be contained in the YANG "description" statement
@@ -2719,7 +3001,7 @@ each supported optional protocol feature. This includes optional
 query parameters and MAY include other capability URIs defined
 outside this document.
 
-*** Query Parameter URIs
+*** Query Parameter URIs @query-parameter-uri@
 
 A new set of RESTCONF Capability URIs are defined to identify the specific
 query parameters (defined in ^query-parameters^)
@@ -2919,6 +3201,7 @@ The parent MIME media type for RESTCONF resources is application/yang,
 which is defined in ^RFC6020^.  This document defines the following
 sub-types for this media type.
 
+   - action
    - api
    - data
    - datastore
@@ -2928,8 +3211,8 @@ sub-types for this media type.
 
    Type name: application
 
-   Subtype name: yang.xxx, where "xxx" is 1 of "api", "data",
-   "datastore", "errors", "operation", or "stream"
+   Subtype name: yang.xxx, where "xxx" is 1 of "action", "api",
+   "data", "datastore", "errors", "operation", or "stream"
 
    Required parameters: none
 
@@ -3038,6 +3321,12 @@ their contributions to this document: Ladislav Lhotka,
 Juergen Schoenwaelder, Rex Fernando, Robert Wilton,
 and Jonathan Hansford.
 
+The authors would like to thank the following people for
+their excellent review comments and contributions to this document:
+Qin Wu, Joe Clarke, Bert Wijnen, Ladislav Lhotka, Rodney Cummings,
+Frank Xialiang, Tom Petch, Robert Sparks, Balint Uveges, Randy Presuhn,
+and Sue Hares.
+
 Contributions to this material by Andy Bierman are based upon work
 supported by the The Space & Terrestrial Communications Directorate
 (S&TCD) under Contract No. W15P7T-13-C-A616. Any opinions, findings
@@ -3096,9 +3385,12 @@ RESTCONF will be extended in the future
 - remove sec. 5.2 Message Headers
 - remove 202 Accepted from list of used status-lines -- not allowed
 - made implementation of OPTIONS MUST instead of SHOULD
-- made implementation of NACM mandatory
 - Clarified that successful PUT for altering data returns 204
 - Fixed "point" parameter example
+- Added example of alternate value for root resource discovery
+- Made action a separate resource type, because it is not handled
+the same as an operation resource
+- Added separate section for action resources with examples
 
 ** v08 - v09
 
