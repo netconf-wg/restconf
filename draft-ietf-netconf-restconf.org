@@ -12,7 +12,8 @@ data-model specific protocol operations, and event notifications
 within a networking device, in a modular and extensible manner.
 
 This document describes an HTTP ^RFC7230^ based protocol called
-RESTCONF, for accessing data defined in YANG version 1 ^RFC6020^ or
+REST-like Configuration Protocol (RESTCONF),
+for accessing data defined in YANG version 1 ^RFC6020^ or
 YANG version 1.1 ^I-D.ietf-netmod-rfc6020bis^, using datastores defined
 in NETCONF ^RFC6241^.
 
@@ -38,8 +39,6 @@ Resources representing configuration data
 can be modified with the DELETE, PATCH, POST, and PUT methods.
 Data is encoded with either XML ^W3C.REC-xml-20081126^
 or JSON ^RFC7159^.
-The server MAY provide access to specific data-specific actions using
-action resources, as described in ^action-resource^.
 
 Data-model specific operations defined with the YANG "rpc" or
 "action" statements can be invoked with the POST method.  Data-model
@@ -147,8 +146,6 @@ It contains a conceptual system or data-model specific event
 that is delivered within an event notification stream.
 Also called a "stream resource".
 
-- HATEOAS: Hypermedia as the Engine of Application State
-
 - media-type: HTTP uses Internet media types ^RFC2046^ in the Content-Type
 and Accept header fields in order to provide open and extensible
 data typing and type negotiation.
@@ -170,10 +167,6 @@ the patch type in use.
 
 - query parameter: a parameter (and its value if any),
 encoded within the query component of the request URI.
-
-- REST: Representational state transfer
-
-- RESTCONF: REST-like Configuration Management
 
 - RESTCONF capability: An optional RESTCONF protocol feature
 supported by the server, which is identified by an IANA registered
@@ -239,7 +232,8 @@ to be altered in an all-or-none fashion.
 
 RESTCONF is not intended to replace the full functionality of NETCONF,
 but rather provide
-an additional simplified interface that follows REST principles and
+an additional simplified interface that follows
+Representational State Transfer (REST) principles and
 is compatible with a resource-oriented device abstraction.
 
 The following figure shows the system components if a RESTCONF server
@@ -1225,7 +1219,7 @@ as defined in ^errors-media-type^.
 
 The client MUST have proper authorization in order for the
 server to invoke an action on its behalf. The client MUST have
-at least read premission for all the ancestor data of the action statement.
+read permission for all the ancestor data of the action statement.
 
 
 *** Encoding Action Input Parameters @example-action-mod@
