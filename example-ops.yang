@@ -1,0 +1,28 @@
+module example-ops {
+  namespace "https://example.com/ns/example-ops";
+  prefix "ops";
+
+  rpc reboot {
+    input {
+      leaf delay {
+        units seconds;
+        type uint32;
+        default 0;
+      }
+      leaf message { type string; }
+      leaf language { type string; }
+    }
+  }
+
+  rpc get-reboot-info {
+    output {
+      leaf reboot-time {
+        units seconds;
+        type uint32;
+      }
+      leaf message { type string; }
+      leaf language { type string; }
+    }
+  }
+}
+

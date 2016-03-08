@@ -275,7 +275,7 @@ Roy Fielding's doctoral dissertation ^rest-dissertation^.
 # it traverses the URIs to discover the server capabilities.  This
 # approach has the following significant weaknesses with regards to
 # control of complex networking devices:
-# 
+#
 # - inefficient performance: configuration APIs will be quite
 # complex and may require thousands of protocol messages to
 # discover all the schema information.  Typically the
@@ -370,7 +370,8 @@ It is expected that a different entry point {+restconf2} would be defined.
 The server will advertise all protocol versions that it supports
 in its host-meta data.
 
-In this example, the server supports both RESTCONF 1 and RESTCONF 2.
+In this example, the server supports both RESTCONF version 1 and a
+fictitious version 2.
 
    Request
    -------
@@ -545,11 +546,11 @@ Example returning /restconf:
    </XRD>
 
 After discovering the RESTCONF API root, the client MUST prepend it to
-any subsequent request to a RESTCONF resource.  
+any subsequent request to a RESTCONF resource.
 In this example, the client would use the path "/restconf"
 as the RESTCONF entry point.
 
-Example returning /moved/restconf:
+Example returning /top/restconf:
 
    Request
    -------
@@ -564,10 +565,10 @@ Example returning /moved/restconf:
    Content-Length: nnn
 
    <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
-       <Link rel='restconf' href='/moved/restconf'/>
+       <Link rel='restconf' href='/top/restconf'/>
    </XRD>
 
-In this example, the client would use the path "/moved/restconf"
+In this example, the client would use the path "/top/restconf"
 as the RESTCONF entry point.
 
 The client can now determine the
@@ -576,7 +577,7 @@ In this example a custom "play" operation is supported:
 
    Request
    -------
-   GET /restconf/operations  HTTP/1.1
+   GET /top/restconf/operations  HTTP/1.1
    Host: example.com
    Accept: application/yang.api+json
 
@@ -1027,34 +1028,7 @@ Example:
 The following YANG definition is used for the examples in this
 section.
 
-  module example-ops {
-   namespace "https://example.com/ns/example-ops";
-   prefix "ops";
-
-    rpc reboot {
-      input {
-        leaf delay {
-          units seconds;
-          type uint32;
-          default 0;
-        }
-        leaf message { type string; }
-        leaf language { type string; }
-      }
-    }
-
-    rpc get-reboot-info {
-      output {
-        leaf reboot-time {
-          units seconds;
-          type uint32;
-        }
-        leaf message { type string; }
-        leaf language { type string; }
-      }
-    }
-  }
-
+!! include-figure example-ops.yang
 
 The client might send the following POST request message:
 
@@ -1080,13 +1054,13 @@ The same example request message is shown here using JSON encoding:
    Host: example.com
    Content-Type: application/yang.operation+json
 
-   { "example-ops:input" : {
+   {
+     "example-ops:input" : {
        "delay" : 600,
        "message" : "Going down for system maintenance",
        "language" : "en-US"
      }
    }
-
 
 *** Encoding Operation Output Parameters
 
@@ -1142,7 +1116,7 @@ If any errors occur while attempting to invoke the operation,
 then an "errors" media type is returned with the
 appropriate error status.
 
-Using the "reboot" operation from the example in 
+Using the "reboot" operation from the example in
 ^example-ops-mod^,
 the client might send the following POST request message:
 
@@ -1151,9 +1125,9 @@ the client might send the following POST request message:
    Content-Type: application/yang.operation+xml
 
    <input xmlns="https://example.com/ns/example-ops">
-    <delay>-33</delay>
-    <message>Going down for system maintenance</message>
-    <language>en-US</language>
+     <delay>-33</delay>
+     <message>Going down for system maintenance</message>
+     <language>en-US</language>
    </input>
 
 
@@ -1165,14 +1139,14 @@ The server might respond with an "invalid-value" error:
    Content-Type: application/yang.errors+xml
 
    <errors xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
-    <error>
-     <error-type>protocol</error-type>
-     <error-tag>invalid-value</error-tag>
-     <error-path xmlns:err="https://example.com/ns/example-ops">
-       /err:input/err:delay
-     </error-path>
-     <error-message>Invalid input parameter</error-message>
-    </error>
+     <error>
+       <error-type>protocol</error-type>
+       <error-tag>invalid-value</error-tag>
+       <error-path xmlns:ops="https://example.com/ns/example-ops">
+         /ops:input/ops:delay
+       </error-path>
+       <error-message>Invalid input parameter</error-message>
+     </error>
    </errors>
 
 
@@ -1336,7 +1310,7 @@ If any errors occur while attempting to invoke the operation,
 then an "errors" media type is returned with the
 appropriate error status.
 
-Using the "reset" action from the example in 
+Using the "reset" action from the example in
 ^example-action-mod^,
 the client might send the following POST request message
 (wrapped for display purposes):
@@ -1556,7 +1530,7 @@ send a valid response message-body.  More than one element
 MUST NOT be returned for XML encoding.
 
 If a retrieval request for a data resource representing
-a YANG leaf-list or list object 
+a YANG leaf-list or list object
 identifies more than one instance, and XML encoding
 is used in the response, then an error response containing
 a "400 Bad Request" status-line MUST be returned by the server.
@@ -1594,12 +1568,11 @@ The server might respond:
    ETag: a74eefc993a2b
    Last-Modified: Mon, 23 Apr 2012 11:02:14 GMT
 
-   <album xmlns="http://example.com/ns/example-jukebox">
-    <name>Wasting Light</name>
-    <genre xmlns:g="http://example.com/ns/example-jukebox">
-      g:alternative
-    </genre>
-    <year>2011</2011>
+   <album xmlns="http://example.com/ns/example-jukebox"
+          xmlns:jbox="http://example.com/ns/example-jukebox">
+     <name>Wasting Light</name>
+     <genre>jbox:alternative</genre>
+     <year>2011</year>
    </album>
 
 ** POST @post@
@@ -1785,6 +1758,20 @@ If the resource is updated, the server might respond:
    Last-Modified: Mon, 23 Apr 2012 17:04:00 GMT
    ETag: b27480aeda4c
 
+The same request is shown here using XML encoding:
+
+   PUT /restconf/data/example-jukebox:jukebox/
+       library/artist=Foo%20Fighters/album=Wasting%20Light   HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang.data+xml
+
+   <album xmlns="http://example.com/ns/example-jukebox"
+          xmlns:jbox="http://example.com/ns/example-jukebox">
+     <name>Wasting Light</name>
+     <genre>jbox:alternative</genre>
+     <year>2011</year>
+   </album>
+
 ** PATCH @patch@
 
 RESTCONF uses the HTTP PATCH method defined
@@ -1951,7 +1938,7 @@ target resource node.  If the target resource represents a
 configuration data node, then the default for the "content"
 parameter is "config". If the target resource does not represent a
 configuration data node, then the default for the "content"
-parameter is "nonconfig".  
+parameter is "nonconfig".
 
 This query parameter MUST be supported by the server.
 
@@ -2930,8 +2917,8 @@ The server might respond (some lines wrapped for display purposes):
        <error-tag>data-exists</error-tag>
        <error-path
          xmlns:rc="urn:ietf:params:xml:ns:yang:ietf-restconf"
-         xmlns:jb="https://example.com/ns/example-jukebox">
-         /rc:restconf/rc:data/jb:jukebox
+         xmlns:jbox="https://example.com/ns/example-jukebox">
+         /rc:restconf/rc:data/jbox:jukebox
        </error-path>
        <error-message>
          Data already exists, cannot create new resource
@@ -3702,7 +3689,7 @@ The server might respond as follows.
            "schema" : "https://example.com/modules/foo/2012-01-02",
            "namespace" : "http://example.com/ns/foo",
            "feature" : [ "feature1", "feature2" ],
-           "conformance" : "implement"
+           "conformance-type" : "implement"
          },
          {
            "name" : "foo-types",
@@ -3711,7 +3698,7 @@ The server might respond as follows.
              "https://example.com/modules/foo-types/2012-01-05",
            "schema" : [null],
            "namespace" : "http://example.com/ns/foo-types",
-           "conformance" : "import"
+           "conformance-type" : "import"
          },
          {
            "name" : "bar",
@@ -3719,7 +3706,7 @@ The server might respond as follows.
            "schema" : "https://example.com/modules/bar/2012-11-05",
            "namespace" : "http://example.com/ns/bar",
            "feature" : [ "bar-ext" ],
-           "conformance" : "implement",
+           "conformance-type" : "implement",
            "submodule" : [
              {
                "name" : "bar-submod1",
@@ -3822,15 +3809,12 @@ for display purposes only:
    POST /restconf/data/example-jukebox:jukebox/
        library/artist=Foo%20Fighters  HTTP/1.1
    Host: example.com
-   Content-Type: application/yang.data+json
+   Content-Type: application/yang.data+xml
 
-   {
-     "example-jukebox:album" : {
-       "name" : "Wasting Light",
-       "genre" : "example-jukebox:alternative",
-       "year" : 2012    # note this is the wrong date
-     }
-   }
+   <album xmlns="http://example.com/ns/example-jukebox">
+     <name>Wasting Light</name>
+     <year>2011</year>
+   </album>
 
 If the resource is created, the server might respond
 as follows.  Note that the "Location" header line is wrapped
@@ -3852,17 +3836,17 @@ mandatory datastore last-changed timestamp.
 The client has previously retrieved the "Last-Modified"
 header and has some value cached to provide in
 the following request to patch an "album" list entry
-with key value "Wasting Light". Only the "year" field is being
+with key value "Wasting Light". Only the "genre" field is being
 updated.
 
    PATCH /restconf/data/example-jukebox:jukebox/
-       library/artist=Foo%20Fighters/album=Wasting%20Light/year
+       library/artist=Foo%20Fighters/album=Wasting%20Light/genre
        HTTP/1.1
    Host: example.com
    If-Unmodified-Since: Mon, 23 Apr 2012 17:01:00 GMT
    Content-Type: application/yang.data+json
 
-   { "example-jukebox:year" : "2011" }
+   { "example-jukebox:genre" : "example-jukebox:alternative" }
 
 In this example the datastore resource has changed
 since the time specified in the "If-Unmodified-Since"

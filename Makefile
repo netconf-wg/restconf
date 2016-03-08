@@ -26,7 +26,7 @@ next_ver ?= $(shell printf "%.2d" $$((1$(current_ver)-99)))
 endif
 next := $(draft)-$(next_ver)
 
-.PHONY: latest submit clean
+.PHONY: latest submit clean validate
 
 submit: $(next).txt
 
@@ -45,6 +45,12 @@ endif
 ifeq (.org,$(draft_type))
 	-rm -f $(draft).xml
 endif
+
+validate:
+	pyang --ietf ietf-restconf.yang
+	pyang --ietf ietf-restconf-monitoring.yang
+	pyang example-jukebox.yang
+	pyang example-ops.yang
 
 $(next).xml: $(draft).xml
 	sed -e"s/$(basename $<)-latest/$(basename $@)/" $< > $@
