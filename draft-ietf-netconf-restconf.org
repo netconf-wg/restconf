@@ -3722,7 +3722,7 @@ The server might respond as follows.
 *** Retrieve The Server Capability Information
 
 In this example the client is retrieving the capability information
-from the server in JSON format, and the server supports all
+from the server in XML format, and the server supports all
 the RESTCONF query parameters, plus one vendor parameter:
 
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
