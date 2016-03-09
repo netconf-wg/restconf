@@ -1930,16 +1930,7 @@ This parameter is only allowed for GET methods on datastore and data
 resources.  A "400 Bad Request" status-line is returned if used for other
 methods or resource types.
 
-If the target resource identifies a datastore resource,
-then the default value is "all".
-If the target resource identifies a data resource,
-then the default value is determined by the "config" statement value of the
-target resource node.  If the target resource represents a
-configuration data node, then the default for the "content"
-parameter is "config". If the target resource does not represent a
-configuration data node, then the default for the "content"
-parameter is "nonconfig".
-
+If this query parameter is not present, the default value is "all".
 This query parameter MUST be supported by the server.
 
 *** The "depth" Query Parameter @depth@
@@ -3372,6 +3363,8 @@ RESTCONF will be extended in the future
 - Made action a separate resource type, because it is not handled
 the same as an operation resource
 - Added separate section for action resources with examples
+- Fixed some examples
+- changed default value for content query parameter to "all"
 
 ** v08 - v09
 
