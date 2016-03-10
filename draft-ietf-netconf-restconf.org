@@ -460,7 +460,7 @@ outcome as described in Section 6.6 of ^RFC6125^.
 The RESTCONF server MUST authenticate client access to any
 protected resource.   If the RESTCONF client is not authorized
 to access a resource, the server MUST send an HTTP response with
-"401 (Unauthorized) status-line, as defined in Section 3.1 of
+"401 Unauthorized" status-line, as defined in Section 3.1 of
 ^RFC7235^.
 
 RESTCONF client authentication MUST either use TLS client
@@ -1777,11 +1777,15 @@ The same request is shown here using XML encoding:
 RESTCONF uses the HTTP PATCH method defined
 in ^RFC5789^ to provide an extensible framework for
 resource patching mechanisms.  It is optional to implement
-by the server.  Each patch type needs a unique
-media type.  Zero or more PATCH media types MAY be supported
+by the server.  Each patch mechanism needs a unique
+media type.  Zero or more patch media types MAY be supported
 by the server.  The media types supported by a server can be
 discovered by the client by sending an OPTIONS request (see
 ^options^).
+
+This document defines one patch mechanism (^plain-patch^).  The YANG
+PATCH mechanism is defined in ^I.D.ietf-netconf-yang-patch^.  Other
+patch mechanisms may be defined by future specifications.
 
 If the target resource instance does not exist, the server MUST NOT
 create it.
@@ -2928,7 +2932,7 @@ as a top-level data node (under the "/restconf/data" entry point).
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2015-10-18.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2016-03-10.yang"
 
 * RESTCONF Monitoring
 
@@ -3056,7 +3060,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2015-06-19.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2016-03-10.yang"
 
 * YANG Module Library
 

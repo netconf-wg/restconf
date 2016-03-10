@@ -35,7 +35,7 @@ module ietf-restconf {
      provides a normative syntax for XML and JSON message
      encoding purposes.
 
-     Copyright (c) 2015 IETF Trust and the persons identified as
+     Copyright (c) 2016 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -52,11 +52,11 @@ module ietf-restconf {
   // note.
 
   // RFC Ed.: remove this note
-  // Note: extracted from draft-ietf-netconf-restconf-08.txt
+  // Note: extracted from draft-ietf-netconf-restconf-10.txt
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2015-10-18 {
+  revision 2016-03-10 {
     description
       "Initial revision.";
     reference

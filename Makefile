@@ -55,6 +55,10 @@ validate:
 $(next).xml: $(draft).xml
 	sed -e"s/$(basename $<)-latest/$(basename $@)/" $< > $@
 
+$(draft).xml: restconf-back.xml ietf-restconf.yang \
+		ietf-restconf-monitoring.yang \
+		example-jukebox.yang example-ops.yang
+
 .INTERMEDIATE: $(draft).xml
 %.xml: %.md
 	$(kramdown-rfc2629) $< > $@
