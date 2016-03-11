@@ -780,7 +780,7 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
 
 <references title="Informative References">
 
-  <reference anchor='rest-dissertation'>
+  <reference anchor="rest-dissertation">
       <front>
 	<title>Architectural Styles and
 the Design of Network-based Software Architectures</title>

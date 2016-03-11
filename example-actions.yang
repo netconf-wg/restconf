@@ -1,0 +1,35 @@
+module example-actions {
+  yang-version 1.1;
+  namespace "https://example.com/ns/example-actions";
+  prefix "act";
+  import ietf-yang-types { prefix yang; }
+  revision "2016-03-10";
+
+  container interfaces {
+    list interface {
+      key name;
+      leaf name { type string; }
+
+      action reset {
+        input {
+          leaf delay {
+            units seconds;
+            type uint32;
+            default 0;
+          }
+        }
+      }
+
+      action get-last-reset-time {
+        output {
+          leaf last-reset {
+            type yang:date-and-time;
+            mandatory true;
+          }
+        }
+      }
+    }
+  }
+
+}
+

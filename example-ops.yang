@@ -1,6 +1,7 @@
 module example-ops {
   namespace "https://example.com/ns/example-ops";
   prefix "ops";
+  revision "2016-03-10";
 
   rpc reboot {
     input {

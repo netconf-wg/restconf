@@ -51,6 +51,7 @@ validate:
 	pyang --ietf ietf-restconf-monitoring.yang
 	pyang example-jukebox.yang
 	pyang example-ops.yang
+	pyang example-actions.yang
 
 $(next).xml: $(draft).xml
 	sed -e"s/$(basename $<)-latest/$(basename $@)/" $< > $@
