@@ -23,6 +23,15 @@ in the "open" state:
 - DONE: The edits have been reviewed and the issue has been resolved
 
 
+## pyang
+
+This draft contains examples using YANG 1.1.
+You can get the version of pyang that supports YANG 1.1 from github.
+
+     git clone http://github.com/mbj4668/pyang
+     cd pyang
+     git checkout yang-1.1
+
 ## Contributing
 
 Before submitting feedback, please familiarize yourself with our current issues
