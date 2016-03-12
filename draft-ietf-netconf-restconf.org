@@ -835,17 +835,21 @@ defined in another module than its parent node, then module name
 followed by a colon character (":") is prepended to the node name in
 the resource identifier.  See ^path-abnf^ for details.
 
+If a data node in the path expression is a YANG leaf-list node,
+then the leaf-list value MUST be encoded according to the following rules:
+
+- The instance-identifier for the leaf-list MUST be encoded
+using one path segment ^RFC3986^.
+- The path segment is constructed by having the leaf-list name,
+followed by an "=" character, followed by the leaf-list value.
+(e.g., /restconf/data/top-leaflist=fred).
+
 If a data node in the path expression is a YANG list node,
 then the key values for the list (if any) MUST be encoded
 according to the following rules:
 
 - The key leaf values for a data resource representing a YANG
 list MUST be encoded using one path segment ^RFC3986^.
-
-- An instance identifier for a data resource representing a YANG
-leaf-list MUST be encoded using one path segment ^RFC3986^.
-The leaf-list instance value is used as if it were a list key
-(e.g., /restconf/data/top-leaflist=fred).
 
 - If there is only one key leaf value, the path segment is constructed
 by having the list name, followed by an "=" character,
@@ -3305,6 +3309,7 @@ RESTCONF will be extended in the future
 - changed default value for content query parameter to "all"
 - changed empty container JSON encoding from "[null]" to "{}"
 - added mandatory yang-library capability to advertise revision-date
+- clarified URI encoding rules for leaf-list
 
 ** v08 - v09
 
