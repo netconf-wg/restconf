@@ -470,15 +470,14 @@ specifications of each URI scheme.
     <author initials="M" surname="Bjorklund" fullname="Martin Bjorklund">
       <organization/>
     </author>
-    <date month="September" day="23" year="2015"/>
+    <date month="February" day="16" year="2016"/>
     <abstract>
       <t>YANG is a data modeling language used to model configuration data, state data, remote procedure calls, and notifications for network management protocols like the Network Configuration Protocol (NETCONF).</t>
     </abstract>
   </front>
-  <seriesInfo name="Internet-Draft" value="draft-ietf-netmod-rfc6020bis-07"/>
-  <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-netmod-rfc6020bis-07.txt"/>
+  <seriesInfo name="Internet-Draft" value="draft-ietf-netmod-rfc6020bis-11"/>
+  <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-netmod-rfc6020bis-11.txt"/>
 </reference>
-
 
   <reference anchor='RFC6241'>
       <front>
