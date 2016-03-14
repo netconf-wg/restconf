@@ -251,6 +251,19 @@ module ietf-restconf {
               }
           ";
       }
+
+      leaf yang-library-version {
+        type string {
+          pattern '\d{4}-\d{2}-\d{2}';
+        }
+        mandatory true;
+        config false;
+        description
+          "Identifies the revision date of the ietf-yang-library
+           module that is implemented by this RESTCONF server.
+           Indicates the year, month, and day in YYYY-MM-DD
+           numeric format.";
+      }
     }
   }
 

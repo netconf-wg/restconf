@@ -624,6 +624,7 @@ YANG Tree Diagram for an API Resource:
    +--rw restconf
       +--rw data
       +--rw operations
+      +--ro yang-library-version
 
 The "application/yang.api" restconf-media-type extension
 in the "ietf-restconf" module
@@ -638,6 +639,7 @@ This resource has the following child resources:
 !! head ! Child Resource ! Description
 !! row  ! data           ! Contains all data resources
 !! row  ! operations     ! Data-model specific operations
+!! row  ! yang-library-version ! ietf-yang-library module date
 
 *** {+restconf}/data
 
@@ -685,6 +687,35 @@ modules advertised by the server MUST be available as child nodes of
 this resource.
 
 Operation resources are defined in ^operation-resource^.
+
+*** {+restconf}/yang-library-version  @library-version@
+
+This mandatory leaf identifies the revision date of the "ietf-yang-library"
+YANG module that is implemented by this server.
+
+Example:
+
+   GET /restconf/yang-library-version  HTTP/1.1
+   Host: example.com
+   Accept: application/yang.data+xml
+
+The server might respond
+(response wrapped for display purposes):
+
+   HTTP/1.1 200 OK
+   Date: Mon, 23 Apr 2012 17:01:30 GMT
+   Server: example-server
+   Cache-Control: no-cache
+   Pragma: no-cache
+   Content-Type: application/yang.data+xml
+
+   <yang-library-version
+     xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
+     2016-02-01
+   </yang-library-version>
+
+
+
 
 ** Datastore Resource @datastore-resource@
 
@@ -2886,8 +2917,6 @@ data node is retrieved with the GET or HEAD methods.
 
 The server MUST include a "capability" URI leaf-list entry for
 the "defaults" mode used by the server, defined in ^defaults-uri^.
-The server MUST include a "capability" URI leaf-list entry for
-the "yang-library" revision used by the server, defined in ^library-uri^.
 
 The server MUST include a "capability" URI leaf-list entry identifying
 each supported optional protocol feature. This includes optional
@@ -2950,30 +2979,6 @@ Example: (split for display purposes only)
 
    urn:ietf:params:restconf:capability:defaults:1.0?
         basic-mode=explicit
-
-*** The "yang-library" Protocol Capability URI @library-uri@
-
-This URI identifies the revision date of the "ietf-yang-library"
-YANG module that is implemented by this server.
-A parameter named "revision" is required for this capability URI.
-
-!! table RESTCONF yang-library capability URI
-!! head ! Name ! URI
-!! row  ! library ! urn:ietf:params:restconf:capability:yang-library:1.0
-
-This protocol capability URI MUST be supported by the server, and
-MUST be listed in the "capability" leaf-list in ^mon-mod^.
-
-The "revision" parameter is set to a string containing the
-revision date of the "ietf-yang-library" module.
-It MUST match the argument string for the most recent revision-stmt
-found in the module.
-
-Example: (split for display purposes only)
-
-   urn:ietf:params:restconf:capability:yang-library:1.0?
-        revision=2016-02-01
-
 
 ** restconf-state/streams
 
@@ -3308,7 +3313,8 @@ RESTCONF will be extended in the future
 - fixed some JSON examples
 - changed default value for content query parameter to "all"
 - changed empty container JSON encoding from "[null]" to "{}"
-- added mandatory yang-library capability to advertise revision-date
+- added mandatory /restconf/yang-library-version leaf to
+advertise revision-date of the YANG library implemented by the server
 - clarified URI encoding rules for leaf-list
 
 ** v08 - v09
@@ -3596,6 +3602,7 @@ which might be as follows :
    <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <data/>
      <operations/>
+     <yang-library-version>2016-02-01</yang-library-version>
    </restconf>
 
 *** Retrieve The Server Module Information
@@ -3608,7 +3615,9 @@ from the server in JSON format:
    Accept: application/yang.data+json
 
 
-The server might respond as follows.
+The server might respond as follows
+(some strings wrapped for display purposes):
+
 
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2012 17:01:00 GMT
@@ -3627,6 +3636,15 @@ The server might respond as follows.
            "schema" : "https://example.com/modules/foo/2012-01-02",
            "namespace" : "http://example.com/ns/foo",
            "feature" : [ "feature1", "feature2" ],
+           "conformance-type" : "implement"
+         },
+         {
+           "name" : "ietf-yang-library",
+           "revision" : "2016-02-01",
+           "schema" : "https://example.com/modules/ietf-yang-
+             library/2016-02-01",
+           "namespace" :
+             "urn:ietf:params:xml:ns:yang:ietf-yang-library",
            "conformance-type" : "implement"
          },
          {
@@ -4146,7 +4164,7 @@ The server might respond as follows.
          },
          {
            "name" : "ietf-yang-library",
-           "revision" : "2015-07-03"
+           "revision" : "2016-02-01"
          },
          {
            "name" : "ietf-yang-types",
