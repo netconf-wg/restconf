@@ -31,6 +31,7 @@ You can get the version of pyang that supports YANG 1.1 from github.
      git clone http://github.com/mbj4668/pyang
      cd pyang
      git checkout yang-1.1
+     sudo python setup.py install
 
 ## Contributing
 
