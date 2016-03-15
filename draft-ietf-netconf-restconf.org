@@ -11,9 +11,8 @@ to access the configuration data, operational data,
 data-model specific protocol operations, and event notifications
 within a networking device, in a modular and extensible manner.
 
-This document describes an HTTP ^RFC7230^ based protocol called
-REST-like Configuration Protocol (RESTCONF),
-for accessing data defined in YANG version 1 ^RFC6020^ or
+This document defines an HTTP ^RFC7230^ based protocol called
+RESTCONF, for configuring data defined in YANG version 1 ^RFC6020^ or
 YANG version 1.1 ^I-D.ietf-netmod-rfc6020bis^, using datastores defined
 in NETCONF ^RFC6241^.
 
@@ -212,23 +211,25 @@ marked with a colon (":").
 - Ellipsis ("...") stands for contents of subtrees that are not shown.
 
 
-** Simple Subset of NETCONF Functionality
+** Subset of NETCONF Functionality
 
-An HTTP-based management protocol does not need to mirror the functionality
-of the NETCONF protocol, but it needs to be compatible with NETCONF.
-A simplified transaction model is needed that allows basic
-CRUD operations on a hierarchy of conceptual resources.
-This represents a limited subset of the transaction capabilities
-of the NETCONF protocol.
+RESTCONF does not need to mirror the full functionality of the NETCONF
+protocol, but it does need to be compatible with NETCONF.  RESTCONF
+acheives this by implementing a subset of the interaction capabilities
+provided by the NETCONF protocol, for instance, by eliminating 
+datastores and explicit locking.
+
+RESTCONF uses HTTP methods to implement the eqivalent of NETCONF
+operations, enabling basic CRUD operations on a hierarchy of
+conceptual resources.
 
 The HTTP POST, PUT, PATCH, and DELETE methods are used to
 edit data resources represented by YANG data models.
 These basic edit operations allow the running configuration
 to be altered in an all-or-none fashion.
 
-RESTCONF is not intended to replace the full functionality of NETCONF,
-but rather provide
-an additional simplified interface that follows
+RESTCONF is not intended to replace NETCONF, but rather provide
+an additional interface that follows
 Representational State Transfer (REST) principles and
 is compatible with a resource-oriented device abstraction.
 
@@ -426,21 +427,29 @@ No other versions of HTTP are supported for use with RESTCONF.
 
 Given the nearly ubiquitous support for HTTP over TLS ^RFC7230^,
 RESTCONF implementations MUST support the "https" URI scheme, which
-has the IANA assigned default port 443.  Consistent with the exclusive
-use of X.509v3 certificates for NETCONF over TLS
-^RFC7589^, use of certificates in RESTCONF is
-also limited to X.509v3 certificates.
+has the IANA assigned default port 443.
+
+RESTCONF servers MUST present an X.509v3 based certificate when 
+establishing a TLS connection with a RESTCONF client.  The exclusive
+use the X.509v3 based certificates is consistent with NETCONF over TLS
+^RFC7589^.
 
 ** Certificate Validation
 
-When presented an X.509 certificate, the RESTCONF peer MUST use X.509
-certificate path validation ^RFC5280^ to verify the integrity of the
-certificate.  The presented X.509 certificate MAY also be considered
-valid if it matches a locally configured certificate fingerprint.  If
-X.509 certificate path validation fails and the presented X.509
-certificate does not match a locally configured certificate
-fingerprint, the connection MUST be terminated as defined in
-^RFC5246^.
+The RESTCONF client MUST use X.509 certificate path validation ^RFC5280^
+to verify the integrity of the RESTCONF server's TLS certificate.  The 
+presented X.509 certificate MUST also be considered valid if it matches
+a locally configured certificate fingerprint.  If X.509 certificate path
+validation fails and the presented X.509 certificate does not match a
+locally configured certificate fingerprint, the connection MUST be 
+terminated as defined in ^RFC5246^.
+
+# NOTE: the zero-touch explicity allows for a provisional session to
+# be established.  That is, is allows the client to blindly accept the
+# server's certificate.  It does this, but the requires that the data
+# obtained from the server is signed.  I'm not sure is this section
+# needs to say anything about that though. - K.
+
 
 ** Authenticated Server Identity
 
@@ -459,21 +468,23 @@ to access a resource, the server MUST send an HTTP response with
 "401 Unauthorized" status-line, as defined in Section 3.1 of
 ^RFC7235^.
 
-RESTCONF client authentication MUST either use TLS client
-certificates, like NETCONF over TLS ^RFC7589^, or use
-a standard HTTP Authentication scheme, see Section 5.1
-in ^RFC7235^.  A combination of both client certificates
-and an HTTP Authentication scheme is also allowed, with
-the determination of how to process this combination left
-as an implementation decision.
+To authenticate a client, a RESTCONF server MUST use TLS
+based client certificates (Section 7.4.6 of ^RFC5246^), or
+MUST use any HTTP authentication scheme defined in the
+HTTP Authentication Scheme Registry (Section 5.1 in ^RFC7235^).
+A server MAY also support the combination of both client
+certificates and an HTTP client authentication scheme,
+with the determination of how to process this combination
+left as an implementation decision.
 
 The RESTCONF client identity derived from the authentication
 mechanism used is hereafter known as the "RESTCONF username" and
 subject to the NETCONF Access Control Module (NACM) ^RFC6536^.
-When a client certificate is presented, this identity MUST
+When a client certificate is presented, the RESTCONF username MUST
 be derived using the algorithm defined in Section 7 of ^RFC7589^.
-For all other cases, when HTTP Authentication is used, the
-identity is provided by the HTTP Authentication scheme used.
+For all other cases, when HTTP authentication is used, the
+RESTCONF username MUST be provided by the HTTP authentication
+scheme used.
 
 
 ### END OF TRANSPORT PROTOCOL REQUIREMENTS
@@ -3200,24 +3211,13 @@ Security considerations for the
 YANG-defined content manipulated by RESTCONF can be found in the documents
 defining those YANG modules.
 
-This document does not specify an authentication scheme, but
-it does require that an authenticated NETCONF username be
-associated with each HTTP request.  The authentication scheme
-MAY be implemented in the underlying transport layer (e.g.,
-client certificates) or within the HTTP layer (e.g., Basic
-Auth, OAuth, etc.).  RESTCONF does not itself define an
-authentication mechanism. Authentication MUST occur in a
-lower layer.  Implementors SHOULD provide a comprehensive
-authorization scheme with RESTCONF and ensure that the resulting
-NETCONF username is made available to the RESTCONF server.
-
-Authorization of individual user access to operations and data
-MAY be configured via NETCONF Access Control Model (NACM)
-^RFC6536^, as specified in ^operations^.
-
-#Other authorization
-#models MAY be used, but are outside of the scope of this
-#document.
+This document does not require use of a specific client authentication
+mechanism or authorization model, but it does require that a client 
+authentication mechanim and authorization model is used whenever a
+client accesses a protected resource.  Client authentication MUST be
+implemented using client certificates or MUST be implemented using an
+HTTP authentication scheme.  Client authorization MAY be configured
+using the NETCONF Access Control Model (NACM) ^RFC6536^.
 
 Configuration information is by its very nature sensitive.  Its
 transmission in the clear and without integrity checking leaves
