@@ -215,11 +215,11 @@ marked with a colon (":").
 
 RESTCONF does not need to mirror the full functionality of the NETCONF
 protocol, but it does need to be compatible with NETCONF.  RESTCONF
-acheives this by implementing a subset of the interaction capabilities
+achieves this by implementing a subset of the interaction capabilities
 provided by the NETCONF protocol, for instance, by eliminating 
 datastores and explicit locking.
 
-RESTCONF uses HTTP methods to implement the eqivalent of NETCONF
+RESTCONF uses HTTP methods to implement the equivalent of NETCONF
 operations, enabling basic CRUD operations on a hierarchy of
 conceptual resources.
 
@@ -721,7 +721,7 @@ The server might respond
    Content-Type: application/yang.data+xml
 
    <yang-library-version
-     xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
+     xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
      2016-02-01
    </yang-library-version>
 
@@ -765,17 +765,6 @@ top-level {+restconf}/data resource.  This timestamp is only
 affected by configuration data resources, and MUST NOT be updated
 for changes to non-configuration data.
 
-
-# and SHOULD maintain
-# last-modified timestamps for descendant data resources.  For all
-# data resources, the server MUST return the "Last-Modified" header
-# when the resource is retrieved with the GET or HEAD methods.
-# If the server does not maintain a timestamp for a data resource,
-# it MUST return the timestamp of the resource's ancestor, a
-# process that may recurse up to the top-level {+restconf}/data resource.
-# Only changes to configuration data resources within
-# the datastore affect the timestamp.
-
 **** Entity tag
 
 A unique opaque string is maintained and
@@ -792,15 +781,19 @@ This entity tag is only
 affected by configuration data resources, and MUST NOT be updated
 for changes to non-configuration data.
 
-# and SHOULD maintain
-# entity tags for descendant data resources.  For all
-# data resources, the server MUST return the "ETag" header
-# when the resource is retrieved with the GET or HEAD methods.
-# If the server does not maintain an entity tag for a data resource,
-# it MUST return the entity tag of the resource's ancestor, a
-# process that may recurse up to the top-level {+restconf}/data resource.
-# Only changes to configuration data resources within
-# the datastore affect the entity tag.
+**** Update Procedure
+
+Changes to configuration data resources affect the timestamp
+and entity tag to that resource, any ancestor data resources,
+and the datastore resource.
+
+For example, an edit to disable an interface might be
+done by setting the leaf "/interfaces/interface/enabled" to "false".
+The "enabled" data node and its ancestors
+(one "interface" list instance, and the "interfaces" container)
+are considered to be changed. The datastore is considered to be
+changed when any top-level configuration data node is changed
+(e.g., "interfaces").
 
 ** Data Resource  @data-resource@
 
@@ -2889,7 +2882,7 @@ as a top-level data node (under the "/restconf/data" entry point).
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2016-03-10.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2016-03-16.yang"
 
 * RESTCONF Monitoring
 
@@ -3017,7 +3010,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2016-03-10.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2016-03-16.yang"
 
 * YANG Module Library
 
@@ -3213,7 +3206,7 @@ defining those YANG modules.
 
 This document does not require use of a specific client authentication
 mechanism or authorization model, but it does require that a client 
-authentication mechanim and authorization model is used whenever a
+authentication mechanism and authorization model is used whenever a
 client accesses a protected resource.  Client authentication MUST be
 implemented using client certificates or MUST be implemented using an
 HTTP authentication scheme.  Client authorization MAY be configured
@@ -3316,6 +3309,8 @@ RESTCONF will be extended in the future
 - added mandatory /restconf/yang-library-version leaf to
 advertise revision-date of the YANG library implemented by the server
 - clarified URI encoding rules for leaf-list
+- clarified sec. 2.2 wrt/ certificates and TLS
+- added update procedure for entity tag and timestamp
 
 ** v08 - v09
 

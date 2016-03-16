@@ -56,7 +56,7 @@ module ietf-restconf {
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2016-03-10 {
+  revision 2016-03-16 {
     description
       "Initial revision.";
     reference
