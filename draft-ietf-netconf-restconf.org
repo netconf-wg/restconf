@@ -4172,7 +4172,7 @@ The server might respond as follows.
 
 *** "insert" Parameter
 
-In this example, a new first entry in the "Foo-One" playlist
+In this example, a new first song entry in the "Foo-One" playlist
 is being created.
 
 Request from client:
