@@ -753,10 +753,10 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
         <author initials="K.W." surname="Watsen" fullname="Kent Watsen">
           <organization />
         </author>
-        <date year="2015" month="July"/>
+        <date year="2016" month="April"/>
       </front>
-      <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-library-01" />
-      <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-library-01"/>
+      <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-library-05" />
+      <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-library-05"/>
 </reference>
 
 <reference anchor="XPath" target="http://www.w3.org/TR/1999/REC-xpath-19991116">

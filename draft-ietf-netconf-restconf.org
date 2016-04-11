@@ -7,7 +7,7 @@ using the datastores defined in NETCONF.
 * Introduction
 
 There is a need for standard mechanisms to allow Web applications
-to access the configuration data, operational data,
+to access the configuration data, state data,
 data-model specific protocol operations, and event notifications
 within a networking device, in a modular and extensible manner.
 
@@ -20,7 +20,7 @@ NETCONF defines configuration datastores and
 a set of Create, Retrieve, Update, Delete (CRUD) operations
 that can be used to access these datastores.  The YANG language
 defines the syntax and semantics of datastore content,
-operational data, protocol operations, and event notifications.
+state data, protocol operations, and event notifications.
 
 RESTCONF uses HTTP operations to provide CRUD operations on a
 conceptual datastore containing YANG-defined data, which is
@@ -106,7 +106,6 @@ The following terms are defined in ^I-D.ietf-netmod-rfc6020bis^:
 - leaf-list
 - list
 - non-presence container (or NP-container)
-- ordered-by system
 - ordered-by user
 - presence container (or P-container)
 - RPC operation
@@ -230,8 +229,8 @@ to be altered in an all-or-none fashion.
 
 RESTCONF is not intended to replace NETCONF, but rather provide
 an additional interface that follows
-Representational State Transfer (REST) principles and
-is compatible with a resource-oriented device abstraction.
+Representational State Transfer (REST) principles ^rest-dissertation^,
+and is compatible with a resource-oriented device abstraction.
 
 The following figure shows the system components if a RESTCONF server
 is co-located with a NETCONF server:
@@ -345,8 +344,9 @@ If the server is expecting a "persist-id" parameter to complete the confirmed
 commit procedure then the RESTCONF edit operation MUST fail with a
 "409 Conflict" status-line.
 
-If the device supports :startup, the device automatically copies the
-content of running to startup after running has been updated as
+If the device supports :startup, the device MUST automatically
+update the non-volatile "startup datastore", after the
+running datastore has been updated as
 a consequence of a RESTCONF edit operation.
 
 If a datastore that would be modified by a RESTCONF operation has an
@@ -430,15 +430,19 @@ RESTCONF implementations MUST support the "https" URI scheme, which
 has the IANA assigned default port 443.
 
 RESTCONF servers MUST present an X.509v3 based certificate when 
-establishing a TLS connection with a RESTCONF client.  The exclusive
+establishing a TLS connection with a RESTCONF client.  The
 use the X.509v3 based certificates is consistent with NETCONF over TLS
 ^RFC7589^.
 
 ** Certificate Validation
 
-The RESTCONF client MUST use X.509 certificate path validation ^RFC5280^
-to verify the integrity of the RESTCONF server's TLS certificate.  The 
-presented X.509 certificate MUST also be considered valid if it matches
+The RESTCONF client MUST either use X.509
+certificate path validation ^RFC5280^
+to verify the integrity of the RESTCONF server's TLS certificate,
+or match the presented X.509 certificate with locally configured
+certificate fingerprints.
+
+The  presented X.509 certificate MUST also be considered valid if it matches
 a locally configured certificate fingerprint.  If X.509 certificate path
 validation fails and the presented X.509 certificate does not match a
 locally configured certificate fingerprint, the connection MUST be 
@@ -530,7 +534,10 @@ resource identifier.
 In line with the best practices defined by ^RFC7320^, RESTCONF
 enables deployments to specify where the RESTCONF API is located.
 When first connecting to a RESTCONF server, a RESTCONF client MUST
-determine the root of the RESTCONF API.  The client discovers this
+determine the root of the RESTCONF API.  There MUST be exactly
+one "restconf" link relation returned by the device.
+
+The client discovers this
 by getting the "/.well-known/host-meta" resource (^RFC6415^) and
 using the <Link> element containing the "restconf" attribute :
 
@@ -655,7 +662,7 @@ This resource has the following child resources:
 *** {+restconf}/data
 
 This mandatory resource represents the combined configuration
-and operational data resources that can be accessed by a client.
+and state data resources that can be accessed by a client.
 It cannot be created or deleted by the client.
 The datastore resource type is defined in ^datastore-resource^.
 
@@ -722,7 +729,7 @@ The server might respond
 
    <yang-library-version
      xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
-     2016-02-01
+     2016-04-09
    </yang-library-version>
 
 
@@ -731,19 +738,20 @@ The server might respond
 ** Datastore Resource @datastore-resource@
 
 The "{+restconf}/data" subtree represents the datastore resource type,
-which is a collection of configuration and operational data nodes.
+which is a collection of configuration data and state data nodes.
 
 This resource type is an abstraction of the system's underlying datastore
 implementation. It is used to simplify resource
 editing for the client. The RESTCONF datastore resource is a
-conceptual collection of all configuration and operational data
+conceptual collection of all configuration and state data
 that is present on the device.
 
 Configuration edit transaction management and configuration persistence
 are handled by the server and not controlled by the client.
 A datastore resource can be written directly with
 the POST and PATCH methods. Each RESTCONF edit of a datastore resource is
-saved to non-volatile storage by the server.
+saved to non-volatile storage by the server, if the server supports
+non-volatile storage of configuration data.
 
 *** Edit Collision Detection @edit-collision@
 
@@ -812,6 +820,11 @@ For configuration data resources,
 the server SHOULD maintain a last-modified timestamp for the
 resource, and return the "Last-Modified" header when it
 is retrieved with the GET or HEAD methods.
+
+The "Last-Modified" header information can be used by a
+RESTCONF client in subsequent requests, within the "If-Modified-Since"
+and "If-Unmodified-Since" headers.
+
 If maintained, the resource timestamp MUST be set to the current
 time whenever the resource
 or any configuration resource within the resource is altered.
@@ -831,6 +844,10 @@ whenever the resource
 or any configuration resource within the resource is altered.
 If not maintained, then the resource entity tag for the datastore
 MUST be used instead.
+
+The "ETag" header information can be used by a
+RESTCONF client in subsequent requests, within the "If-Match"
+and "If-None-Match" headers.
 
 This entity tag is only
 affected by configuration data resources, and MUST NOT be updated
@@ -1001,7 +1018,7 @@ the server MUST use the YANG-defined default as the configured value.
 
 If the target of a GET method is a data node
 that represents a leaf that has a default value,
-and the leaf has not been given a value yet, the server MUST
+and the leaf has not been configured yet, the server MUST
 return the default value that is in use by the server.
 
 If the target of a GET method is a data node
@@ -1049,8 +1066,11 @@ as follows:
 If the "rpc" or "action" statement has an "input" section, then a
 message-body MAY be sent by the client in the request, otherwise the
 request message MUST NOT include a message-body.
-If the "input" section contains mandatory parameters,
+If the "input" objcet tree contains mandatory parameters,
 then a message-body MUST be sent by the client.
+A mandatory parameter is a leaf or choice with a "mandatory" statement set to "true",
+or a list or leaf-list than have a "min-elements" statement
+value greater than zero.
 
 If the operation is invoked without errors, and if the "rpc" or "action"
 statement has an "output" section, then a message-body MAY be sent by
@@ -1150,12 +1170,12 @@ The server might respond:
 The same example request message is shown here using JSON encoding
 (text wrap for display purposes):
 
-   POST /restconf/data/example-action:interfaces/interface=eth0
+   POST /restconf/data/example-actions:interfaces/interface=eth0
      /reset HTTP/1.1
    Host: example.com
    Content-Type: application/yang.operation+json
 
-   { "example-action:input" : {
+   { "example-actions:input" : {
        "delay" : 600
      }
    }
@@ -1167,6 +1187,11 @@ If the "rpc" or "action" statement has an "output" section, then
 the "output" node is provided in the message-body,
 corresponding to the YANG data definition statements
 within the "output" section.
+
+The request URI is not returned in the response.
+This URI might have context information required to associate
+the output to the specific "rpc" or "action"
+statement used in the request.
 
 Examples:
 
@@ -1468,7 +1493,7 @@ that contains at least the entry point.
 The server MUST NOT return any data resources for which the user
 does not have read privileges.
 If the user is not authorized to read the target resource, an error
-response containing a "403 Forbidden" status-line SHOULD be
+response containing a "401 Unauthorized" status-line SHOULD be
 returned.  A server MAY return a "404 Not Found" status-line, as
 described in section 6.5.3 in ^RFC7231^.
 
@@ -1550,12 +1575,10 @@ resource).  The message-body MUST NOT contain more than one instance
 of the expected data resource. The data-model for the child tree
 is the subtree as defined by YANG for the child resource.
 
-The "insert" and "point" query parameters are supported
+The "insert" and "point" query parameters MUST be supported
 by the POST method for datastore and data resources.
-If the server implements any YANG module that contains a
-configuration data node that is "ordered-by" user, then
-the "insert" and "point" query parameters MUST be supported.
-If not, then these parameters are not applicable.
+These parameters are only allowed if the list or leaf-list
+is ordered-by user.
 
 If the POST method succeeds,
 a "201 Created" status-line is returned and there is
@@ -1651,8 +1674,10 @@ The only target resource media type that supports PUT is the data
 resource. The message-body is expected to contain the
 content used to create or replace the target resource.
 
-The "insert" (^insert^) and "point" (^point^) query parameters are
+The "insert" (^insert^) and "point" (^point^) query parameters MUST be
 supported by the PUT method for data resources.
+These parameters are only allowed if the list or leaf-list
+is ordered-by user.
 
 Consistent with ^RFC7231^, if the PUT request creates a new resource,
 a "201 Created" status-line is returned.   If an existing resource
@@ -1666,16 +1691,11 @@ All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
 If the target resource represents a YANG leaf-list, then the
-PUT method MUST not change the value of the leaf-list instance.
+PUT method MUST NOT change the value of the leaf-list instance.
 
 If the target resource represents a YANG list instance, then
 the PUT method MUST NOT change any key leaf values
 in the message-body representation.
-
-If the server implements any YANG module that contains a
-configuration data node that is "ordered-by" user, then
-the "insert" and "point" query parameters MUST be supported.
-If not, then these parameters are not applicable.
 
 Example:
 
@@ -1851,8 +1871,8 @@ resource used, in the request.
 !! row  ! depth ! GET ! Request limited sub-tree depth in the reply content
 !! row  ! fields ! GET ! Request a subset of the target resource contents
 !! row  ! filter ! GET ! Boolean notification filter for event stream resources
-!! row  ! insert ! POST, PUT ! Insertion mode for user-ordered data resources
-!! row  ! point ! POST, PUT ! Insertion point for user-ordered data resources
+!! row  ! insert ! POST, PUT ! Insertion mode for ordered-by user data resources
+!! row  ! point ! POST, PUT ! Insertion point for ordered-yb user data resources
 !! row  ! start-time ! GET ! Replay buffer start time for event stream resources
 !! row  ! stop-time ! GET ! Replay buffer stop time for event stream resources
 !! row  ! with-defaults ! GET ! Control retrieval of default values
@@ -1966,7 +1986,7 @@ supports the "fields" parameter.
 *** The "insert" Query Parameter @insert@
 
 The "insert" parameter is used to specify how a
-resource should be inserted within a user-ordered list.
+resource should be inserted within a ordered-by user list.
 
 The allowed values are:
 
@@ -1982,7 +2002,7 @@ The default value is "last".
 This parameter is only supported for the POST and PUT
 methods. It is also only supported if the target
 resource is a data resource, and that data represents
-a YANG list or leaf-list that is ordered by the user.
+a YANG list or leaf-list that is ordered-by user.
 
 More than one "insert" query parameter MUST NOT appear in a request.
 If more than one instance is present, then a "400 Bad Request"
@@ -1999,7 +2019,7 @@ The "insert" query parameter MUST be supported by the server.
 
 The "point" parameter is used to specify the
 insertion point for a data resource that is being
-created or moved within a user ordered list or leaf-list.
+created or moved within an ordered-by user list or leaf-list.
 
 The value of the "point" parameter is a string that identifies
 the path to the insertion point object.  The format is
@@ -2008,7 +2028,7 @@ the same as a target resource URI string.
 This parameter is only supported for the POST and PUT
 methods. It is also only supported if the target
 resource is a data resource, and that data represents
-a YANG list or leaf-list that is ordered by the user.
+a YANG list or leaf-list that is ordered-by user.
 
 If the "insert" query parameter is not present, or has
 a value other than "before" or "after", then a "400 Bad Request"
@@ -3258,6 +3278,21 @@ The Space & Terrestrial Communications Directorate (S&TCD).
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
 
+** v10 - v11
+
+- change term 'operational data' to 'state data'
+- clarify :startup behavior
+- clarify X.509 security text
+- change '403 Forbidden' to '401 Unauthorized' for GET error
+- clarify MUST have one "restconf" link relation
+- clarify that NV-storage is not mandatory
+- clarify how "Last-Modified" and "ETag" header info can be used by a client
+- clarify meaning of mandatory parameter
+- fix module name in action examples
+- clarify operation resource request needs to be known to parse the output
+- clarify ordered-by user terminology
+- fixed JSON example in D.1.1
+
 ** v09 - v10
 
 - address review comments: github issue #36
@@ -3573,7 +3608,8 @@ The server might respond as follows:
    {
      "ietf-restconf:restconf": {
        "data" : {},
-       "operations" : {}
+       "operations" : {},
+       "yang-library-version" : "2016-04-09"
      }
    }
 
@@ -3597,7 +3633,7 @@ which might be as follows :
    <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <data/>
      <operations/>
-     <yang-library-version>2016-02-01</yang-library-version>
+     <yang-library-version>2016-04-09</yang-library-version>
    </restconf>
 
 *** Retrieve The Server Module Information
@@ -3635,9 +3671,9 @@ The server might respond as follows
          },
          {
            "name" : "ietf-yang-library",
-           "revision" : "2016-02-01",
+           "revision" : "2016-04-09",
            "schema" : "https://example.com/modules/ietf-yang-
-             library/2016-02-01",
+             library/2016-04-09",
            "namespace" :
              "urn:ietf:params:xml:ns:yang:ietf-yang-library",
            "conformance-type" : "implement"
@@ -4159,7 +4195,7 @@ The server might respond as follows.
          },
          {
            "name" : "ietf-yang-library",
-           "revision" : "2016-02-01"
+           "revision" : "2016-04-09"
          },
          {
            "name" : "ietf-yang-types",

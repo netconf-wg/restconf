@@ -52,7 +52,7 @@ module ietf-restconf {
   // note.
 
   // RFC Ed.: remove this note
-  // Note: extracted from draft-ietf-netconf-restconf-10.txt
+  // Note: extracted from draft-ietf-netconf-restconf-11.txt
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
@@ -226,7 +226,7 @@ module ietf-restconf {
         description
           "Container representing the application/yang.datastore
            resource type. Represents the conceptual root of all
-           operational data and configuration data supported by
+           state data and configuration data supported by
            the server.  The child nodes of this container can be
            any data resource (application/yang.data), which are
            defined as top-level data nodes from the YANG modules
