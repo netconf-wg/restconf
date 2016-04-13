@@ -768,7 +768,7 @@ in edit operation requests to cause the server
 to reject the request if the resource has been modified
 since the specified timestamp.
 
-The server MUST maintain a last-modified timestamp for the
+The server SHOULD maintain a last-modified timestamp for the
 top-level {+restconf}/data resource.  This timestamp is only
 affected by configuration data resources, and MUST NOT be updated
 for changes to non-configuration data.
@@ -817,7 +817,7 @@ resource affect both the targeted data node and all
 its descendants, if any.
 
 For configuration data resources,
-the server SHOULD maintain a last-modified timestamp for the
+the server MAY maintain a last-modified timestamp for the
 resource, and return the "Last-Modified" header when it
 is retrieved with the GET or HEAD methods.
 
@@ -862,16 +862,12 @@ with some or all of the edit operations, depending on the
 target resource and the specific operation. Refer to ^operations^
 for more details on edit operations.
 
-The resource definition version for a data resource
-is identified by the revision date of the YANG module
-containing the YANG definition for the data resource.
-
 *** Encoding Data Resource Identifiers in the Request URI @uri-encoding@
 
-In YANG, data nodes are named with an absolute
+In YANG, data nodes are identified with an absolute
 XPath expression, defined in ^XPath^, starting
 from the document root to the target resource.
-In RESTCONF, URL encoded path expressions are used instead.
+In RESTCONF, URI-encoded path expressions are used instead.
 
 A predictable location for a data resource
 is important, since applications will code to the YANG
@@ -1865,6 +1861,13 @@ The specific parameters that are allowed depends
 on the resource type, and sometimes the specific target
 resource used, in the request.
 
+- Query parameters can be given in any order.
+- Each parameter can appear at most once in a request URI.
+- A default value may apply if the parameter is missing.
+- Query parameter names and values are case-sensitive
+- A server MUST return an error with a '400 Bad Request' status-line
+if a query parameter is unexpected.
+
 !! table RESTCONF Query Parameters
 !! head ! Name ! Methods !  Description
 !! row  ! content ! GET ! Select config and/or non-config data resources
@@ -1877,9 +1880,6 @@ resource used, in the request.
 !! row  ! stop-time ! GET ! Replay buffer stop time for event stream resources
 !! row  ! with-defaults ! GET ! Control retrieval of default values
 
-Query parameters can be given in any order.
-Each parameter can appear at most once in a request URI.
-A default value may apply if the parameter is missing.
 
 Refer to ^ex-query^ for examples of query parameter usage.
 
@@ -1933,7 +1933,9 @@ status-line MUST be returned by the server.
 By default, the server will include all sub-resources within a
 retrieved resource, which have the same resource type as the requested
 resource.  Only one level of sub-resources with a different media type
-than the target resource will be returned.
+than the target resource will be returned.  The exception is
+the datastore resource.  If this resource type is retrieved then
+by default the datastore and all child data resources are returned.
 
 If the "depth" query parameter URI is listed in
 the "capability" leaf-list in ^mon-mod^, then the server
@@ -1982,6 +1984,42 @@ status-line MUST be returned by the server.
 If the "fields" query parameter URI is listed in the
 "capability" leaf-list in ^mon-mod^, then the server
 supports the "fields" parameter.
+
+*** The "filter" Query Parameter @filter@
+
+The "filter" parameter is used to indicate which subset of
+all possible events are of interest.  If not present, all
+events not precluded by other parameters will be sent.
+
+This parameter is only allowed for GET methods on a
+text/event-stream data resource.  A "400 Bad Request" status-line
+is returned if used for other methods or resource types.
+
+The format of this parameter is an XPath 1.0 expression, and is
+evaluated in the following context:
+
+-  The set of namespace declarations is the set of
+   prefix and namespace pairs for all supported YANG
+   modules, where the prefix is the YANG module name, and
+   the namespace is as defined by the "namespace" statement
+   in the YANG module.
+-  The function library is the core function library defined
+   in XPath 1.0.
+-  The set of variable bindings is empty.
+-  The context node is the root node.
+
+More than one "filter" query parameter MUST NOT appear in a request.
+If more than one instance is present, then a "400 Bad Request"
+status-line MUST be returned by the server.
+
+The filter is used as defined in ^RFC5277^, Section 3.6.
+If the boolean result of the expression is true when applied
+to the conceptual "notification" document root, then the
+event notification is delivered to the client.
+
+If the "filter" query parameter URI is listed in the "capability" leaf-list
+in ^mon-mod^, then the server supports the "filter" query parameter.
+
 
 *** The "insert" Query Parameter @insert@
 
@@ -2044,40 +2082,6 @@ POST or PUT method.
 
 The "point" query parameter MUST be supported by the server.
 
-*** The "filter" Query Parameter @filter@
-
-The "filter" parameter is used to indicate which subset of
-all possible events are of interest.  If not present, all
-events not precluded by other parameters will be sent.
-
-This parameter is only allowed for GET methods on a
-text/event-stream data resource.  A "400 Bad Request" status-line
-is returned if used for other methods or resource types.
-
-The format of this parameter is an XPath 1.0 expression, and is
-evaluated in the following context:
-
--  The set of namespace declarations is the set of
-   prefix and namespace pairs for all supported YANG
-   modules, where the prefix is the YANG module name, and
-   the namespace is as defined by the "namespace" statement
-   in the YANG module.
--  The function library is the core function library defined
-   in XPath 1.0.
--  The set of variable bindings is empty.
--  The context node is the root node.
-
-More than one "filter" query parameter MUST NOT appear in a request.
-If more than one instance is present, then a "400 Bad Request"
-status-line MUST be returned by the server.
-
-The filter is used as defined in ^RFC5277^, Section 3.6.
-If the boolean result of the expression is true when applied
-to the conceptual "notification" document root, then the
-event notification is delivered to the client.
-
-If the "filter" query parameter URI is listed in the "capability" leaf-list
-in ^mon-mod^, then the server supports the "filter" query parameter.
 
 *** The "start-time" Query Parameter @start-time@
 
@@ -2112,7 +2116,7 @@ If this query parameter is supported by the server, then the
 in ^mon-mod^. The "stop-time" query parameter MUST also be supported
 by the server.
 
-If the "replay-support" leaf is present in the "stream"
+If the "replay-support" leaf has the value 'true' in the "stream"
 entry (defined in ^mon-mod^) then the server MUST support
 the "start-time" and "stop-time" query parameters for that stream.
 
@@ -2617,9 +2621,8 @@ them.
 !! row  ! filter ! ^filter^ ! boolean content filter
 
 The semantics and syntax for these query parameters are
-defined in the sections listed above.
-The YANG encoding MUST be converted to URL-encoded string
-for use in the request URI.
+defined in the sections listed above. The YANG definition
+MUST be converted to a URI-encoded string for use in the request URI.
 
 Refer to ^ex-filters^ for filter parameter examples.
 
@@ -2788,19 +2791,19 @@ for the "action" or "rpc" statement.
 
 ** Error Response Message @errors@
 
-When an error occurs for a request message on a data resource
-or an operation resource, and a "4xx" class of status codes
+When an error occurs for a request message on any resource
+type, and a "4xx" class of status codes
 will be returned (except for status code "403 Forbidden"),
 then the server SHOULD send a response message-body containing
 the information described by the "errors" container definition
 within the YANG module ^module^.  The Content-Type of this
-response message MUST be application/yang.errors (see example
+response message MUST be a subtype of application/yang.errors (see example
 below).
 
-The client MAY specify the desired encoding for error messages
+The client SHOULD specify the desired encoding for error messages
 by specifying the appropriate media-type in the Accept header.
-If no error media is specified, then the media type of
-the request message SHOULD be used, or the server MAY choose
+If no error media is specified, then the media subtype (e.g., XML or JSON)
+of the request message SHOULD be used, or the server MAY choose
 any supported message encoding format. If there is no request message
 the server MUST select "application/yang.errors+xml"
 or "application/yang.errors+json", depending on server preference.
@@ -2830,11 +2833,9 @@ an "lock-denied" error that can occur if a NETCONF
 client has locked a datastore. The RESTCONF client
 is attempting to delete a data resource.  Note that
 an Accept header is used to specify the desired
-encoding for the error message. This example's
-use of the Accept header is especially notable
-since the DELETE method typically doesn't return a
-message-body and hence Accept headers are typically
-not passed.
+encoding for the error message. No response
+message-body content is expected by the client
+in this example.
 
    DELETE /restconf/data/example-jukebox:jukebox/
       library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
@@ -3181,6 +3182,7 @@ sub-types for this media type.
 
 This document defines a registry for RESTCONF capability identifiers.
 The name of the registry is "RESTCONF Capability URNs".
+The review policy for this registry is "IETF Review".
 The registry shall record for each entry:
 
 - the name of the RESTCONF capability. By convention, this name is
@@ -3277,6 +3279,19 @@ The Space & Terrestrial Communications Directorate (S&TCD).
 
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
+
+** v11 - v12
+
+- clarify query parameter requirements
+- move filter query section to match table order in sec. 4.8
+- clarify that depth default is entire subtree for datastore resource
+- change ietf-restconf to YANG 1.1 to use anydata instead of anyxml
+- made implementation of timestamps optional since ETags are mandatory
+- removed confusing text about data resource definition revision date
+- clarify that errors should be returned for any resource type
+- clarified media subtype (not type) for error response
+- clarified client SHOULD (not MAY) specify errors format in Accept header
+- clarified terminology in many sections
 
 ** v10 - v11
 
