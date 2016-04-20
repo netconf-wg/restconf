@@ -711,6 +711,10 @@ Operation resources are defined in ^operation-resource^.
 This mandatory leaf identifies the revision date of the "ietf-yang-library"
 YANG module that is implemented by this server.
 
+[RFC Editor Note: Adjust the date for ietf-yang-library below to the
+date in the published ietf-yang-library YANG module, and remove this
+note.]
+
 Example:
 
    GET /restconf/yang-library-version  HTTP/1.1
@@ -731,9 +735,6 @@ The server might respond
      xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
      2016-04-09
    </yang-library-version>
-
-
-
 
 ** Datastore Resource @datastore-resource@
 
@@ -1332,7 +1333,7 @@ for this URL. The URL value shown below is just an example.
 
 The client might send the following GET request message:
 
-   GET /restconf/data/ietf-yang-library:modules/module=
+   GET /restconf/data/ietf-yang-library:modules-state/module=
        example-jukebox,2015-04-04/schema HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json
@@ -3615,6 +3616,10 @@ API resource, using the entry point URI "{+restconf}".
 
 The server might respond as follows:
 
+[RFC Editor Note: Adjust the date for ietf-yang-library below to the
+date in the published ietf-yang-library YANG module, and remove this
+note.]
+
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
@@ -3638,6 +3643,10 @@ the "Accept" header can be used, as in this example request:
 The server will return the same response either way,
 which might be as follows :
 
+[RFC Editor Note: Adjust the date for ietf-yang-library below to the
+date in the published ietf-yang-library YANG module, and remove this
+note.]
+
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
@@ -3656,13 +3665,17 @@ which might be as follows :
 In this example the client is retrieving the modules information
 from the server in JSON format:
 
-   GET /restconf/data/ietf-yang-library:modules HTTP/1.1
+   GET /restconf/data/ietf-yang-library:modules-state HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json
 
 
 The server might respond as follows
 (some strings wrapped for display purposes):
+
+[RFC Editor Note: Adjust the date for ietf-yang-library below to the
+date in the published ietf-yang-library YANG module, and remove this
+note.]
 
 
    HTTP/1.1 200 OK
@@ -3674,7 +3687,8 @@ The server might respond as follows
    Content-Type: application/yang.data+json
 
    {
-     "ietf-yang-library:modules": {
+     "ietf-yang-library:modules-state": {
+       "module-set-id": "5479120c17a619545ea6aff7aa19838b036ebbd7",
        "module": [
          {
            "name" : "foo",
@@ -4181,12 +4195,21 @@ In this example the client is retrieving the API resource, but
 retrieving only the "name" and "revision" nodes
 from each module, in JSON format:
 
-   GET /restconf/data?fields=ietf-yang-library:modules/
+   GET /restconf/data?fields=ietf-yang-library:modules-state/
        module(name;revision) HTTP/1.1
    Host: example.com
    Accept: application/yang.data+json
 
 The server might respond as follows.
+
+[RFC Editor Note: Adjust the date for ietf-yang-library below to the
+date in the published ietf-yang-library YANG module, and remove this
+note.]
+
+[RFC Editor Note: Adjust the date for ietf-restconf-monitoring below to the
+date in the published ietf-restconf-monitoring YANG module, and remove this
+note.]
+
 
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2012 17:01:00 GMT
@@ -4194,7 +4217,8 @@ The server might respond as follows.
    Content-Type: application/yang.data+json
 
    {
-     "ietf-yang-library:modules": {
+     "ietf-yang-library:modules-state": {
+       "module-set-id": "cb4c422111a779e1eed55bffc8d6b46a3a0999e2",
        "module": [
          {
            "name" : "example-jukebox",
@@ -4206,7 +4230,7 @@ The server might respond as follows.
          },
          {
            "name" : "ietf-restconf-monitoring",
-           "revision" : "2015-06-19"
+           "revision" : "2016-03-16"
          },
          {
            "name" : "ietf-yang-library",
