@@ -1786,7 +1786,7 @@ sub-operations (e.g., merge, delete) within a single PATCH
 operation.
 
 If the target resource represents a YANG leaf-list, then the
-PATCH method MUST not change the value of the leaf-list instance.
+PATCH method MUST NOT change the value of the leaf-list instance.
 
 If the target resource represents a YANG list instance, then
 the PATCH method MUST NOT change any key leaf values
@@ -3221,7 +3221,7 @@ This document registers several capability identifiers in
 
 This section provides security considerations for the resources
 defined by the RESTCONF protocol.  Security considerations for
-HTTPS are defined in ^RFC2818^. RESTCONF does not specify
+HTTPS are defined in ^RFC7230^. RESTCONF does not specify
 which YANG modules a server needs to support.
 Security considerations for the
 YANG-defined content manipulated by RESTCONF can be found in the documents
@@ -3260,9 +3260,9 @@ and Jonathan Hansford.
 
 The authors would like to thank the following people for
 their excellent review comments and contributions to this document:
-Qin Wu, Joe Clarke, Bert Wijnen, Ladislav Lhotka, Rodney Cummings,
-Frank Xialiang, Tom Petch, Robert Sparks, Balint Uveges, Randy Presuhn,
-and Sue Hares.
+Mehmet Ersue, Mahesh Jethanandani, Qin Wu, Joe Clarke, Bert Wijnen,
+Ladislav Lhotka, Rodney Cummings, Frank Xialiang, Tom Petch, Robert Sparks,
+Balint Uveges, Randy Presuhn, and Sue Hares.
 
 Contributions to this material by Andy Bierman are based upon work
 supported by the The Space & Terrestrial Communications Directorate
@@ -3280,6 +3280,12 @@ The Space & Terrestrial Communications Directorate (S&TCD).
 
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
+
+** v12 - v13
+
+- fix YANG library module examples (now called module-state)
+- fix MUST not term (should be MUST NOT)
+- removed RFC 2818 reference (changed citation to RFC 7230)
 
 ** v11 - v12
 

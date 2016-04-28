@@ -194,26 +194,22 @@
 <format type='TXT' octets='235053' target='http://www.rfc-editor.org/rfc/rfc7231.txt' />
 </reference>
 
-  <reference anchor='RFC2818'>
-    <front>
-      <title>The IETF XML Registry</title>
-      <author initials='E.R.' surname='Rescorla' fullname='Erir Rescorla'>
-	<organization>RTFM, Inc.</organization></author>
-      <date year='2000' month='May' />
-      <abstract>
-        <t>This memo describes how to use TLS to secure HTTP connections over
-   the Internet. Current practice is to layer HTTP over SSL (the
-   predecessor to TLS), distinguishing secured traffic from insecure
-   traffic by the use of a different server port. This document
-   documents that practice using TLS. A companion document describes a
-   method for using HTTP/TLS over the same port as normal HTTP
-   [RFC2817].</t>
-      </abstract>
-    </front>
-    <seriesInfo name='RFC' value='2818' />
-    <format type='HTTP' octets='26507' target='http://tools.ietf.org/html/rfc2818' />
-  </reference>
-  
+<!--
+<reference anchor='RFC2818'>
+
+<front>
+<title>HTTP Over TLS</title>
+<author initials='E.' surname='Rescorla' fullname='E. Rescorla'>
+<organization /></author>
+<date year='2000' month='May' />
+<abstract>
+<t>This memo describes how to use Transport Layer Security (TLS) to secure Hypertext Transfer Protocol (HTTP) connections over the Internet.  This memo provides information for the Internet community.</t></abstract></front>
+
+<seriesInfo name='RFC' value='2818' />
+<format type='TXT' octets='15170' target='http://www.rfc-editor.org/rfc/rfc2818.txt' />
+</reference>
+ -->
+
 <reference anchor='RFC7232'>
 
 <front>
@@ -755,8 +751,8 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
         </author>
         <date year="2016" month="April"/>
       </front>
-      <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-library-05" />
-      <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-library-05"/>
+      <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-library-06" />
+      <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-library-06"/>
 </reference>
 
 <reference anchor="XPath" target="http://www.w3.org/TR/1999/REC-xpath-19991116">
