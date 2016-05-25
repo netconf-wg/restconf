@@ -1833,7 +1833,7 @@ All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
 If the target resource represents a YANG leaf-list or list, then the
-PATCH method SHOULD NOT delete more than one such instance.
+DELETE method SHOULD NOT delete more than one such instance.
 The server MAY delete more than one instance if
 a query parameter is used requesting this behavior.
 (Definition of this query parameter is outside the scope
