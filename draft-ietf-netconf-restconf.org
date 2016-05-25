@@ -3760,7 +3760,7 @@ the RESTCONF query parameters, plus one vendor parameter:
 
 
 The server might respond as follows.
-The extra whitespace in 'capability' elements
+The extra whitespace in 'capability' elements is
 for display purposes only.
 
    HTTP/1.1 200 OK
@@ -3771,7 +3771,15 @@ for display purposes only.
    Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
    Content-Type: application/yang.data+xml
 
-   <capabilities xmlns="">
+   <capabilities
+       xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
+    <capability>
+     urn:ietf:params:restconf:capability:defaults:1.0?
+        basic-mode=explicit
+    </capability>
+    <capability>
+     urn:ietf:params:restconf:capability:with-defaults:1.0
+    </capability>
     <capability>
      urn:ietf:params:restconf:capability:depth:1.0
     </capability>
