@@ -1876,7 +1876,7 @@ if a query parameter is unexpected.
 !! row  ! fields ! GET ! Request a subset of the target resource contents
 !! row  ! filter ! GET ! Boolean notification filter for event stream resources
 !! row  ! insert ! POST, PUT ! Insertion mode for ordered-by user data resources
-!! row  ! point ! POST, PUT ! Insertion point for ordered-yb user data resources
+!! row  ! point ! POST, PUT ! Insertion point for ordered-by user data resources
 !! row  ! start-time ! GET ! Replay buffer start time for event stream resources
 !! row  ! stop-time ! GET ! Replay buffer stop time for event stream resources
 !! row  ! with-defaults ! GET ! Control retrieval of default values
