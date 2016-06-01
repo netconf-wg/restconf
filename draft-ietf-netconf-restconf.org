@@ -3043,7 +3043,7 @@ Implementation is mandatory for RESTCONF servers.
 All YANG modules and submodules used by the server MUST
 be identified in the YANG module library.
 
-** modules
+** modules-state
 
 This mandatory container holds the identifiers
 for the YANG data model modules supported by the server.
@@ -3056,7 +3056,7 @@ The server SHOULD maintain an entity-tag for this
 container, and return the "ETag" header when this
 data node is retrieved with the GET or HEAD methods.
 
-*** modules/module
+*** modules-state/module
 
 This mandatory list contains one entry
 for each YANG data model module supported by the server.
