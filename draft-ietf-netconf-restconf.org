@@ -18,9 +18,10 @@ in NETCONF ^RFC6241^.
 
 NETCONF defines configuration datastores and
 a set of Create, Retrieve, Update, Delete (CRUD) operations
-that can be used to access these datastores.  The YANG language
-defines the syntax and semantics of datastore content,
-state data, protocol operations, and event notifications.
+that can be used to access these datastores.
+The YANG language defines the syntax and semantics
+of datastore content, configuration, state data, protocol operations,
+and event notifications.
 
 RESTCONF uses HTTP operations to provide CRUD operations on a
 conceptual datastore containing YANG-defined data, which is
@@ -29,7 +30,7 @@ compatible with a server which implements NETCONF datastores.
 If a RESTCONF server is co-located with a NETCONF server,
 then there are protocol interactions to be considered,
 as described in ^netconf-coexistence^.
-The server MAY provide access to specific datastores using
+The RESTCONF server MAY provide access to specific datastores using
 operation resources, as described in ^operation-resource^.
 
 Configuration data and state data are exposed as resources that
@@ -57,13 +58,13 @@ The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 The following terms are defined in ^RFC6241^:
 
 - candidate configuration datastore
-- client
+- NETCONF client
 - configuration data
 - datastore
 - configuration datastore
 - protocol operation
 - running configuration datastore
-- server
+- NETCONF server
 - startup configuration datastore
 - state data
 - user
@@ -166,6 +167,12 @@ encoded within the query component of the request URI.
 supported by the server, which is identified by an IANA registered
 NETCONF Capability URI, and advertised with an entry in
 the "capability" leaf-list in ^mon-mod^.
+
+- RESTCONF client: a client which implements the RESTCONF protocol.
+Also called "client".
+
+- RESTCONF server: a server which implements the RESTCONF protocol.
+Also called "server".
 
 - retrieval request: a request using the GET or HEAD methods.
 
@@ -3280,6 +3287,13 @@ The Space & Terrestrial Communications Directorate (S&TCD).
 
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
+
+** v13 - v14
+
+- change term 'server' to 'NETCONF server'
+- add term 'RESTCONF server' also called 'server'
+- change term 'client' to 'NETCONF client'
+- add term 'RESTCONF client' also called 'client'
 
 ** v12 - v13
 
