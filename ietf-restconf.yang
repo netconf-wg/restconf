@@ -53,11 +53,11 @@ module ietf-restconf {
   // note.
 
   // RFC Ed.: remove this note
-  // Note: extracted from draft-ietf-netconf-restconf-13.txt
+  // Note: extracted from draft-ietf-netconf-restconf-14.txt
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2016-03-16 {
+  revision 2016-06-11 {
     description
       "Initial revision.";
     reference
@@ -243,13 +243,35 @@ module ietf-restconf {
            Each resource is represented as an empty leaf with the
            name of the RPC operation from the YANG rpc statement.
 
-           E.g.;
+           For example, the 'system-restart' RPC operation defined
+           in the 'ietf-system' module would be represented as
+           an empty leaf in the 'ietf-system' namespace. This is
+           a conceptual leaf, and will not actually be found in
+           the module:
 
-              POST /restconf/operations/show-log-errors
-
-              leaf show-log-errors {
-                type empty;
+              module ietf-system {
+                leaf system-reset {
+                  type empty;
+                }
               }
+
+           To invoke the 'system-restart' RPC operation:
+
+              POST /restconf/operations/ietf-system:system-restart
+
+           To discover the RPC operations supported by the server:
+
+              GET /restconf/operations
+
+           In XML the YANG module namespace identifies the module:
+
+             <system-restart
+                xmlns='urn:ietf:params:xml:ns:yang:ietf-system' />
+
+           In JSON the YANG module name identifies the module:
+
+             { 'ietf-system:system-restart' : [null] }
+
           ";
       }
 

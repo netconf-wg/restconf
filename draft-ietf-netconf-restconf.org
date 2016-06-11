@@ -48,10 +48,15 @@ statement can be accessed.
 
 ** Terminology
 
-The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in BCP
-14, ^RFC2119^.
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in
+^RFC2119^.
+
+#The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+#"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+#"OPTIONAL" in this document are to be interpreted as described in BCP
+#14, ^RFC2119^.
 
 *** NETCONF
 
@@ -1785,11 +1790,13 @@ for display purposes only:
    Content-Type: application/yang.data+json
 
    {
-     "example-jukebox:album" : {
-       "name" : "Wasting Light",
-       "genre" : "example-jukebox:alternative",
-       "year" : 2011
-     }
+     "example-jukebox:album" : [
+       {
+         "name" : "Wasting Light",
+         "genre" : "example-jukebox:alternative",
+         "year" : 2011
+       }
+     ]
    }
 
 If the resource is updated, the server might respond:
@@ -2262,7 +2269,6 @@ for generic URIs in ^RFC3986^.
 A RESTCONF operation is derived from the HTTP method
 and the request URI, using the following conceptual fields:
 
-
         <OP> /<restconf>/<path>?<query>#<fragment>
 
        ^       ^        ^       ^         ^
@@ -2491,6 +2497,10 @@ An HTTP "status-line" header line is returned for each request.
 If a 4xx or 5xx range status code is returned in the status-line,
 then the error information will be returned in the response,
 according to the format defined in ^errors^.
+If a 1xx, 2xx, or 3xx range status code is returned in the status-line,
+then error information MUST NOT be returned in the response,
+since these ranges do not represent error conditions.
+
 
 ** Message Caching
 
@@ -2959,10 +2969,13 @@ not meant to be implemented as datastore contents by a server.
 E.g., the "restconf" container is not intended to be implemented
 as a top-level data node (under the "/restconf/data" entry point).
 
+Note that the "ietf-restconf" module does not have any
+protocol-accessible objects, so no YANG tree diagram is shown.
+
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2016-03-16.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2016-06-11.yang"
 
 * RESTCONF Monitoring
 
@@ -3257,6 +3270,15 @@ This document registers several capability identifiers in
 
 * Security Considerations
 
+The "ietf-restconf-monitoring" YANG module defined in this memo
+is designed to be accessed via the NETCONF protocol ^RFC6241^.
+ The lowest NETCONF layer is the secure transport layer,
+and the mandatory-to-implement secure transport is Secure Shell
+(SSH) ^RFC6242^. The NETCONF access control model ^RFC6536^
+provides the means to restrict access for particular NETCONF users
+to a pre-configured subset of all available NETCONF protocol
+operations and content.
+
 This section provides security considerations for the resources
 defined by the RESTCONF protocol.  Security considerations for
 HTTPS are defined in ^RFC7230^. RESTCONF does not specify
@@ -3297,7 +3319,7 @@ Juergen Schoenwaelder, Rex Fernando, Robert Wilton,
 and Jonathan Hansford.
 
 The authors would like to thank the following people for
-their excellent review comments and contributions to this document:
+their excellent technical reviews of this document:
 Mehmet Ersue, Mahesh Jethanandani, Qin Wu, Joe Clarke, Bert Wijnen,
 Ladislav Lhotka, Rodney Cummings, Frank Xialiang, Tom Petch, Robert Sparks,
 Balint Uveges, Randy Presuhn, and Sue Hares.
@@ -3344,11 +3366,17 @@ and /modules-state/module objects, since these are not configuration data nodes
 - clarified unsupported encoding format error handling
 - change term 'meta-data' to 'metadata'
 - clarified RESTCONF metadata definition
+- clarified error info not returned for 1xx, 2xx, and 3xx ranges
+- clarified operations description in ietf-restconf module
+- clarified Acknowledgements section
+- clarified some examples
+- update some references
+- update RFC 2119 boilerplace
 
 ** v12 - v13
 
 - fix YANG library module examples (now called module-state)
-- fix MUST not term (should be MUST NOT)
+- fix terminology idnit issue
 - removed RFC 2818 reference (changed citation to RFC 7230)
 
 ** v11 - v12
@@ -3677,8 +3705,24 @@ This section shows some typical RESTCONF message exchanges.
 
 *** Retrieve the Top-level API Resource
 
-The client may start by retrieving the top-level
-API resource, using the entry point URI "{+restconf}".
+The client starts by retrieving the RESTCONF entry point:
+
+   GET /.well-known/host-meta HTTP/1.1
+   Host: example.com
+   Accept: application/xrd+xml
+
+The server might respond:
+
+   HTTP/1.1 200 OK
+   Content-Type: application/xrd+xml
+   Content-Length: nnn
+
+   <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
+       <Link rel='restconf' href='/restconf'/>
+   </XRD>
+
+The client may then retrieve the top-level
+API resource, using the entry point "/restconf".
 
    GET /restconf   HTTP/1.1
    Host: example.com
@@ -3733,6 +3777,11 @@ note.]
 
 *** Retrieve The Server Module Information
 
+It is possible the YANG library module will change over time.
+The client can retrieve the revision date of the ietf-yang-library
+supported by the server from the API resource, as described in the
+previous section.
+
 In this example the client is retrieving the modules information
 from the server in JSON format:
 
@@ -3767,6 +3816,12 @@ note.]
            "schema" : "https://example.com/modules/foo/2012-01-02",
            "namespace" : "http://example.com/ns/foo",
            "feature" : [ "feature1", "feature2" ],
+           "deviation" : [
+             {
+               "name" : "foo-dev",
+               "revision" "2012-02-16"
+             }
+           ],
            "conformance-type" : "implement"
          },
          {
@@ -4289,9 +4344,13 @@ The server might respond:
 
 *** "fields" Parameter
 
-In this example the client is retrieving the API resource, but
-retrieving only the "name" and "revision" nodes
-from each module, in JSON format:
+In this example the client is retrieving the datastore resource
+in JSON format, but retrieving only the "modules-state/module" list, and
+only the "name" and "revision" nodes
+from each list entry. Note that top node returned
+by the server matches the target resource node (which is "data"
+in this example). The "module-set-id" leaf is not returned because it
+is not selected in the fields expression.
 
    GET /restconf/data?fields=ietf-yang-library:modules-state/
        module(name;revision) HTTP/1.1
@@ -4315,31 +4374,31 @@ note.]
    Content-Type: application/yang.data+json
 
    {
-     "ietf-yang-library:modules-state": {
-       "module-set-id": "cb4c422111a779e1eed55bffc8d6b46a3a0999e2",
-       "module": [
-         {
-           "name" : "example-jukebox",
-           "revision" : "2015-06-04"
-         },
-         {
-           "name" : "ietf-inet-types",
-           "revision" : "2013-07-15"
-         },
-         {
-           "name" : "ietf-restconf-monitoring",
-           "revision" : "2016-03-16"
-         },
-         {
-           "name" : "ietf-yang-library",
-           "revision" : "2016-04-09"
-         },
-         {
-           "name" : "ietf-yang-types",
-           "revision" : "2013-07-15"
-         }
-
-       ]
+     "ietf-restconf:data" : {
+       "ietf-yang-library:modules-state": {
+         "module": [
+           {
+             "name" : "example-jukebox",
+             "revision" : "2015-06-04"
+           },
+           {
+             "name" : "ietf-inet-types",
+             "revision" : "2013-07-15"
+           },
+           {
+             "name" : "ietf-restconf-monitoring",
+             "revision" : "2016-03-16"
+           },
+           {
+             "name" : "ietf-yang-library",
+             "revision" : "2016-04-09"
+           },
+           {
+             "name" : "ietf-yang-types",
+             "revision" : "2013-07-15"
+           }
+         ]
+       }
      }
    }
 
