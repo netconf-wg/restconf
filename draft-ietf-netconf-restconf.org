@@ -677,6 +677,9 @@ of the conceptual child resources within the API resource.
 
 The API resource can be retrieved with the GET method.
 
+The fragment field in the request URI has no defined purpose
+if the target resource is the API resource.
+
 This resource has the following child resources:
 
 !! table RESTCONF API Resource
@@ -768,6 +771,8 @@ The server might respond
 
 The "{+restconf}/data" subtree represents the datastore resource type,
 which is a collection of configuration data and state data nodes.
+The fragment field in the request URI has no defined purpose
+if the target resource is a datastore resource.
 
 This resource type is an abstraction of the system's underlying datastore
 implementation. It is used to simplify resource
@@ -854,6 +859,8 @@ its descendants, if any.
 A data resource can be retrieved with the GET method.
 Data resources are accessed via the "{+restconf}/data" entry point.
 This sub-tree is used to retrieve and edit data resources.
+The fragment field in the request URI has no defined purpose
+if the target resource is a data resource.
 
 A configuration data resource can be altered by the client
 with some or all of the edit operations, depending on the
@@ -1093,6 +1100,9 @@ An operation resource represents an RPC operation
 defined with the YANG "rpc" statement or a data-model specific
 action defined with a YANG "action" statement.
 It is invoked using a POST method on the operation resource.
+The fragment field in the request URI has no defined purpose
+if the target resource is an operation resource.
+
 
 An RPC operation is invoked as:
 
@@ -1460,6 +1470,9 @@ A notification stream functions according to the NETCONF
 Notifications specification ^RFC5277^. The available streams
 can be retrieved from the stream list,
 which specifies the syntax and semantics of a stream resource.
+
+The fragment field in the request URI has no defined purpose
+if the target resource is an event stream resource.
 
 ** Errors Media Type @errors-media-type@
 
@@ -2298,7 +2311,8 @@ If this field is not present, then the target resource
 is the API itself, represented by the media type "application/yang.api".
 
 - query: the set of parameters associated with the RESTCONF
-message. These have the familiar form of "name=value" pairs.
+message, as defined in section 3.4 of ^RFC3986^.
+RESTCONF parameters have the familiar form of "name=value" pairs.
 Most query parameters are optional to implement by the server
 and optional to use by the client. Each optional query parameter is
 identified by a URI. The server MUST list the
@@ -2489,8 +2503,11 @@ The server might respond as follows.
 
 Each message represents some sort of resource access.
 An HTTP "status-line" header line is returned for each request.
-If a 4xx or 5xx range status code is returned in the status-line,
-then the error information will be returned in the response,
+If a "4xx" range status code is returned in the status-line,
+then the error information SHOULD be returned in the response,
+according to the format defined in ^errors^.
+If a "5xx" range status code is returned in the status-line,
+then the error information MAY be returned in the response,
 according to the format defined in ^errors^.
 If a 1xx, 2xx, or 3xx range status code is returned in the status-line,
 then error information MUST NOT be returned in the response,
@@ -2794,32 +2811,7 @@ for RESTCONF operations.
 The <rpc-error> element returned in NETCONF error responses
 contains some useful information.  This error information
 is adapted for use in RESTCONF, and error information
-is returned for "4xx" class of status codes.
-
-The following table summarizes the return status codes
-used specifically by RESTCONF operations:
-
-!! table HTTP Status Codes used in RESTCONF
-!! head ! Status-Line ! Description
-!! row  ! 100 Continue ! POST accepted, 201 should follow
-!! row  ! 200 OK ! Success with response message-body
-!! row  ! 201 Created ! POST to create a resource success
-!! row  ! 204 No Content ! Success without response message-body
-!! row  ! 304 Not Modified ! Conditional operation not done
-!! row  ! 400 Bad Request ! Invalid request message
-!! row  ! 401 Unauthorized ! Client cannot be authenticated
-!! row  ! 403 Forbidden !  Access to resource denied
-!! row  ! 404 Not Found !  Resource target or resource node not found
-!! row  ! 405 Method Not Allowed !  Method not allowed for target resource
-!! row  ! 406 Not Acceptable ! Accept header cannot be honored
-!! row  ! 409 Conflict ! Resource or lock in use
-!! row  ! 412 Precondition Failed ! Conditional method is false
-!! row  ! 413 Request Entity Too Large ! too-big error
-!! row  ! 414 Request-URI Too Large ! too-big error
-!! row  ! 415 Unsupported Media Type ! non RESTCONF media type
-!! row  ! 500 Internal Server Error ! operation-failed
-!! row  ! 501 Not Implemented ! unknown-operation
-!! row  ! 503 Service Unavailable ! Recoverable server error
+is returned for "4xx" and "5xx" class of status codes.
 
 Since an operation resource is defined with a YANG "rpc"
 statement, and an action is defined with a YANG "action" statement,
@@ -2854,11 +2846,12 @@ for the "action" or "rpc" statement.
 ** Error Response Message @errors@
 
 When an error occurs for a request message on any resource
-type, and a "4xx" class of status codes
-will be returned (except for status code "403 Forbidden"),
+type, and the status code that will be returned is in the "4xx" range
+(except for status code "403 Forbidden"),
 then the server SHOULD send a response message-body containing
 the information described by the "errors" container definition
-within the YANG module ^module^.  The Content-Type of this
+within the YANG module ^module^.
+The Content-Type of this
 response message MUST be a subtype of application/yang.errors (see example
 below).
 
@@ -3369,6 +3362,7 @@ and /modules-state/module objects, since these are not configuration data nodes
 - remove Pragma: no-cache from examples since RFC 7234 says
 this pragma is not defined for responses
 - remove suggestion MAY send Pragma: no-cache in response
+- remove table of HTTP status codes used in RESTCONF
 
 ** v12 - v13
 
