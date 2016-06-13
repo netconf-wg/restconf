@@ -124,16 +124,16 @@ The following terms are defined in ^RFC5277^:
 
 The following terms are used within this document:
 
-- API resource: a resource with the media type
+- API resource: a resource that has a representation with the media type
 "application/yang.api+xml" or "application/yang.api+json".
 
-- data resource: a resource with the media type
+- data resource: a resource that has a representation with the media type
 "application/yang.data+xml" or "application/yang.data+json".
 Containers, leafs, list entries, anydata and anyxml nodes can be data
 resources.
 
-- datastore resource: a resource with the media type
-"application/yang.datastore+xml" or
+- datastore resource: a resource that has a representation
+with the media type "application/yang.datastore+xml" or
 "application/yang.datastore+json". Represents a datastore.
 
 - edit operation: a RESTCONF operation on a data resource
@@ -165,7 +165,7 @@ Called "server" in ^RFC6241^.
 - operation: the conceptual RESTCONF operation for a message,
 derived from the HTTP method, request URI, headers, and message-body.
 
-- operation resource: a resource with the media type
+- operation resource: a resource that has a representation with the media type
 "application/yang.operation+xml" or
 "application/yang.operation+json". An operation resource is used to invoke
 an RPC operation with the POST method.
@@ -175,8 +175,8 @@ or data resource.
 The media type of the message-body content will identify
 the patch type in use.
 
-- plain patch: a specific PATCH request type that can be used
- for simple merge operations.
+- plain patch: a specific PATCH request type, defined in ^plain-patch^,
+that can be used for simple merge operations. 
 
 - query parameter: a parameter (and its value if any),
 encoded within the query component of the request URI.
@@ -291,7 +291,9 @@ like using URI Templates ^RFC6570^, but in a more holistic
 manner.   This strategy obviates the need for responses provided
 by the server to contain Hypermedia as the Engine of Application State
 (HATEOAS) links, originally described in
-Roy Fielding's doctoral dissertation ^rest-dissertation^.
+Roy Fielding's doctoral dissertation ^rest-dissertation^,
+because the client can determine the links it needs from
+the YANG modules.
 
 # In contrast, a REST client using HATEOAS principles would not use any
 # data modeling language to define the application-specific content of
@@ -447,10 +449,6 @@ integrity and confidentiality. A RESTCONF server MUST support the TLS
 protocol ^RFC5246^.  The RESTCONF protocol MUST NOT be used over HTTP
 without using the TLS protocol.
 
-HTTP/1.1 pipelining MUST be supported by the server.
-Responses MUST be sent in the same order that requests are received.
-No other versions of HTTP are supported for use with RESTCONF.
-
 ** HTTPS with X.509v3 Certificates
 
 Given the nearly ubiquitous support for HTTP over TLS ^RFC7230^,
@@ -495,8 +493,8 @@ outcome as described in Section 6.6 of ^RFC6125^.
 ** Authenticated Client Identity
 
 The RESTCONF server MUST authenticate client access to any
-protected resource.   If the RESTCONF client is not authorized
-to access a resource, the server MUST send an HTTP response with
+protected resource.   If the RESTCONF client is not authenticated,
+the server SHOULD send an HTTP response with
 "401 Unauthorized" status-line, as defined in Section 3.1 of
 ^RFC7235^.
 
@@ -533,7 +531,8 @@ set of allowed methods on that data.  It can contain nested child
 resources.  The child resource types and methods allowed on them are
 data-model specific.
 
-A resource has a media type identifier, represented
+A resource has a representation associated with a
+media type identifier, as represented
 by the "Content-Type" header in the HTTP response message.
 A resource can contain zero or more nested resources.
 A resource can be created and deleted independently of its
@@ -629,7 +628,6 @@ In this example a custom "play" operation is supported:
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
    Cache-Control: no-cache
-   Pragma: no-cache
    Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
    Content-Type: application/yang.api+json
 
@@ -712,7 +710,6 @@ The server might respond:
    Date: Mon, 23 Apr 2012 17:01:30 GMT
    Server: example-server
    Cache-Control: no-cache
-   Pragma: no-cache
    Content-Type: application/yang.data+xml
 
    <library xmlns="https://example.com/ns/example-jukebox">
@@ -760,7 +757,6 @@ The server might respond
    Date: Mon, 23 Apr 2012 17:01:30 GMT
    Server: example-server
    Cache-Control: no-cache
-   Pragma: no-cache
    Content-Type: application/yang.data+xml
 
    <yang-library-version
@@ -1109,7 +1105,7 @@ For example, if "module-A" defined a "reset" rpc operation, then
 invoking the operation from "module-A" would be requested as follows:
 
    POST /restconf/operations/module-A:reset HTTP/1.1
-   Server example.com
+   Server: example.com
 
 An action is invoked as:
 
@@ -1124,7 +1120,7 @@ container "interfaces", then invoking this action would be requested
 as follows:
 
    POST /restconf/data/module-A:interfaces/reset-all HTTP/1.1
-   Server example.com
+   Server: example.com
 
 If the "rpc" or "action" statement has an "input" section and the 
 "input" object tree contains any child data nodes which are considered
@@ -1593,8 +1589,8 @@ If the target resource of a retrieval request is for an operation
 resource
 then a "405 Method Not Allowed" status-line MUST be returned by the server.
 
-Note that the way that access control is applied to data resources is
-completely incompatible with HTTP caching.  The Last-Modified
+Note that the way that access control is applied to data resources may
+not be completely compatible with HTTP caching.  The Last-Modified
 and ETag headers maintained for a data resource are not affected
 by changes to the access control rules for that data resource.  It is possible
 for the representation of a data resource that is visible to
@@ -1618,8 +1614,7 @@ The server might respond:
    Server: example-server
    Content-Type: application/yang.data+xml
    Cache-Control: no-cache
-   Pragma: no-cache
-   ETag: a74eefc993a2b
+   ETag: "a74eefc993a2b"
    Last-Modified: Mon, 23 Apr 2012 11:02:14 GMT
 
    <album xmlns="http://example.com/ns/example-jukebox"
@@ -1693,7 +1688,7 @@ that the "Location" header line is wrapped for display purposes only:
    Location: https://example.com/restconf/data/
        example-jukebox:jukebox
    Last-Modified: Mon, 23 Apr 2012 17:01:00 GMT
-   ETag: b3a3e673be2
+   ETag: "b3a3e673be2"
 
 Refer to ^ex-create^ for more resource creation examples.
 
@@ -1805,7 +1800,7 @@ If the resource is updated, the server might respond:
    Date: Mon, 23 Apr 2012 17:04:00 GMT
    Server: example-server
    Last-Modified: Mon, 23 Apr 2012 17:04:00 GMT
-   ETag: b27480aeda4c
+   ETag: "b27480aeda4c"
 
 The same request is shown here using XML encoding:
 
@@ -1885,7 +1880,7 @@ for display purposes only:
    PATCH /restconf/data/example-jukebox:jukebox/
        library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
-   If-Match: b8389233a4c
+   If-Match: "b8389233a4c"
    Content-Type: application/yang.data+xml
 
    <album xmlns="http://example.com/ns/example-jukebox">
@@ -1899,13 +1894,13 @@ If the field is updated, the server might respond:
    Date: Mon, 23 Apr 2012 17:49:30 GMT
    Server: example-server
    Last-Modified: Mon, 23 Apr 2012 17:49:30 GMT
-   ETag: b2788923da4c
+   ETag: "b2788923da4c"
 
 ** DELETE @delete@
 
 The DELETE method is used to delete the target resource.
 If the DELETE request succeeds, a "204 No Content" status-line
-is returned, and there is no response message-body.
+is returned.
 
 If the user is not authorized to delete the target resource then
 an error response containing a "403 Forbidden" status-line SHOULD be
@@ -2508,9 +2503,7 @@ Since the datastore contents change at unpredictable times,
 responses from a RESTCONF server generally SHOULD NOT be cached.
 
 The server SHOULD include a "Cache-Control" header in every response
-that specifies whether the response should be cached.  A "Pragma"
-header specifying "no-cache" MAY also be sent in case the
-"Cache-Control" header is not supported.
+that specifies whether the response should be cached.
 
 Instead of relying on HTTP caching, the client SHOULD track the "ETag"
 and/or "Last-Modified" headers returned by the server for the
@@ -2796,7 +2789,7 @@ restart the event stream.
 
 * Error Reporting @error-reporting@
 
-HTTP status-lines are used to report success or failure
+HTTP status codes are used to report success or failure
 for RESTCONF operations.
 The <rpc-error> element returned in NETCONF error responses
 contains some useful information.  This error information
@@ -3372,6 +3365,10 @@ and /modules-state/module objects, since these are not configuration data nodes
 - clarified some examples
 - update some references
 - update RFC 2119 boilerplace
+- remove requirements that simply restate HTTP requirements
+- remove Pragma: no-cache from examples since RFC 7234 says
+this pragma is not defined for responses
+- remove suggestion MAY send Pragma: no-cache in response
 
 ** v12 - v13
 
@@ -3766,7 +3763,6 @@ note.]
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
    Cache-Control: no-cache
-   Pragma: no-cache
    Content-Type: application/yang.api+xml
 
    <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
@@ -3802,7 +3798,6 @@ note.]
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
    Cache-Control: no-cache
-   Pragma: no-cache
    Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
    Content-Type: application/yang.data+json
 
@@ -3887,7 +3882,6 @@ for display purposes only.
    Date: Mon, 23 Apr 2012 17:02:00 GMT
    Server: example-server
    Cache-Control: no-cache
-   Pragma: no-cache
    Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
    Content-Type: application/yang.data+xml
 
@@ -3948,7 +3942,7 @@ for display purposes only:
    Location: https://example.com/restconf/data/
        example-jukebox:jukebox/library/artist=Foo%20Fighters
    Last-Modified: Mon, 23 Apr 2012 17:02:00 GMT
-   ETag: b3830f23a4c
+   ETag: "b3830f23a4c"
 
 To create a new "album" resource for this artist within the "jukebox"
 resource, the client might send the following request.
@@ -3976,7 +3970,7 @@ for display purposes only:
        example-jukebox:jukebox/library/artist=Foo%20Fighters/
        album=Wasting%20Light
    Last-Modified: Mon, 23 Apr 2012 17:03:00 GMT
-   ETag: b8389233a4c
+   ETag: "b8389233a4c"
 
 *** Detect Resource Entity Tag Change
 
@@ -4005,7 +3999,7 @@ header.  The server might respond:
    Date: Mon, 23 Apr 2012 19:01:00 GMT
    Server: example-server
    Last-Modified: Mon, 23 Apr 2012 17:45:00 GMT
-   ETag: b34aed893a4c
+   ETag: "b34aed893a4c"
 
 *** Edit a Datastore Resource
 
@@ -4094,7 +4088,6 @@ The server might respond:
    Date: Mon, 23 Apr 2012 17:11:30 GMT
    Server: example-server
    Cache-Control: no-cache
-   Pragma: no-cache
    Content-Type: application/yang.data+json
 
    {
@@ -4133,9 +4126,8 @@ The server might respond:
    Date: Mon, 23 Apr 2012 17:11:30 GMT
    Server: example-server
    Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
-   ETag: eeeada438af
+   ETag: "eeeada438af"
    Cache-Control: no-cache
-   Pragma: no-cache
    Content-Type: application/yang.data+json
 
    {
@@ -4171,7 +4163,6 @@ The server might respond:
    Date: Mon, 23 Apr 2012 17:11:30 GMT
    Server: example-server
    Cache-Control: no-cache
-   Pragma: no-cache
    Content-Type: application/yang.data+json
 
    {
@@ -4222,7 +4213,6 @@ The server might respond:
    Date: Mon, 23 Apr 2012 17:11:30 GMT
    Server: example-server
    Cache-Control: no-cache
-   Pragma: no-cache
    Content-Type: application/yang.data+json
 
    {
@@ -4299,7 +4289,6 @@ The server might respond:
    Date: Mon, 23 Apr 2012 17:11:30 GMT
    Server: example-server
    Cache-Control: no-cache
-   Pragma: no-cache
    Content-Type: application/yang.data+json
 
    {
@@ -4321,7 +4310,6 @@ The server might respond:
    Date: Mon, 23 Apr 2012 17:11:30 GMT
    Server: example-server
    Cache-Control: no-cache
-   Pragma: no-cache
    Content-Type: application/yang.data+json
 
    {
@@ -4430,7 +4418,7 @@ Response from server:
    Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
    Location: https://example.com/restconf/data/
        example-jukebox:jukebox/playlist=Foo-One/song=1
-   ETag: eeeada438af
+   ETag: "eeeada438af"
 
 *** "point" Parameter
 
@@ -4463,7 +4451,7 @@ Response from server:
    Date: Mon, 23 Apr 2012 13:01:20 GMT
    Server: example-server
    Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
-   ETag: abcada438af
+   ETag: "abcada438af"
 
 *** "filter" Parameter @ex-filters@
 
