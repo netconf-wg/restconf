@@ -52,7 +52,7 @@ module ietf-restconf-monitoring {
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2016-03-16 {
+  revision 2016-06-15 {
     description
       "Initial revision.";
     reference
@@ -130,7 +130,7 @@ module ietf-restconf-monitoring {
           description
             "The server will create an entry in this list for each
              encoding format that is supported for this stream.
-             The media type 'application/yang.stream' is expected
+             The media type 'application/yang-stream' is expected
              for all event streams. This list identifies the
              sub-types supported for this stream.";
 
@@ -140,9 +140,9 @@ module ietf-restconf-monitoring {
               "This is the secondary encoding format within the
                'text/event-stream' encoding used by all streams.
                The type 'xml' is supported for the media type
-               'application/yang.stream+xml'. The type 'json'
+               'application/yang-stream+xml'. The type 'json'
                is supported for the media type
-               'application/yang.stream+json'.";
+               'application/yang-stream+json'.";
 
           }
 

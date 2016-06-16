@@ -57,7 +57,7 @@ module ietf-restconf {
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2016-06-11 {
+  revision 2016-06-15 {
     description
       "Initial revision.";
     reference
@@ -131,11 +131,11 @@ module ietf-restconf {
       ";
   }
 
-  rc:restconf-media-type "application/yang.errors" {
+  rc:restconf-media-type "application/yang-errors" {
     uses errors;
   }
 
-  rc:restconf-media-type "application/yang.api" {
+  rc:restconf-media-type "application/yang-api" {
     uses restconf;
   }
 
@@ -216,20 +216,20 @@ module ietf-restconf {
   grouping restconf {
     description
       "Conceptual container representing the
-       application/yang.api resource type.";
+       application/yang-api resource type.";
 
     container restconf {
       description
         "Conceptual container representing the
-         application/yang.api resource type.";
+         application/yang-api resource type.";
 
       container data {
         description
-          "Container representing the application/yang.datastore
+          "Container representing the application/yang-datastore
            resource type. Represents the conceptual root of all
            state data and configuration data supported by
            the server.  The child nodes of this container can be
-           any data resource (application/yang.data), which are
+           any data resource (application/yang-data), which are
            defined as top-level data nodes from the YANG modules
            advertised by the server in the ietf-restconf-monitoring
            module.";
@@ -238,7 +238,7 @@ module ietf-restconf {
       container operations {
         description
           "Container for all operation resources
-           (application/yang.operation),
+           (application/yang-operation),
 
            Each resource is represented as an empty leaf with the
            name of the RPC operation from the YANG rpc statement.
