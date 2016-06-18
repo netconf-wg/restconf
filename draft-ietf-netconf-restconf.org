@@ -656,6 +656,9 @@ resource types are defined in RESTCONF:
 !! row  !             ! application/yang-operation+json
 !! row  ! Schema      ! application/yang
 
+Note that the "application/yang" media type is defined in ^RFC6020^
+and the rest of the media types are defined in ^media-types^.
+
 ** API Resource @api-resource@
 
 The API resource contains the entry points for
@@ -679,6 +682,12 @@ The API resource can be retrieved with the GET method.
 
 The fragment field in the request URI has no defined purpose
 if the target resource is the API resource.
+
+The {+restconf} entry point resource name used in responses
+MUST identify the "ietf-restconf" YANG module.
+For example, a request to GET the entry point "/restconf"
+in JSON format will return a representation of
+the API resource named "ietf-restconf:restconf".
 
 This resource has the following child resources:
 
@@ -2825,7 +2834,8 @@ for the "action" or "rpc" statement.
 !! head ! <error-tag> ! status code
 !! row  ! in-use ! 409
 !! row  ! invalid-value ! 400
-!! row  ! too-big ! 413
+!! row  ! (request) too-big ! 413
+!! row  ! (response) too-big ! 400
 !! row  ! missing-attribute ! 400
 !! row  ! bad-attribute ! 400
 !! row  ! unknown-attribute ! 400
@@ -3180,9 +3190,9 @@ registry ^RFC6020^.
   // RFC Ed.: replace XXXX with RFC number and remove this note
   reference:    RFCXXXX
 
+** Media Types @media-types@
 
-
-** Media Type application/yang-api+xml
+*** Media Type application/yang-api+xml
 
 
    Type name: application
@@ -3331,7 +3341,8 @@ The authors would like to thank the following people for
 their excellent technical reviews of this document:
 Mehmet Ersue, Mahesh Jethanandani, Qin Wu, Joe Clarke, Bert Wijnen,
 Ladislav Lhotka, Rodney Cummings, Frank Xialiang, Tom Petch, Robert Sparks,
-Balint Uveges, Randy Presuhn, and Sue Hares.
+Balint Uveges, Randy Presuhn, Sue Hares, Mark Nottingham,
+Benoit Claise, and Dale Worley.
 
 Contributions to this material by Andy Bierman are based upon work
 supported by the The Space & Terrestrial Communications Directorate
@@ -3387,6 +3398,7 @@ this pragma is not defined for responses
 - remove suggestion MAY send Pragma: no-cache in response
 - remove table of HTTP status codes used in RESTCONF
 - changed media type names so they conform to RFC 6838
+- clarified too-big error-tag conversion
 
 ** v12 - v13
 
