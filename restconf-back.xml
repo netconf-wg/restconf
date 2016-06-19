@@ -605,17 +605,16 @@ specifications of each URI scheme.
 <format type='TXT' octets='60242' target='http://www.rfc-editor.org/rfc/rfc6991.txt' />
 </reference>
 
-<reference anchor="W3C.CR-eventsource-20121211"
-           target="http://www.w3.org/TR/2012/CR-eventsource-20121211">
-  <front>
-    <title>Server-Sent Events</title>
-    <author initials="I." surname="Hickson" fullname="Ian Hickson">
-      <organization/></author><date month="December" day="11" year="2012"/>
-  </front>
-  <seriesInfo name="World Wide Web Consortium CR"
-              value="CR-eventsource-20121211"/>
-  <format type="HTML"
-          target="http://www.w3.org/TR/2012/CR-eventsource-20121211"/>
+<reference anchor="W3C.REC-eventsource-20150203" target="http://www.w3.org/TR/2015/REC-eventsource-20150203">
+<front>
+<title>Server-Sent Events</title>
+<author initials="I." surname="Hickson" fullname="Ian Hickson">
+<organization/>
+</author>
+<date month="February" day="3" year="2015"/>
+</front>
+<seriesInfo name="World Wide Web Consortium Recommendation" value="REC-eventsource-20150203"/>
+<format type="HTML" target="http://www.w3.org/TR/2015/REC-eventsource-20150203"/>
 </reference>
 
 <reference anchor='W3C.REC-xml-20081126'
