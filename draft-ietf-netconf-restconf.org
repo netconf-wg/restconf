@@ -795,6 +795,11 @@ the POST and PATCH methods. Each RESTCONF edit of a datastore resource is
 saved to non-volatile storage by the server, if the server supports
 non-volatile storage of configuration data.
 
+If the datastore resource represented by the "{+restconf}/data" subtree
+is retrieved, then the datastore and its contents are returned
+by the server. The datastore is represented by a node named "data"
+in the "ietf-restconf" module namespace.
+
 *** Edit Collision Detection @edit-collision@
 
 Two "edit collision detection" mechanisms are provided
@@ -1112,9 +1117,6 @@ It is invoked using a POST method on the operation resource.
 The fragment field in the request URI has no defined purpose
 if the target resource is an operation resource.
 
-Invocation
-----------
-
 An RPC operation is invoked as:
 
    POST {+restconf}/operations/<operation>
@@ -1144,9 +1146,6 @@ as follows:
    Server: example.com
 
 
-Input
------
-
 If the "rpc" or "action" statement has an "input" section then
 instances of these input parameters are encoded
 in the module namespace where the "rpc" or "action" statement is defined,
@@ -1164,8 +1163,6 @@ MAY be sent by the client in the request.
 If the "rpc" or "action" statement has no "input" section, the
 request message MUST NOT include a message-body.
 
-Output
-------
 
 If the "rpc" or "action" statement has an "output" section then
 instances of these input parameters are encoded
@@ -1626,6 +1623,11 @@ identifies more than one instance, and XML encoding
 is used in the response, then an error response containing
 a "400 Bad Request" status-line MUST be returned by the server.
 
+If a retrieval request for a data resource represents
+an instance that does not exist,
+then an error response containing a "404 Not Found" status-line
+MUST be returned by the server.
+
 If the target resource of a retrieval request is for an operation
 resource
 then a "405 Method Not Allowed" status-line MUST be returned by the server.
@@ -1684,7 +1686,7 @@ If the target resource type is a datastore or data resource, then the
 POST is treated as a request to create a top-level resource or child
 resource, respectively.  The message-body is expected to contain the
 content of a child resource to create within the parent (target
-resource).  The message-body MUST NOT contain more than one instance
+resource).  The message-body MUST contain exactly one instance
 of the expected data resource. The data-model for the child tree
 is the subtree as defined by YANG for the child resource.
 
@@ -1868,9 +1870,10 @@ by the server.  The media types supported by a server can be
 discovered by the client by sending an OPTIONS request (see
 ^options^).
 
-This document defines one patch mechanism (^plain-patch^).  The YANG
-PATCH mechanism is defined in ^I-D.ietf-netconf-yang-patch^.  Other
-patch mechanisms may be defined by future specifications.
+This document defines one patch mechanism (^plain-patch^). Another
+patch mechanism, the YANG PATCH mechanism, is defined in
+^I-D.ietf-netconf-yang-patch^. Other patch mechanisms may be
+defined by future specifications.
 
 If the target resource instance does not exist, the server MUST NOT
 create it.
@@ -1899,7 +1902,7 @@ application/yang-data+json.
 Plain patch can be used to create or update, but not delete, a child
 resource within the target resource.  Please see
 ^I-D.ietf-netconf-yang-patch^ for an alternate media-type supporting
-more granular control. The YANG Patch Media Type allows multiple
+the ablity to delete child resources. The YANG Patch Media Type allows multiple
 sub-operations (e.g., merge, delete) within a single PATCH
 operation.
 
@@ -2080,6 +2083,8 @@ retrieve only the "genre" and "year" of an album, use:
 "fields=genre;year".
 
 Parentheses are used to specify sub-selectors of a node.
+Note that there is no path separator character '/'
+between a "path" field and left parenthesis character '('.
 
 For example, assume the target resource is the "album" list.
 To retrieve only the "label" and
