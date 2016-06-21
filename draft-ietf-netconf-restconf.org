@@ -1902,7 +1902,7 @@ application/yang-data+json.
 Plain patch can be used to create or update, but not delete, a child
 resource within the target resource.  Please see
 ^I-D.ietf-netconf-yang-patch^ for an alternate media-type supporting
-the ablity to delete child resources. The YANG Patch Media Type allows multiple
+the ability to delete child resources. The YANG Patch Media Type allows multiple
 sub-operations (e.g., merge, delete) within a single PATCH
 operation.
 
@@ -4137,7 +4137,8 @@ and non-configuration child resources.
 Example 1: content=all
 
 To retrieve all the child resources, the "content" parameter
-is set to "all". The client might send:
+is set to "all", or omitted, since this is the default value.
+The client might send:
 
    GET /restconf/data/example-events:events?content=all
        HTTP/1.1
@@ -4172,9 +4173,8 @@ The server might respond:
 Example 2: content=config
 
 To retrieve only the configuration child resources,
-the "content" parameter is set to "config" or omitted
-since this is the default value.  Note that the "ETag"
-and "Last-Modified" headers are only returned if
+the "content" parameter is set to "config".
+Note that the "ETag" and "Last-Modified" headers are only returned if
 the content parameter value is "config".
 
    GET /restconf/data/example-events:events?content=config
