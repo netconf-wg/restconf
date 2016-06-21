@@ -68,13 +68,14 @@ module ietf-restconf {
    argument media-type-id {
      yin-element true;
    }
-   // RFC Ed.: replace draft-ietf-netmod-yang-json with RFC number
-   // in the description below, and remove this note.
    description
      "This extension is used to specify a YANG data structure which
       represents a conceptual RESTCONF media type.
       Data definition statements within this extension specify
       the generic syntax for the specific media type.
+
+      // RFC Ed.: replace draft-ietf-netmod-yang-json with RFC number
+      // in the description below, and remove this note.
 
       YANG is mapped to specific encoding formats outside the
       scope of this extension statement. RFC 6020 defines XML

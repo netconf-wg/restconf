@@ -2212,6 +2212,9 @@ is not being requested.  It is not valid to specify start
 times that are later than the current time.  If the value
 specified is earlier than the log can support, the replay
 will begin with the earliest available notification.
+A client can obtain a server's current time by examining the "Date"
+header field that the server returns in response messages, according
+to ^RFC7231^.
 
 If this query parameter is supported by the server, then the
 "replay" query parameter URI MUST be listed in the "capability" leaf-list
@@ -2221,6 +2224,7 @@ by the server.
 If the "replay-support" leaf has the value 'true' in the "stream"
 entry (defined in ^mon-mod^) then the server MUST support
 the "start-time" and "stop-time" query parameters for that stream.
+
 
 *** The "stop-time" Query Parameter @stop-time@
 
@@ -2849,13 +2853,13 @@ is returned for "4xx" and "5xx" class of status codes.
 Since an operation resource is defined with a YANG "rpc"
 statement, and an action is defined with a YANG "action" statement,
 a mapping between the NETCONF <error-tag> value
-and the HTTP status code is needed.   The specific error
-condition and response code to use are data-model specific
+and the HTTP status code is needed.   The specific error-tag
+and response code to use are data-model specific
 and might be contained in the YANG "description" statement
 for the "action" or "rpc" statement.
 
 !! table Mapping from error-tag to status code
-!! head ! <error-tag> ! status code
+!! head ! error-tag ! status code
 !! row  ! in-use ! 409
 !! row  ! invalid-value ! 400
 !! row  ! (request) too-big ! 413
@@ -2884,7 +2888,7 @@ type, and the status code that will be returned is in the "4xx" range
 (except for status code "403 Forbidden"),
 then the server SHOULD send a response message-body containing
 the information described by the "errors" container definition
-within the YANG module ^module^.
+within the "ietf-restconf" module defined in ^module^.
 The Content-Type of this
 response message MUST be a subtype of application/yang-errors (see example
 below).
@@ -3187,7 +3191,7 @@ Relation Type Registry defined by ^RFC5988^:
 `
 ** YANG Module Registry
 
-This document registers two URIs in the IETF XML registry
+This document registers two URIs as namesapces in the IETF XML registry
 ^RFC3688^. Following the format in RFC 3688, the following
 registration is requested to be made.
 
@@ -3280,8 +3284,8 @@ The name of the registry is "RESTCONF Capability URNs".
 The review policy for this registry is "IETF Review".
 The registry shall record for each entry:
 
-- the name of the RESTCONF capability. By convention, this name is
-prefixed with the colon ':' character.
+- the name of the RESTCONF capability. By convention, this name begins
+with the colon ':' character.
 
 - the URN for the RESTCONF capability.
 
@@ -4468,7 +4472,11 @@ Request from client:
       }
    }
 
-Response from server:
+
+Response from server.
+Note that the "Location" header line is wrapped
+for display purposes only:
+
 
    HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2012 13:01:20 GMT
