@@ -466,13 +466,13 @@ specifications of each URI scheme.
     <author initials="M" surname="Bjorklund" fullname="Martin Bjorklund">
       <organization/>
     </author>
-    <date month="June" day="06" year="2016"/>
+    <date month="June" day="17" year="2016"/>
     <abstract>
       <t>YANG is a data modeling language used to model configuration data, state data, remote procedure calls, and notifications for network management protocols like the Network Configuration Protocol (NETCONF).</t>
     </abstract>
   </front>
-  <seriesInfo name="Internet-Draft" value="draft-ietf-netmod-rfc6020bis-13"/>
-  <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-netmod-rfc6020bis-13.txt"/>
+  <seriesInfo name="Internet-Draft" value="draft-ietf-netmod-rfc6020bis-14"/>
+  <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-netmod-rfc6020bis-14.txt"/>
 </reference>
 
   <reference anchor='RFC6241'>

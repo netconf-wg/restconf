@@ -124,17 +124,21 @@ The following terms are defined in ^RFC5277^:
 
 The following terms are used within this document:
 
-- API resource: a resource that has a representation with the media type
-"application/yang-api+xml" or "application/yang-api+json".
+- API resource: a resource that models the RESTCONF entry point
+and the sub-resources to access YANG-defined content.
+It is defined with the YANG data template named "yang-api"
+in the "ietf-restconf" module.
 
-- data resource: a resource that has a representation with the media type
-"application/yang-data+xml" or "application/yang-data+json".
-Containers, leafs, list entries, anydata and anyxml nodes can be data
-resources.
+- data resource: a resource that models a YANG data node.
+It is defined with YANG data definition statements, and
+YANG containers, leafs, leaf-list entries, list entries,
+anydata and anyxml nodes can be data resources.
 
-- datastore resource: a resource that has a representation
-with the media type "application/yang-datastore+xml" or
-"application/yang-datastore+json". Represents a datastore.
+- datastore resource: a resource that models a
+programmatic interface to NETCONF datastores.
+By default, RESTCONF methods access a unified view
+of the underlying datastore implementation on the server.
+It is defined as a sub-resource within the API resource.
 
 - edit operation: a RESTCONF operation on a data resource
 using either a POST, PUT, PATCH, or DELETE method.  This is
@@ -164,10 +168,9 @@ Called "server" in ^RFC6241^.
 - operation: the conceptual RESTCONF operation for a message,
 derived from the HTTP method, request URI, headers, and message-body.
 
-- operation resource: a resource that has a representation with the media type
-"application/yang-operation+xml" or
-"application/yang-operation+json". An operation resource is used to invoke
-an RPC operation with the POST method.
+- operation resource: a resource that models a data-model specific operation,
+that is defined with a YANG "rpc" or "action" statement.
+It is invoked with the POST method.
 
 - patch: a generic PATCH request on the target datastore
 or data resource.
@@ -175,7 +178,9 @@ The media type of the message-body content will identify
 the patch type in use.
 
 - plain patch: a specific PATCH request type, defined in ^plain-patch^,
-that can be used for simple merge operations. 
+that can be used for simple merge operations. It has a representation
+with the media-type "application/yang-data+xml"
+or "application/yang-data+json".
 
 - query parameter: a parameter (and its value if any),
 encoded within the query component of the request URI.
@@ -197,9 +202,9 @@ Also called "server".
 a particular message, identified by the "path" component
 of the request URI.
 
-- schema resource: a resource with the media type
-"application/yang".  The schema resource is used to retrieve
-the YANG representation of the schema by the client with the GET method.
+- schema resource: a resource that has a representation with the media type
+"application/yang".  The schema resource is used by the client to retrieve
+the YANG schema with the GET method.
 
 - stream list: the set of data resource instances that describe
 the event stream resources available from the server.
@@ -208,6 +213,12 @@ module as the "stream" list. It can be retrieved using the
 target resource "{+restconf}/data/ietf-restconf-monitoring:restconf-state/streams/stream".
 The stream list contains information about each stream,
 such as the URL to retrieve the event stream data.
+
+- YANG data template: a schema for modeling a conceptual
+data structure in an encoding-independent manner.  It is
+defined with the "yang-data" extension, found in ^module^.
+It has a representation with the media-type "application/yang-data+xml"
+or "application/yang-data+json".
 
 *** URI Template and Examples @uri-template@
 
@@ -619,7 +630,7 @@ In this example a custom "play" operation is supported:
    -------
    GET /top/restconf/operations  HTTP/1.1
    Host: example.com
-   Accept: application/yang-api+json
+   Accept: application/yang-data+json
 
    Response
    --------
@@ -628,42 +639,31 @@ In this example a custom "play" operation is supported:
    Server: example-server
    Cache-Control: no-cache
    Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
-   Content-Type: application/yang-api+json
+   Content-Type: application/yang-data+json
 
-   { "operations" : { "example-jukebox:play" : {} } }
+   { "operations" : { "example-jukebox:play" : [null] } }
 
 If the XRD contains more than one link relation, then only the
 relation named "restconf" is relevant to this specification.
 
 ** RESTCONF Media Types
 
-The RESTCONF protocol defines a set of application specific media
-types to identify each of the available resource types.  The following
-resource types are defined in RESTCONF:
+The RESTCONF protocol defines two application specific media
+types to identify representations of data which conforms
+to the schema for a particular YANG construct.
 
-!! table RESTCONF Media Types
-!! head ! Resource    ! Media Type
-!! row  ! API         ! application/yang-api+xml
-!! row  !             ! application/yang-api+json
-!! row  ! Datastore   ! application/yang-datastore+xml
-!! row  !             ! application/yang-datastore+json
-!! row  ! Data        ! application/yang-data+xml
-!! row  !             ! application/yang-data+json
-!! row  ! [none]      ! application/yang-errors+xml
-!! row  !             ! application/yang-errors+json
-!! row  ! Operation   ! application/yang-operation+xml
-!! row  !             ! application/yang-operation+json
-!! row  ! Schema      ! application/yang
-
-Note that the "application/yang" media type is defined in ^RFC6020^
-and the rest of the media types are defined in ^media-types^.
+This document defines media types for XML and JSON serialization
+of YANG data.  Other documents MAY define other media types for
+different serializations of YANG data.
+The "application/yang-data+xml" media-type is defined in ^yang-data-xml^.
+The "application/yang-data+json" media-type is defined in ^yang-data-json^.
 
 ** API Resource @api-resource@
 
 The API resource contains the entry points for
 the RESTCONF datastore and operation resources.
 It is the top-level resource located at {+restconf} and has the media type
-"application/yang-api+xml" or "application/yang-api+json".
+"application/yang-data+xml" or "application/yang-data+json".
 
 YANG Tree Diagram for an API Resource:
 
@@ -672,15 +672,12 @@ YANG Tree Diagram for an API Resource:
       +--rw operations
       +--ro yang-library-version
 
-The "application/yang-api" restconf-media-type extension
-in the "ietf-restconf" module
-defined in ^module^ is used to specify the structure and syntax
+The "yang-api" YANG data template is defined with the "yang-data" extension
+in the "ietf-restconf" module, found in ^module^.
+It is used to specify the structure and syntax
 of the conceptual child resources within the API resource.
 
 The API resource can be retrieved with the GET method.
-
-The fragment field in the request URI has no defined purpose
-if the target resource is the API resource.
 
 The {+restconf} entry point resource name used in responses
 MUST identify the "ietf-restconf" YANG module.
@@ -1225,7 +1222,7 @@ to invoke the "reboot" RPC operation:
 
    POST /restconf/operations/example-ops:reboot HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-operation+xml
+   Content-Type: application/yang-data+xml
 
    <input xmlns="https://example.com/ns/example-ops">
     <delay>600</delay>
@@ -1243,7 +1240,7 @@ The same example request message is shown here using JSON encoding:
 
    POST /restconf/operations/example-ops:reboot HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-operation+json
+   Content-Type: application/yang-data+json
 
    {
      "example-ops:input" : {
@@ -1262,7 +1259,7 @@ to invoke the "reset" action (text wrap for display purposes):
    POST /restconf/data/example-actions:interfaces/interface=eth0
      /reset HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-operation+xml
+   Content-Type: application/yang-data+xml
 
    <input xmlns="https://example.com/ns/example-actions">
      <delay>600</delay>
@@ -1280,7 +1277,7 @@ The same example request message is shown here using JSON encoding
    POST /restconf/data/example-actions:interfaces/interface=eth0
      /reset HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-operation+json
+   Content-Type: application/yang-data+json
 
    { "example-actions:input" : {
        "delay" : 600
@@ -1312,7 +1309,7 @@ to invoke the "get-reboot-info" operation:
 
    POST /restconf/operations/example-ops:get-reboot-info HTTP/1.1
    Host: example.com
-   Accept: application/yang-operation+json
+   Accept: application/yang-data+json
 
 
 The server might respond:
@@ -1320,7 +1317,7 @@ The server might respond:
    HTTP/1.1 200 OK
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
-   Content-Type: application/yang-operation+json
+   Content-Type: application/yang-data+json
 
    {
      "example-ops:output" : {
@@ -1335,7 +1332,7 @@ The same response is shown here using XML encoding:
    HTTP/1.1 200 OK
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
-   Content-Type: application/yang-operation+xml
+   Content-Type: application/yang-data+xml
 
    <output xmlns="https://example.com/ns/example-ops">
      <reboot-time>30</reboot-time>
@@ -1354,14 +1351,14 @@ to invoke the "get-last-reset-time" action:
    POST /restconf/data/example-actions:interfaces/interface=eth0
       /get-last-reset-time HTTP/1.1
    Host: example.com
-   Accept: application/yang-operation+json
+   Accept: application/yang-data+json
 
 The server might respond:
 
    HTTP/1.1 200 OK
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
-   Content-Type: application/yang-operation+json
+   Content-Type: application/yang-data+json
 
    {
      "example-actions:output" : {
@@ -1382,7 +1379,7 @@ the client might send the following POST request message:
 
    POST /restconf/operations/example-ops:reboot HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-operation+xml
+   Content-Type: application/yang-data+xml
 
    <input xmlns="https://example.com/ns/example-ops">
      <delay>-33</delay>
@@ -1396,7 +1393,7 @@ The server might respond with an "invalid-value" error:
    HTTP/1.1 400 Bad Request
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
-   Content-Type: application/yang-errors+xml
+   Content-Type: application/yang-data+xml
 
    <errors xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <error>
@@ -1414,7 +1411,7 @@ The same response is shown here in JSON encoding:
    HTTP/1.1 400 Bad Request
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
-   Content-Type: application/yang-errors+json
+   Content-Type: application/yang-data+json
 
    { "ietf-restconf:errors" : {
        "error" : [
@@ -1499,17 +1496,18 @@ which specifies the syntax and semantics of a stream resource.
 The fragment field in the request URI has no defined purpose
 if the target resource is an event stream resource.
 
-** Errors Media Type @errors-media-type@
+** Errors YANG Data Template @errors-media-type@
 
-An "errors" media type is a collection of error information that
+An "errors" YANG data template models a collection
+of error information that
 is sent as the message-body in a server response message,
 if an error occurs while processing a request message.
 It is not considered a resource type because no instances
 can be retrieved with a GET request.
 
-The "ietf-restconf" YANG module contains the "application/yang-errors"
-restconf-media-type extension which specifies the syntax and
-semantics of an "errors" media type.
+The "ietf-restconf" YANG module contains the "yang-errors"
+YANG data template, that specifies the syntax and
+semantics of an "errors" container within a RESTCONF response.
 RESTCONF error handling behavior is defined in ^error-reporting^.
 
 * Operations @operations@
@@ -1763,7 +1761,7 @@ A client might send a "play" request as follows:
 
    POST /restconf/operations/example-jukebox:play   HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-operation+json
+   Content-Type: application/yang-data+json
 
    {
      "example-jukebox:input" : {
@@ -1892,17 +1890,15 @@ the procedures defined in ^error-reporting^.
 *** Plain Patch @plain-patch@
 
 The plain patch mechanism merges the contents of the message-body with
-the target resource.  If the target resource is a datastore resource
-(see ^datastore-resource^), the message-body MUST be either
-application/yang-datastore+xml or application/yang-datastore+json.  If
-then the target resource is a data resource (see ^data-resource^),
-then the message-body MUST be either application/yang-data+xml or
-application/yang-data+json.
+the target resource.  The message-body for a plain patch
+MUST be present and MUST be represented by the
+media type "application/yang-data+xml" or "application/yang-data+json".
 
 Plain patch can be used to create or update, but not delete, a child
 resource within the target resource.  Please see
 ^I-D.ietf-netconf-yang-patch^ for an alternate media-type supporting
-the ability to delete child resources. The YANG Patch Media Type allows multiple
+the ability to delete child resources.
+The YANG Patch Media Type allows multiple
 sub-operations (e.g., merge, delete) within a single PATCH
 operation.
 
@@ -2345,7 +2341,8 @@ resource, as described in ^root-resource-discovery^.
 - resource: the path expression identifying the resource
 that is being accessed by the operation.
 If this field is not present, then the target resource
-is the API itself, represented by the media type "application/yang-api".
+is the API itself, represented by the YANG data template
+named "yang-api", found in ^module^.
 
 - query: the set of parameters associated with the RESTCONF
 message, as defined in section 3.4 of ^RFC3986^.
@@ -2447,7 +2444,7 @@ format encoding.
 
 A client can determine if the RESTCONF server supports an
 encoding format by sending a request using a specific format
-in the ContentType and/or Accept header.  If the server does not
+in the Content-Type and/or Accept header.  If the server does not
 support the requested input encoding for a request,
 then it MUST return an error response with
 a '415 Unsupported Media Type' status-line.
@@ -2613,7 +2610,7 @@ The server might send the following response:
 
 
    HTTP/1.1 200 OK
-   Content-Type: application/yang-api+xml
+   Content-Type: application/yang-data+xml
 
    <streams
      xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
@@ -2692,7 +2689,7 @@ The client might send the following request:
 The server might send the following response:
 
    HTTP/1.1 200 OK
-   Content-Type: application/yang-api+xml
+   Content-Type: application/yang-data+xml
 
    <location
      xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
@@ -2887,19 +2884,19 @@ When an error occurs for a request message on any resource
 type, and the status code that will be returned is in the "4xx" range
 (except for status code "403 Forbidden"),
 then the server SHOULD send a response message-body containing
-the information described by the "errors" container definition
-within the "ietf-restconf" module defined in ^module^.
+the information described by the "yang-errors" YANG template definition
+within the "ietf-restconf" module, found in ^module^.
 The Content-Type of this
-response message MUST be a subtype of application/yang-errors (see example
-below).
+response message MUST be a subtype of application/yang-data
+(see example below).
 
 The client SHOULD specify the desired encoding for error messages
 by specifying the appropriate media-type in the Accept header.
 If no error media is specified, then the media subtype (e.g., XML or JSON)
 of the request message SHOULD be used, or the server MAY choose
 any supported message encoding format. If there is no request message
-the server MUST select "application/yang-errors+xml"
-or "application/yang-errors+json", depending on server preference.
+the server MUST select "application/yang-data+xml"
+or "application/yang-data+json", depending on server preference.
 All of the examples
 in this document, except for the one below, assume
 that XML encoding will be returned if there is an error.
@@ -2916,8 +2913,8 @@ YANG Tree Diagram for <errors> data:
          +--ro error-info
 
 The semantics and syntax for RESTCONF error messages are
-defined in the "application/yang-errors" restconf-media-type
-extension in ^module^.
+defined with the "yang-errors" YANG data template
+extension, found in ^module^.
 
 Examples:
 
@@ -2933,14 +2930,14 @@ in this example.
    DELETE /restconf/data/example-jukebox:jukebox/
       library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
-   Accept: application/yang-errors+json
+   Accept: application/yang-data+json
 
 The server might respond:
 
    HTTP/1.1 409 Conflict
    Date: Mon, 23 Apr 2012 17:11:00 GMT
    Server: example-server
-   Content-Type: application/yang-errors+json
+   Content-Type: application/yang-data+json
 
    {
      "ietf-restconf:errors": {
@@ -2968,7 +2965,7 @@ The server might respond (some lines wrapped for display purposes):
    HTTP/1.1 409 Conflict
    Date: Mon, 23 Apr 2012 17:11:00 GMT
    Server: example-server
-   Content-Type: application/yang-errors+xml
+   Content-Type: application/yang-data+xml
 
    <errors xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <error>
@@ -2999,7 +2996,7 @@ protocol-accessible objects, so no YANG tree diagram is shown.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2016-06-15.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2016-06-26.yang"
 
 * RESTCONF Monitoring
 
@@ -3131,7 +3128,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2016-06-15.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2016-06-26.yang"
 
 * YANG Module Library
 
@@ -3193,7 +3190,7 @@ Relation Type Registry defined by ^RFC5988^:
 
 This document registers two URIs as namesapces in the IETF XML registry
 ^RFC3688^. Following the format in RFC 3688, the following
-registration is requested to be made.
+registration is requested:
 
      URI: urn:ietf:params:xml:ns:yang:ietf-restconf
      Registrant Contact: The NETMOD WG of the IETF.
@@ -3204,7 +3201,7 @@ registration is requested to be made.
      XML: N/A, the requested URI is an XML namespace.
 
 This document registers two YANG modules in the YANG Module Names
-registry ^RFC6020^.
+registry ^RFC6020^:
 
   name:         ietf-restconf
   namespace:    urn:ietf:params:xml:ns:yang:ietf-restconf
@@ -3220,56 +3217,168 @@ registry ^RFC6020^.
 
 ** Media Types @media-types@
 
-*** Media Type application/yang-api+xml
+*** Media Type application/yang-data+xml @yang-data-xml@
 
 
    Type name: application
 
-   Subtype name: yang-api+xml
+   Subtype name: yang-data+xml
 
    Required parameters: none
 
-   Optional parameters:
+   Optional parameters: none
 
-   Encoding considerations:
+  // RFC Ed.: replace draft-ietf-netmod-rfc6020bis with
+  // the actual RFC reference for YANG 1.1, and remove this note.
 
-   Security considerations:
+   Encoding considerations: 8-bit
+      Each conceptual YANG data node is encoded according to
+      XML Encoding Rules and Canonical Format for the specific
+      YANG data node type defined in [draft-ietf-netmod-rfc6020bis].
 
-   Interoperability considerations:
+  // RFC Ed.: replace 'NN' in Section NN of [RFCXXXX] with the
+  // section number for Security Considerations
+  // Replace 'XXXX' in Section NN of [RFCXXXX] with the actual
+  // RFC number, and remove this note.
+
+   Security considerations: Security considerations related
+      to the generation and consumption of RESTCONF messages
+      are discussed in Section NN of [RFCXXXX].
+      Additional security considerations are specific to the
+      semantics of particular YANG data models. Each YANG module
+      is expected to specify security considerations for the
+      YANG data defined in that module.
+
+  // RFC Ed.: replace XXXX with actual RFC number and remove this
+  // note.
+
+   Interoperability considerations: [RFCXXXX] specifies format of
+      conforming messages and the interpretation thereof.
 
   // RFC Ed.: replace XXXX with actual RFC number and remove this
   // note.
 
    Published specification: RFC XXXX
 
-   Applications that use this media type:
+   Applications that use this media type: Instance document
+     data parsers used within a protocol or automation tool
+     that utilizes YANG defined data structures.
 
-   Fragment identifier considerations:
+   Fragment identifier considerations: The fragment field in the
+      request URI has no defined purpose.
 
    Additional information:
 
-     Deprecated alias names for this type:
-     Magic number(s):
-     File extension(s):
-     Macintosh file type code(s):
+     Deprecated alias names for this type: n/a
+     Magic number(s): n/a
+     File extension(s): .xml
+     Macintosh file type code(s): "TEXT"
 
-   Person & email address to contact for further information:
+  // RFC Ed.: replace XXXX with actual RFC number and remove this
+  // note.
 
-   Intended usage:
+   Person & email address to contact for further information: See
+      Authors' Addresses section of [RFCXXXX].
+
+   Intended usage: COMMON
 
    (One of COMMON, LIMITED USE, or OBSOLETE.)
 
-   Restrictions on usage:
+   Restrictions on usage: n/a
 
-   (Any restrictions on where the media type can be used go here.)
+  // RFC Ed.: replace XXXX with actual RFC number and remove this
+  // note.
 
-   Author:
+   Author: See Authors' Addresses section of [RFCXXXX].
 
-   Change controller:
+   Change controller: Internet Engineering Task Force
+      (mailto:iesg&ietf.org).
 
-   Provisional registration? (standards tree only):
+   Provisional registration? (standards tree only): no
 
 
+*** Media Type application/yang-data+json @yang-data-json@
+
+   Type name: application
+
+   Subtype name: yang-data+json
+
+   Required parameters: none
+
+   Optional parameters: none
+
+  // RFC Ed.: replace draft-ietf-netmod-yang-json with
+  // the actual RFC reference for JSON Encoding of YANG Data,
+  //  and remove this note.
+
+  // RFC Ed.: replace draft-ietf-netmod-yang-metadata with
+  // the actual RFC reference for JSON Encoding of YANG Data,
+  //  and remove this note.
+
+   Encoding considerations: 8-bit
+      Each conceptual YANG data node is encoded according to
+      [draft-ietf-netmod-yang-json]. A data annotation is
+      encoded according to [draft-ietf-netmod-yang-metadata]
+
+  // RFC Ed.: replace 'NN' in Section NN of [RFCXXXX] with the
+  // section number for Security Considerations
+  // Replace 'XXXX' in Section NN of [RFCXXXX] with the actual
+  // RFC number, and remove this note.
+
+   Security considerations: Security considerations related
+      to the generation and consumption of RESTCONF messages
+      are discussed in Section NN of [RFCXXXX].
+      Additional security considerations are specific to the
+      semantics of particular YANG data models. Each YANG module
+      is expected to specify security considerations for the
+      YANG data defined in that module.
+
+  // RFC Ed.: replace XXXX with actual RFC number and remove this
+  // note.
+
+   Interoperability considerations: [RFCXXXX] specifies format of
+      conforming messages and the interpretation thereof.
+
+  // RFC Ed.: replace XXXX with actual RFC number and remove this
+  // note.
+
+   Published specification: RFC XXXX
+
+   Applications that use this media type: Instance document
+     data parsers used within a protocol or automation tool
+     that utilizes YANG defined data structures.
+
+   Fragment identifier considerations: The fragment field in the
+      request URI has no defined purpose.
+
+   Additional information:
+
+     Deprecated alias names for this type: n/a
+     Magic number(s): n/a
+     File extension(s): .json
+     Macintosh file type code(s): "TEXT"
+
+  // RFC Ed.: replace XXXX with actual RFC number and remove this
+  // note.
+
+   Person & email address to contact for further information: See
+      Authors' Addresses section of [RFCXXXX].
+
+   Intended usage: COMMON
+
+   (One of COMMON, LIMITED USE, or OBSOLETE.)
+
+   Restrictions on usage: n/a
+
+  // RFC Ed.: replace XXXX with actual RFC number and remove this
+  // note.
+
+   Author: See Authors' Addresses section of [RFCXXXX].
+
+   Change controller: Internet Engineering Task Force
+      (mailto:iesg&ietf.org).
+
+   Provisional registration? (standards tree only): no
 
 
 ** RESTCONF Capability URNs
@@ -3431,6 +3540,8 @@ this pragma is not defined for responses
 - clarified too-big error-tag conversion
 - update SSE reference
 - clarify leaf-list identifier encoding
+- removed all media types except yang-data
+- changed restconf-media-type extension to be more generic yang-data extension
 
 ** v12 - v13
 
@@ -3785,7 +3896,7 @@ API resource, using the entry point "/restconf".
 
    GET /restconf   HTTP/1.1
    Host: example.com
-   Accept: application/yang-api+json
+   Accept: application/yang-data+json
 
 The server might respond as follows:
 
@@ -3797,7 +3908,7 @@ note.]
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
-   Content-Type: application/yang-api+json
+   Content-Type: application/yang-data+json
 
    {
      "ietf-restconf:restconf": {
@@ -3812,7 +3923,7 @@ the "Accept" header can be used, as in this example request:
 
    GET /restconf HTTP/1.1
    Host: example.com
-   Accept: application/yang-api+xml
+   Accept: application/yang-data+xml
 
 The server will return the same response either way,
 which might be as follows :
@@ -3825,7 +3936,7 @@ note.]
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
    Cache-Control: no-cache
-   Content-Type: application/yang-api+xml
+   Content-Type: application/yang-data+xml
 
    <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <data/>
@@ -4070,7 +4181,7 @@ sending a PATCH to the datastore resource:
 
    PATCH /restconf/data HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-datastore+xml
+   Content-Type: application/yang-data+xml
 
    <data xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <jukebox xmlns="http://example.com/ns/example-jukebox">

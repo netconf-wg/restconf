@@ -57,22 +57,24 @@ module ietf-restconf {
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2016-06-15 {
+  revision 2016-06-26 {
     description
       "Initial revision.";
     reference
       "RFC XXXX: RESTCONF Protocol.";
   }
 
-  extension restconf-media-type {
-   argument media-type-id {
+  extension yang-data {
+   argument name {
      yin-element true;
    }
    description
-     "This extension is used to specify a YANG data structure which
-      represents a conceptual RESTCONF media type.
+     "This extension is used to specify a YANG data template which
+      represents conceptual data defined in YANG. It is
+      intended to describe hierarchical data independent of
+      protocol context or specific message encoding format.
       Data definition statements within this extension specify
-      the generic syntax for the specific media type.
+      the generic syntax for the specific YANG data template.
 
       // RFC Ed.: replace draft-ietf-netmod-yang-json with RFC number
       // in the description below, and remove this note.
@@ -84,15 +86,15 @@ module ietf-restconf {
       JSON encoding rules for all RESTCONF media types that
       use the '+json' suffix.
 
-      The 'media-type-id' parameter value identifies the media type
-      that is being defined. It contains the string associated
-      with the generic media type, i.e., no suffix is specified.
+      The mandatory 'name' parameter value identifies the YANG
+      data template that is being defined. It contains the
+      template name.
 
       This extension is ignored unless it appears as a top-level
       statement. It SHOULD contain data definition statements
       that result in exactly one container data node definition.
       This allows compliant translation to an XML instance
-      document for each media type.
+      document for each YANG data template.
 
       The module name and namespace value for the YANG module using
       the extension statement is assigned to instance document data
@@ -119,7 +121,7 @@ module ietf-restconf {
          - instance-identifier data type
 
       The following data-def-stmt sub-statements have special
-      meaning when used within a restconf-resource extension
+      meaning when used within a yang-data-resource extension
       statement.
 
       - The list-stmt is not required to have a key-stmt defined.
@@ -132,11 +134,11 @@ module ietf-restconf {
       ";
   }
 
-  rc:restconf-media-type "application/yang-errors" {
+  rc:yang-data yang-errors {
     uses errors;
   }
 
-  rc:restconf-media-type "application/yang-api" {
+  rc:yang-data yang-api {
     uses restconf;
   }
 
