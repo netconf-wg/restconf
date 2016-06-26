@@ -76,15 +76,9 @@ module ietf-restconf {
       Data definition statements within this extension specify
       the generic syntax for the specific YANG data template.
 
-      // RFC Ed.: replace draft-ietf-netmod-yang-json with RFC number
-      // in the description below, and remove this note.
-
-      YANG is mapped to specific encoding formats outside the
-      scope of this extension statement. RFC 6020 defines XML
-      encoding rules for all RESTCONF media types that use
-      the '+xml' suffix. draft-ietf-netmod-yang-json defines
-      JSON encoding rules for all RESTCONF media types that
-      use the '+json' suffix.
+      Note that this extension does not define a media-type.
+      A specification using this extension MUST specify the
+      message encoding rules, including the content media type.
 
       The mandatory 'name' parameter value identifies the YANG
       data template that is being defined. It contains the
