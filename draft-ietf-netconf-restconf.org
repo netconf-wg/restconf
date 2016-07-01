@@ -1146,7 +1146,9 @@ as follows:
 If the "rpc" or "action" statement has an "input" section then
 instances of these input parameters are encoded
 in the module namespace where the "rpc" or "action" statement is defined,
-in an XML element or JSON object named "input".
+in an XML element or JSON object named "input",
+which is in the module namespace where the "rpc"
+or "action" statement is defined.
 
 If the "rpc" or "action" statement has an "input" section and the 
 "input" object tree contains any child data nodes which are considered
@@ -1160,11 +1162,12 @@ MAY be sent by the client in the request.
 If the "rpc" or "action" statement has no "input" section, the
 request message MUST NOT include a message-body.
 
-
 If the "rpc" or "action" statement has an "output" section then
-instances of these input parameters are encoded
+instances of these output parameters are encoded
 in the module namespace where the "rpc" or "action" statement is defined,
-in an XML element or JSON object named "output".
+in an XML element or JSON object named "output",
+which is in the module namespace where the "rpc"
+or "action" statement is defined.
 
 If the RPC operation is invoked without errors,
 and if the "rpc" or "action" statement has an "output" section and the 
@@ -1201,7 +1204,9 @@ using a URI within the {+restconf}/data subtree.
 If the "rpc" or "action" statement has an "input" section, then
 the "input" node is provided in the message-body,
 corresponding to the YANG data definition statements
-within the "input" section.
+within the "input" section.  The "input" node is defined
+to be in the namespace of the module containing the "rpc"
+or "action" statement.
 
 Examples:
 
@@ -1291,6 +1296,9 @@ If the "rpc" or "action" statement has an "output" section, then
 the "output" node is provided in the message-body,
 corresponding to the YANG data definition statements
 within the "output" section.
+The "output" node is defined
+to be in the namespace of the module containing the "rpc"
+or "action" statement.
 
 The request URI is not returned in the response.
 This URI might have context information required to associate
@@ -1865,8 +1873,9 @@ resource patching mechanisms.  It is optional to implement
 by the server.  Each patch mechanism needs a unique
 media type.  Zero or more patch media types MAY be supported
 by the server.  The media types supported by a server can be
-discovered by the client by sending an OPTIONS request (see
-^options^).
+discovered by the client by sending an OPTIONS request,
+and examining the Accept-Patch header field in the response.
+(see ^options^).
 
 This document defines one patch mechanism (^plain-patch^). Another
 patch mechanism, the YANG PATCH mechanism, is defined in
@@ -2048,8 +2057,7 @@ other methods or resource types.
 
 By default, the server will include all sub-resources within a
 retrieved resource, which have the same resource type as the requested
-resource.  Only one level of sub-resources with a different media type
-than the target resource will be returned.  The exception is
+resource. The exception is
 the datastore resource.  If this resource type is retrieved then
 by default the datastore and all child data resources are returned.
 
@@ -3425,7 +3433,7 @@ This document registers several capability identifiers in
 
 The "ietf-restconf-monitoring" YANG module defined in this memo
 is designed to be accessed via the NETCONF protocol ^RFC6241^.
- The lowest NETCONF layer is the secure transport layer,
+The lowest NETCONF layer is the secure transport layer,
 and the mandatory-to-implement secure transport is Secure Shell
 (SSH) ^RFC6242^. The NETCONF access control model ^RFC6536^
 provides the means to restrict access for particular NETCONF users
@@ -3462,7 +3470,10 @@ then after authentication.  When an operation is not properly authorized,
 the RESTCONF server MUST return a "401 Unauthorized" status-line.
 Note that authorization information can be exchanged in the form of
 configuration information, which is all the more reason to ensure the
-security of the connection.
+security of the connection.  Note that it is possible for a client
+to detect configuration changes in data resources it is not authorized
+to access by monitoring changes in the ETag and Last-Modified
+header fields returned by the server for the datastore resource.
 
 * Acknowledgements
 
@@ -3479,7 +3490,8 @@ Balint Uveges, Randy Presuhn, Sue Hares, Mark Nottingham,
 Benoit Claise, and Dale Worley.
 
 Contributions to this material by Andy Bierman are based upon work
-supported by the The Space & Terrestrial Communications Directorate
+supported by the United States Army,
+Space & Terrestrial Communications Directorate
 (S&TCD) under Contract No. W15P7T-13-C-A616. Any opinions, findings
 and conclusions or recommendations expressed in this material are
 those of the author(s) and do not necessarily reflect the views of

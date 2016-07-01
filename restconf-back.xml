@@ -495,6 +495,22 @@ specifications of each URI scheme.
       <seriesInfo name='RFC' value='6241'/>
   </reference>
 
+<reference anchor="RFC6242" target="http://www.rfc-editor.org/info/rfc6242">
+<front>
+<title>Using the NETCONF Protocol over Secure Shell (SSH)</title>
+<author initials="M." surname="Wasserman" fullname="M. Wasserman">
+<organization/>
+</author>
+<date year="2011" month="June"/>
+<abstract>
+<t>
+This document describes a method for invoking and running the Network Configuration Protocol (NETCONF) within a Secure Shell (SSH) session as an SSH subsystem. This document obsoletes RFC 4742. [STANDARDS-TRACK]
+</t>
+</abstract>
+</front>
+<seriesInfo name="RFC" value="6242"/>
+<seriesInfo name="DOI" value="10.17487/RFC6242"/>
+</reference>
 
 <reference anchor='RFC6243'>
 
