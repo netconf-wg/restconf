@@ -3224,15 +3224,15 @@ registry ^RFC6020^:
 
    Subtype name: yang-data+xml
 
-   Required parameters: none
+   Required parameters: None
 
-   Optional parameters: none
+   Optional parameters: None
 
   // RFC Ed.: replace draft-ietf-netmod-rfc6020bis with
   // the actual RFC reference for YANG 1.1, and remove this note.
 
    Encoding considerations: 8-bit
-      Each conceptual YANG data node is encoded according to
+      Each conceptual YANG data node is encoded according to the
       XML Encoding Rules and Canonical Format for the specific
       YANG data node type defined in [draft-ietf-netmod-rfc6020bis].
 
@@ -3252,8 +3252,9 @@ registry ^RFC6020^:
   // RFC Ed.: replace XXXX with actual RFC number and remove this
   // note.
 
-   Interoperability considerations: [RFCXXXX] specifies format of
-      conforming messages and the interpretation thereof.
+   Interoperability considerations: [RFCXXXX] specifies the
+      format of conforming messages and the interpretation
+      thereof.
 
   // RFC Ed.: replace XXXX with actual RFC number and remove this
   // note.
@@ -3262,15 +3263,15 @@ registry ^RFC6020^:
 
    Applications that use this media type: Instance document
      data parsers used within a protocol or automation tool
-     that utilizes YANG defined data structures.
+     that utilize YANG defined data structures.
 
    Fragment identifier considerations: The fragment field in the
       request URI has no defined purpose.
 
    Additional information:
 
-     Deprecated alias names for this type: n/a
-     Magic number(s): n/a
+     Deprecated alias names for this type: N/A
+     Magic number(s): N/A
      File extension(s): .xml
      Macintosh file type code(s): "TEXT"
 
@@ -3282,9 +3283,7 @@ registry ^RFC6020^:
 
    Intended usage: COMMON
 
-   (One of COMMON, LIMITED USE, or OBSOLETE.)
-
-   Restrictions on usage: n/a
+   Restrictions on usage: N/A
 
   // RFC Ed.: replace XXXX with actual RFC number and remove this
   // note.
@@ -3303,9 +3302,9 @@ registry ^RFC6020^:
 
    Subtype name: yang-data+json
 
-   Required parameters: none
+   Required parameters: None
 
-   Optional parameters: none
+   Optional parameters: None
 
   // RFC Ed.: replace draft-ietf-netmod-yang-json with
   // the actual RFC reference for JSON Encoding of YANG Data,
@@ -3336,8 +3335,8 @@ registry ^RFC6020^:
   // RFC Ed.: replace XXXX with actual RFC number and remove this
   // note.
 
-   Interoperability considerations: [RFCXXXX] specifies format of
-      conforming messages and the interpretation thereof.
+   Interoperability considerations: [RFCXXXX] specifies the format
+      of conforming messages and the interpretation thereof.
 
   // RFC Ed.: replace XXXX with actual RFC number and remove this
   // note.
@@ -3346,15 +3345,15 @@ registry ^RFC6020^:
 
    Applications that use this media type: Instance document
      data parsers used within a protocol or automation tool
-     that utilizes YANG defined data structures.
+     that utilize YANG defined data structures.
 
    Fragment identifier considerations: The fragment field in the
       request URI has no defined purpose.
 
    Additional information:
 
-     Deprecated alias names for this type: n/a
-     Magic number(s): n/a
+     Deprecated alias names for this type: N/A
+     Magic number(s): N/A
      File extension(s): .json
      Macintosh file type code(s): "TEXT"
 
@@ -3366,9 +3365,7 @@ registry ^RFC6020^:
 
    Intended usage: COMMON
 
-   (One of COMMON, LIMITED USE, or OBSOLETE.)
-
-   Restrictions on usage: n/a
+   Restrictions on usage: N/A
 
   // RFC Ed.: replace XXXX with actual RFC number and remove this
   // note.
