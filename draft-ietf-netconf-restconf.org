@@ -813,9 +813,11 @@ to reject the request if the resource has been modified
 since the specified timestamp.
 
 The server SHOULD maintain a last-modified timestamp for the
-datastore resource.  This timestamp is only
-affected by configuration child data resources, and MUST NOT be updated
+datastore resource, defined in ^datastore-resource^.
+This timestamp is only affected by configuration
+child data resources, and MUST NOT be updated
 for changes to non-configuration child data resources.
+Last-modified timestamps for data resources are discussed in ^data-resource^.
 
 If the RESTCONF server is colocated with a NETCONF server, then the
 last-modified timestamp MUST represent the "running" datastore.
@@ -835,6 +837,7 @@ top-level {+restconf}/data resource.
 This entity tag is only
 affected by configuration data resources, and MUST NOT be updated
 for changes to non-configuration data.
+Entity tags for data resources are discussed in ^data-resource^.
 
 If the RESTCONF server is colocated with a NETCONF server, then this
 entity tag MUST represent the "running" datastore.
@@ -2508,7 +2511,8 @@ The server might respond as follows.
 *** JSON MetaData Encoding Example
 
 Note that RFC 6243 defines the "default" attribute with XSD, not YANG,
-so the YANG module name has to be assigned manually.
+so the YANG module name has to be assigned instead of derived
+from the YANG module name.
 The value "ietf-netconf-with-defaults" is assigned for JSON metadata
 encoding.
 
