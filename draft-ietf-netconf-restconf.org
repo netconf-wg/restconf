@@ -459,6 +459,11 @@ integrity and confidentiality. A RESTCONF server MUST support the TLS
 protocol ^RFC5246^.  The RESTCONF protocol MUST NOT be used over HTTP
 without using the TLS protocol.
 
+HTTP/2 ^RFC7540^ MAY be used for RESTCONF.
+The server MUST respond using the same HTTP/2 stream
+that was used for the corresponding request.
+
+
 ** HTTPS with X.509v3 Certificates
 
 Given the nearly ubiquitous support for HTTP over TLS ^RFC7230^,
