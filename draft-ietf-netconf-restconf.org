@@ -179,7 +179,7 @@ the patch type in use.
 
 - plain patch: a specific PATCH request type, defined in ^plain-patch^,
 that can be used for simple merge operations. It has a representation
-with the media-type "application/yang-data+xml"
+with the media-type "application/yang-data"
 or "application/yang-data+json".
 
 - query parameter: a parameter (and its value if any),
@@ -217,7 +217,7 @@ such as the URL to retrieve the event stream data.
 - YANG data template: a schema for modeling a conceptual
 data structure in an encoding-independent manner.  It is
 defined with the "yang-data" extension, found in ^module^.
-It has a representation with the media-type "application/yang-data+xml"
+It has a representation with the media-type "application/yang-data"
 or "application/yang-data+json".
 
 *** URI Template and Examples @uri-template@
@@ -460,7 +460,8 @@ protocol ^RFC5246^.  The RESTCONF protocol MUST NOT be used over HTTP
 without using the TLS protocol.
 
 HTTP/2 ^RFC7540^ MAY be used for RESTCONF.
-The server MUST respond using the same HTTP/2 stream
+The server MUST respond using a single HTTP/2 stream for all client
+requests from a stream.  The server MAY respond using same HTTP/2 stream
 that was used for the corresponding request.
 
 
@@ -660,7 +661,7 @@ to the schema for a particular YANG construct.
 This document defines media types for XML and JSON serialization
 of YANG data.  Other documents MAY define other media types for
 different serializations of YANG data.
-The "application/yang-data+xml" media-type is defined in ^yang-data-xml^.
+The "application/yang-data" media-type is defined in ^yang-data-xml^.
 The "application/yang-data+json" media-type is defined in ^yang-data-json^.
 
 ** API Resource @api-resource@
@@ -668,7 +669,7 @@ The "application/yang-data+json" media-type is defined in ^yang-data-json^.
 The API resource contains the entry points for
 the RESTCONF datastore and operation resources.
 It is the top-level resource located at {+restconf} and has the media type
-"application/yang-data+xml" or "application/yang-data+json".
+"application/yang-data" or "application/yang-data+json".
 
 YANG Tree Diagram for an API Resource:
 
@@ -715,7 +716,7 @@ query parameter (see ^content^).
    GET /restconf/data/example-jukebox:jukebox/library
        ?content=nonconfig  HTTP/1.1
    Host: example.com
-   Accept: application/yang-data+xml
+   Accept: application/yang-data
 
 The server might respond:
 
@@ -723,7 +724,7 @@ The server might respond:
    Date: Mon, 23 Apr 2012 17:01:30 GMT
    Server: example-server
    Cache-Control: no-cache
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <library xmlns="https://example.com/ns/example-jukebox">
      <artist-count>42</artist-count>
@@ -761,7 +762,7 @@ Example:
 
    GET /restconf/yang-library-version  HTTP/1.1
    Host: example.com
-   Accept: application/yang-data+xml
+   Accept: application/yang-data
 
 The server might respond
 (response wrapped for display purposes):
@@ -770,7 +771,7 @@ The server might respond
    Date: Mon, 23 Apr 2012 17:01:30 GMT
    Server: example-server
    Cache-Control: no-cache
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <yang-library-version
      xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
@@ -1235,7 +1236,7 @@ to invoke the "reboot" RPC operation:
 
    POST /restconf/operations/example-ops:reboot HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <input xmlns="https://example.com/ns/example-ops">
     <delay>600</delay>
@@ -1272,7 +1273,7 @@ to invoke the "reset" action (text wrap for display purposes):
    POST /restconf/data/example-actions:interfaces/interface=eth0
      /reset HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <input xmlns="https://example.com/ns/example-actions">
      <delay>600</delay>
@@ -1348,7 +1349,7 @@ The same response is shown here using XML encoding:
    HTTP/1.1 200 OK
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <output xmlns="https://example.com/ns/example-ops">
      <reboot-time>30</reboot-time>
@@ -1395,7 +1396,7 @@ the client might send the following POST request message:
 
    POST /restconf/operations/example-ops:reboot HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <input xmlns="https://example.com/ns/example-ops">
      <delay>-33</delay>
@@ -1409,7 +1410,7 @@ The server might respond with an "invalid-value" error:
    HTTP/1.1 400 Bad Request
    Date: Mon, 25 Apr 2012 11:10:30 GMT
    Server: example-server
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <errors xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <error>
@@ -1662,14 +1663,14 @@ XML representation of the a specific "album" resource:
    GET /restconf/data/example-jukebox:jukebox/
       library/artist=Foo%20Fighters/album=Wasting%20Light  HTTP/1.1
    Host: example.com
-   Accept: application/yang-data+xml
+   Accept: application/yang-data
 
 The server might respond:
 
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2012 17:02:40 GMT
    Server: example-server
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
    Cache-Control: no-cache
    ETag: "a74eefc993a2b"
    Last-Modified: Mon, 23 Apr 2012 11:02:14 GMT
@@ -1864,7 +1865,7 @@ The same request is shown here using XML encoding:
    PUT /restconf/data/example-jukebox:jukebox/
        library/artist=Foo%20Fighters/album=Wasting%20Light   HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <album xmlns="http://example.com/ns/example-jukebox"
           xmlns:jbox="http://example.com/ns/example-jukebox">
@@ -1909,7 +1910,7 @@ the procedures defined in ^error-reporting^.
 The plain patch mechanism merges the contents of the message-body with
 the target resource.  The message-body for a plain patch
 MUST be present and MUST be represented by the
-media type "application/yang-data+xml" or "application/yang-data+json".
+media type "application/yang-data" or "application/yang-data+json".
 
 Plain patch can be used to create or update, but not delete, a child
 resource within the target resource.  Please see
@@ -1938,7 +1939,7 @@ for display purposes only:
        library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
    If-Match: "b8389233a4c"
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <album xmlns="http://example.com/ns/example-jukebox">
     <year>2011</year>
@@ -2493,7 +2494,7 @@ This example shows that attribute for the "mtu" leaf .
    GET /restconf/data/interfaces/interface=eth1
        ?with-defaults=report-all-tagged HTTP/1.1
    Host: example.com
-   Accept: application/yang-data+xml
+   Accept: application/yang-data
 
 
 The server might respond as follows.
@@ -2502,7 +2503,7 @@ The server might respond as follows.
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <interface
      xmlns="urn:example.com:params:xml:ns:yang:example-interface">
@@ -2620,14 +2621,14 @@ The client might send the following request:
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
        streams HTTP/1.1
    Host: example.com
-   Accept: application/yang-data+xml
+   Accept: application/yang-data
 
 
 The server might send the following response:
 
 
    HTTP/1.1 200 OK
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <streams
      xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
@@ -2700,13 +2701,13 @@ The client might send the following request:
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
        streams/stream=NETCONF/access=xml/location HTTP/1.1
    Host: example.com
-   Accept: application/yang-data+xml
+   Accept: application/yang-data
 
 
 The server might send the following response:
 
    HTTP/1.1 200 OK
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <location
      xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
@@ -2875,7 +2876,7 @@ for the "action" or "rpc" statement.
 !! table Mapping from error-tag to status code
 !! head ! error-tag ! status code
 !! row  ! in-use ! 409
-!! row  ! invalid-value ! 400
+!! row  ! invalid-value ! 400 or 406
 !! row  ! (request) too-big ! 413
 !! row  ! (response) too-big ! 400
 !! row  ! missing-attribute ! 400
@@ -2891,7 +2892,7 @@ for the "action" or "rpc" statement.
 !! row  ! data-exists ! 409
 !! row  ! data-missing ! 409
 !! row  ! operation-not-supported ! 501
-!! row  ! operation-failed ! 500
+!! row  ! operation-failed ! 412 or 500
 !! row  ! partial-operation ! 500
 !! row  ! malformed-message ! 400
 
@@ -2912,7 +2913,7 @@ by specifying the appropriate media-type in the Accept header.
 If no error media is specified, then the media subtype (e.g., XML or JSON)
 of the request message SHOULD be used, or the server MAY choose
 any supported message encoding format. If there is no request message
-the server MUST select "application/yang-data+xml"
+the server MUST select "application/yang-data"
 or "application/yang-data+json", depending on server preference.
 All of the examples
 in this document, except for the one below, assume
@@ -2982,7 +2983,7 @@ The server might respond (some lines wrapped for display purposes):
    HTTP/1.1 409 Conflict
    Date: Mon, 23 Apr 2012 17:11:00 GMT
    Server: example-server
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <errors xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <error>
@@ -3046,13 +3047,13 @@ The server MAY maintain a last-modified timestamp for this
 container, and return the "Last-Modified" header when this
 data node is retrieved with the GET or HEAD methods.
 Note that the last-modified timestamp for the datastore resource is not
-affected by changes this subtree.
+affected by changes to this subtree.
 
 The server SHOULD maintain an entity-tag for this
 container, and return the "ETag" header when this
 data node is retrieved with the GET or HEAD methods.
 Note that the entity-tag for the datastore resource is not
-affected by changes this subtree.
+affected by changes to this subtree.
 
 The server MUST include a "capability" URI leaf-list entry for
 the "defaults" mode used by the server, defined in ^defaults-uri^.
@@ -3205,7 +3206,7 @@ Relation Type Registry defined by ^RFC5988^:
 `
 ** YANG Module Registry
 
-This document registers two URIs as namesapces in the IETF XML registry
+This document registers two URIs as namespaces in the IETF XML registry
 ^RFC3688^. Following the format in RFC 3688, the following
 registration is requested:
 
@@ -3234,12 +3235,12 @@ registry ^RFC6020^:
 
 ** Media Types @media-types@
 
-*** Media Type application/yang-data+xml @yang-data-xml@
+*** Media Type application/yang-data @yang-data-xml@
 
 
    Type name: application
 
-   Subtype name: yang-data+xml
+   Subtype name: yang-data
 
    Required parameters: None
 
@@ -3364,8 +3365,9 @@ registry ^RFC6020^:
      data parsers used within a protocol or automation tool
      that utilize YANG defined data structures.
 
-   Fragment identifier considerations: The fragment field in the
-      request URI has no defined purpose.
+   Fragment identifier considerations: The syntax and semantics
+      of fragment identifiers are the same as specified for the
+     "application/json" media type.
 
    Additional information:
 
@@ -3516,6 +3518,13 @@ The Space & Terrestrial Communications Directorate (S&TCD).
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
 
+** v14 to v15
+
+- added text for HTTP/2 usage
+- changed media type definitions per review comments
+- added some clarifications and typos
+- added error-tag mapping for 406 and 412 errors
+
 ** v13 - v14
 
 This release addresses github issues #61, #62, #63, #65, #66, and #67.
@@ -3548,7 +3557,7 @@ and /modules-state/module objects, since these are not configuration data nodes
 - clarified Acknowledgements section
 - clarified some examples
 - update some references
-- update RFC 2119 boilerplace
+- update RFC 2119 boilerplate
 - remove requirements that simply restate HTTP requirements
 - remove Pragma: no-cache from examples since RFC 7234 says
 this pragma is not defined for responses
@@ -3941,7 +3950,7 @@ the "Accept" header can be used, as in this example request:
 
    GET /restconf HTTP/1.1
    Host: example.com
-   Accept: application/yang-data+xml
+   Accept: application/yang-data
 
 The server will return the same response either way,
 which might be as follows :
@@ -3954,7 +3963,7 @@ note.]
    Date: Mon, 23 Apr 2012 17:01:00 GMT
    Server: example-server
    Cache-Control: no-cache
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <data/>
@@ -4062,7 +4071,7 @@ the RESTCONF query parameters, plus one vendor parameter:
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/
        capabilities  HTTP/1.1
    Host: example.com
-   Accept: application/yang-data+xml
+   Accept: application/yang-data
 
 
 The server might respond as follows.
@@ -4074,7 +4083,7 @@ for display purposes only.
    Server: example-server
    Cache-Control: no-cache
    Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <capabilities
        xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
@@ -4143,7 +4152,7 @@ for display purposes only:
    POST /restconf/data/example-jukebox:jukebox/
        library/artist=Foo%20Fighters  HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <album xmlns="http://example.com/ns/example-jukebox">
      <name>Wasting Light</name>
@@ -4166,7 +4175,7 @@ for display purposes only:
 *** Detect Resource Entity Tag Change
 
 In this example, the server just supports the
-mandatory datastore last-changed timestamp.
+datastore last-changed timestamp.
 The client has previously retrieved the "Last-Modified"
 header and has some value cached to provide in
 the following request to patch an "album" list entry
@@ -4199,7 +4208,7 @@ sending a PATCH to the datastore resource:
 
    PATCH /restconf/data HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <data xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <jukebox xmlns="http://example.com/ns/example-jukebox">
@@ -4231,7 +4240,7 @@ display purposes only):
    PATCH /restconf/data/example-jukebox:jukebox/library/
       artist=Nick%20Cave%20and%20the%Bad%20Seeds HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data+xml
+   Content-Type: application/yang-data
 
    <artist xmlns="http://example.com/ns/example-jukebox">
      <name>Nick Cave and the Bad Seeds</name>

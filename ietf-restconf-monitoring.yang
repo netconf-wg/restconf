@@ -12,12 +12,6 @@ module ietf-restconf-monitoring {
     "WG Web:   <http://tools.ietf.org/wg/netconf/>
      WG List:  <mailto:netconf@ietf.org>
 
-     WG Chair: Mehmet Ersue
-               <mailto:mehmet.ersue@nsn.com>
-
-     WG Chair: Mahesh Jethanandani
-               <mailto:mjethanandani@gmail.com>
-
      Editor:   Andy Bierman
                <mailto:andy@yumaworks.com>
 
