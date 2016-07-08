@@ -1,7 +1,15 @@
 module example-ops {
   namespace "https://example.com/ns/example-ops";
   prefix "ops";
-  revision "2016-03-10";
+
+  organization "Example, Inc.";
+  contact "support at example.com";
+  description "Example Operations Data Model Module";
+  revision "2016-07-07" {
+    description "Initial version.";
+    reference "example.com document 3-3373";
+  }
+
 
   rpc reboot {
     input {

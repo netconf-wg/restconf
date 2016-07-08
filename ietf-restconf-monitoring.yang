@@ -42,11 +42,11 @@ module ietf-restconf-monitoring {
   // note.
 
   // RFC Ed.: remove this note
-  // Note: extracted from draft-ietf-netconf-restconf-14.txt
+  // Note: extracted from draft-ietf-netconf-restconf-15.txt
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2016-06-28 {
+  revision 2016-07-07 {
     description
       "Initial revision.";
     reference

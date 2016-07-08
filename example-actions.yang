@@ -3,6 +3,15 @@ module example-actions {
   namespace "https://example.com/ns/example-actions";
   prefix "act";
   import ietf-yang-types { prefix yang; }
+
+  organization "Example, Inc.";
+  contact "support at example.com";
+  description "Example Actions Data Model Module";
+  revision "2016-07-07" {
+    description "Initial version.";
+    reference "example.com document 2-9973";
+  }
+
   revision "2016-03-10";
 
   container interfaces {
