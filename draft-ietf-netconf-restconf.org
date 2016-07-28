@@ -81,7 +81,7 @@ The following terms are defined in ^RFC3986^:
 
 The following terms are defined in ^RFC7230^:
 
-- header
+- header field
 - message-body
 - request-line
 - request URI
@@ -166,7 +166,7 @@ Called "client" in ^RFC6241^.
 Called "server" in ^RFC6241^.
 
 - operation: the conceptual RESTCONF operation for a message,
-derived from the HTTP method, request URI, headers, and message-body.
+derived from the HTTP method, request URI, header fields, and message-body.
 
 - operation resource: a resource that models a data-model specific operation,
 that is defined with a YANG "rpc" or "action" statement.
@@ -219,6 +219,7 @@ data structure in an encoding-independent manner.  It is
 defined with the "yang-data" extension, found in ^module^.
 It has a representation with the media-type "application/yang-data-xml"
 or "application/yang-data+json".
+
 
 *** URI Template and Examples @uri-template@
 
@@ -549,7 +550,7 @@ data-model specific.
 
 A resource has a representation associated with a
 media type identifier, as represented
-by the "Content-Type" header in the HTTP response message.
+by the "Content-Type" header field in the HTTP response message.
 A resource can contain zero or more nested resources.
 A resource can be created and deleted independently of its
 parent resource, as long as the parent resource exists.
@@ -673,10 +674,11 @@ It is the top-level resource located at {+restconf} and has the media type
 
 YANG Tree Diagram for an API Resource:
 
-   +--rw restconf
-      +--rw data
-      +--rw operations
-      +--ro yang-library-version
+  +---- restconf
+        +---- data
+        +---- operations
+        +--ro yang-library-version    string
+
 
 The "yang-api" YANG data template is defined with the "yang-data" extension
 in the "ietf-restconf" module, found in ^module^.
@@ -811,9 +813,9 @@ in RESTCONF, for datastore and data resources.
 **** Timestamp
 
 The last change time is maintained and
-the "Last-Modified" (^RFC7232^, Section 2.2) header is returned in the
+the "Last-Modified" (^RFC7232^, Section 2.2) header field is returned in the
 response for a retrieval request.
-The "If-Unmodified-Since" header can be used
+The "If-Unmodified-Since" header field can be used
 in edit operation requests to cause the server
 to reject the request if the resource has been modified
 since the specified timestamp.
@@ -831,9 +833,9 @@ last-modified timestamp MUST represent the "running" datastore.
 **** Entity tag
 
 A unique opaque string is maintained and
-the "ETag" (^RFC7232^, Section 2.3) header is returned in the
+the "ETag" (^RFC7232^, Section 2.3) header field is returned in the
 response for a retrieval request.
-The "If-Match" header can be used
+The "If-Match" header field can be used
 in edit operation requests to cause the server
 to reject the request if the resource entity tag
 does not match the specified value.
@@ -890,12 +892,12 @@ for more details on edit operations.
 
 For configuration data resources,
 the server MAY maintain a last-modified timestamp for the
-resource, and return the "Last-Modified" header when it
+resource, and return the "Last-Modified" header field when it
 is retrieved with the GET or HEAD methods.
 
-The "Last-Modified" header information can be used by a
+The "Last-Modified" header field can be used by a
 RESTCONF client in subsequent requests, within the "If-Modified-Since"
-and "If-Unmodified-Since" headers.
+and "If-Unmodified-Since" header fields.
 
 If maintained, the resource timestamp MUST be set to the current
 time whenever the resource
@@ -912,7 +914,7 @@ for changes to non-configuration data.
 
 For non-configuration data resources,
 the server MAY maintain a last-modified timestamp for the
-resource, and return the "Last-Modified" header when it
+resource, and return the "Last-Modified" header field when it
 is retrieved with the GET or HEAD methods. The timestamps
 for non-configuration data resources are updated in an
 implementation-specific manner.
@@ -921,7 +923,7 @@ implementation-specific manner.
 
 For configuration data resources,
 the server SHOULD maintain a resource entity tag for each
-resource, and return the "ETag" header when it
+resource, and return the "ETag" header field when it
 is retrieved as the target resource with the GET or HEAD methods.
 If maintained, the resource entity tag MUST be updated
 whenever the resource
@@ -929,9 +931,9 @@ or any configuration resource within the resource is altered.
 If not maintained, then the resource entity tag for the datastore
 MUST be used instead.
 
-The "ETag" header information can be used by a
+The "ETag" header field can be used by a
 RESTCONF client in subsequent requests, within the "If-Match"
-and "If-None-Match" headers.
+and "If-None-Match" header fields.
 
 This entity tag is only
 affected by configuration data resources, and MUST NOT be updated
@@ -942,7 +944,7 @@ the instance within the "running" datastore.
 
 For non-configuration data resources,
 the server MAY maintain an entity tag for each
-resource, and return the "ETag" header when it
+resource, and return the "ETag" header field when it
 is retrieved with the GET or HEAD methods. The entity tags
 for non-configuration data resources are updated in an
 implementation-specific manner.
@@ -1012,7 +1014,7 @@ are interpreted as a zero-length string.
 - The "list-instance" ABNF rule defined in ^path-abnf^
 represents the syntax of a list instance identifier.
 
-Resource URI values returned in Location headers
+Resource URI values returned in Location header fields
 for data resources MUST identify the module name
 as specified in ^I-D.ietf-netmod-yang-json^, even
 if there are no conflicting local names when the resource
@@ -1585,14 +1587,14 @@ The server MUST implement this method.
 # could be extracted from the YANG modules and the RESTCONF
 # protocol specification.
 
-If the PATCH method is supported, then the "Accept-Patch" header MUST
+If the PATCH method is supported, then the "Accept-Patch" header field MUST
 be supported and returned in the response to the OPTIONS request, as
 defined in ^RFC5789^.
 
 ** HEAD @head@
 
 The HEAD method is sent by the client to
-retrieve just the headers that would be returned
+retrieve just the header fields that would be returned
 for the comparable GET method, without the response message-body.
 It is supported for all resource types, except operation resources.
 
@@ -1649,7 +1651,7 @@ then a "405 Method Not Allowed" status-line MUST be returned by the server.
 
 Note that the way that access control is applied to data resources may
 not be completely compatible with HTTP caching.  The Last-Modified
-and ETag headers maintained for a data resource are not affected
+and ETag header fields maintained for a data resource are not affected
 by changes to the access control rules for that data resource.  It is possible
 for the representation of a data resource that is visible to
 a particular client to be changed without detection via the Last-Modified
@@ -1657,7 +1659,7 @@ or ETag values.
 
 Example:
 
-The client might request the response headers for an
+The client might request the response header fields for an
 XML representation of the a specific "album" resource:
 
    GET /restconf/data/example-jukebox:jukebox/
@@ -1712,7 +1714,7 @@ is ordered-by user.
 
 If the POST method succeeds,
 a "201 Created" status-line is returned and there is
-no response message-body.  A "Location" header identifying
+no response message-body.  A "Location" header field identifying
 the child resource that was created MUST be present
 in the response in this case.
 
@@ -1738,7 +1740,7 @@ To create a new "jukebox" resource, the client might send:
 
 
 If the resource is created, the server might respond as follows.  Note
-that the "Location" header line is wrapped for display purposes only:
+that the "Location" header field is wrapped for display purposes only:
 
    HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2012 17:01:00 GMT
@@ -1915,7 +1917,7 @@ media type "application/yang-data-xml" or "application/yang-data+json".
 Plain patch can be used to create or update, but not delete, a child
 resource within the target resource.  Please see
 ^I-D.ietf-netconf-yang-patch^ for an alternate media-type supporting
-the ability to delete child resources.
+the ability to delete child resources:
 The YANG Patch Media Type allows multiple
 sub-operations (e.g., merge, delete) within a single PATCH
 operation.
@@ -2379,7 +2381,7 @@ MUST be percent-encoded, according to ^RFC3986^, section 2.1.
 
 - fragment: This field is not used by the RESTCONF protocol.
 
-When new resources are created by the client, a "Location" header
+When new resources are created by the client, a "Location" header field
 is returned, which identifies the path of the newly created resource.
 The client uses this exact path identifier to access
 the resource once it has been created.
@@ -2444,13 +2446,13 @@ special encoding rules to identify module namespaces
 and provide consistent type processing of YANG data.
 
 Request input content encoding format is identified with the Content-Type
-header.  This field MUST be present if a message-body is sent
+header field.  This field MUST be present if a message-body is sent
 by the client.
 
-The server MUST support the "Accept" header and "406 Not Acceptable"
+The server MUST support the "Accept" header field and "406 Not Acceptable"
 status-line, as defined in ^RFC7231^.
 Response output content encoding format is identified with the Accept
-header in the request. If it is not specified, the request
+header field in the request. If it is not specified, the request
 input encoding format SHOULD be used, or the server MAY choose
 any supported content encoding format.
 
@@ -2461,7 +2463,7 @@ format encoding.
 
 A client can determine if the RESTCONF server supports an
 encoding format by sending a request using a specific format
-in the Content-Type and/or Accept header.  If the server does not
+in the Content-Type and/or Accept header field.  If the server does not
 support the requested input encoding for a request,
 then it MUST return an error response with
 a '415 Unsupported Media Type' status-line.
@@ -2554,7 +2556,7 @@ The server might respond as follows.
 ** Return Status
 
 Each message represents some sort of resource access.
-An HTTP "status-line" header line is returned for each request.
+An HTTP "status-line" header field is returned for each request.
 If a "4xx" range status code is returned in the status-line,
 then the error information SHOULD be returned in the response,
 according to the format defined in ^errors^.
@@ -2571,19 +2573,19 @@ since these ranges do not represent error conditions.
 Since the datastore contents change at unpredictable times,
 responses from a RESTCONF server generally SHOULD NOT be cached.
 
-The server SHOULD include a "Cache-Control" header in every response
+The server SHOULD include a "Cache-Control" header field in every response
 that specifies whether the response should be cached.
 
 Instead of relying on HTTP caching, the client SHOULD track the "ETag"
-and/or "Last-Modified" headers returned by the server for the
+and/or "Last-Modified" header fields returned by the server for the
 datastore resource (or data resource if the server supports it).
 A retrieval request for a resource can include
-the "If-None-Match" and/or "If-Modified-Since" headers, which
+the "If-None-Match" and/or "If-Modified-Since" header fields, which
 will cause the server to return a "304 Not Modified" status-line
 if the resource has not changed.
 The client MAY use the HEAD method to retrieve just
-the message headers, which SHOULD include the "ETag"
-and "Last-Modified" headers, if this metadata is maintained
+the message header fields, which SHOULD include the "ETag"
+and "Last-Modified" header fields, if this metadata is maintained
 for the target resource.
 
 * Notifications @notifications@
@@ -2851,7 +2853,7 @@ A RESTCONF server SHOULD NOT send the "event" or "id" fields,
 as there are no meaningful values that could be used for them
 that would not be redundant to the contents of the notification itself.
 RESTCONF servers that do not send the "id" field also do not need
-to support the HTTP header "Last-Event-Id".  RESTCONF servers that
+to support the HTTP header field "Last-Event-Id".  RESTCONF servers that
 do send the "id" field MUST still support the "startTime" query
 parameter as the preferred means for a client to specify where to
 restart the event stream.
@@ -2909,7 +2911,7 @@ response message MUST be a subtype of application/yang-data
 (see example below).
 
 The client SHOULD specify the desired encoding for error messages
-by specifying the appropriate media-type in the Accept header.
+by specifying the appropriate media-type in the Accept header field.
 If no error media is specified, then the media subtype (e.g., XML or JSON)
 of the request message SHOULD be used, or the server MAY choose
 any supported message encoding format. If there is no request message
@@ -2921,14 +2923,15 @@ that XML encoding will be returned if there is an error.
 
 YANG Tree Diagram for <errors> data:
 
-   +--ro errors
-      +--ro error*
-         +--ro error-type       enumeration
-         +--ro error-tag        string
-         +--ro error-app-tag?   string
-         +--ro error-path?      instance-identifier
-         +--ro error-message?   string
-         +--ro error-info
+  +---- errors
+        +---- error*
+           +---- error-type       enumeration
+           +---- error-tag        string
+           +---- error-app-tag?   string
+           +---- error-path?      instance-identifier
+           +---- error-message?   string
+           +---- error-info?
+
 
 The semantics and syntax for RESTCONF error messages are
 defined with the "yang-errors" YANG data template
@@ -2940,7 +2943,7 @@ The following example shows an error returned for
 an "lock-denied" error that can occur if a NETCONF
 client has locked a datastore. The RESTCONF client
 is attempting to delete a data resource.  Note that
-an Accept header is used to specify the desired
+an Accept header field is used to specify the desired
 encoding for the error message. No response
 message-body content is expected by the client
 in this example.
@@ -3044,13 +3047,13 @@ This mandatory container holds the RESTCONF
 protocol capability URIs supported by the server.
 
 The server MAY maintain a last-modified timestamp for this
-container, and return the "Last-Modified" header when this
+container, and return the "Last-Modified" header field when this
 data node is retrieved with the GET or HEAD methods.
 Note that the last-modified timestamp for the datastore resource is not
 affected by changes to this subtree.
 
 The server SHOULD maintain an entity-tag for this
-container, and return the "ETag" header when this
+container, and return the "ETag" header field when this
 data node is retrieved with the GET or HEAD methods.
 Note that the entity-tag for the datastore resource is not
 affected by changes to this subtree.
@@ -3521,6 +3524,7 @@ https://github.com/netconf-wg/restconf/issues
 ** v15 to v16
 
 - changed media type application/yang-data to application/yang-data-xml
+- changed header to header field
 
 ** v14 to v15
 
