@@ -32,6 +32,9 @@ then there are protocol interactions to be considered,
 as described in ^netconf-coexistence^.
 The RESTCONF server MAY provide access to specific datastores using
 operation resources, as described in ^operation-resource^.
+The RESTCONF protocol does not specify any
+mandatory operation resources.  The semantics of each operation
+resource determine if and how datastores are accessed.
 
 Configuration data and state data are exposed as resources that
 can be retrieved with the GET method.
@@ -393,6 +396,7 @@ procedure is in progress by any NETCONF client, then this commit will act as the
 If the NETCONF server is expecting a "persist-id" parameter to complete the confirmed
 commit procedure then the RESTCONF edit operation MUST fail with a
 "409 Conflict" status-line. There error-tag "in-use" is returned in this case.
+The error-tag value "resource-denied" is used in this case.
 
 If the NETCONF server supports :startup, the RESTCONF server MUST automatically
 update the non-volatile "startup datastore", after the
@@ -493,9 +497,7 @@ certificate path validation ^RFC5280^
 to verify the integrity of the RESTCONF server's TLS certificate,
 or match the presented X.509 certificate with locally configured
 certificate fingerprints.
-
-The  presented X.509 certificate MUST also be considered valid if it matches
-a locally configured certificate fingerprint.  If X.509 certificate path
+If X.509 certificate path
 validation fails and the presented X.509 certificate does not match a
 locally configured certificate fingerprint, the connection MUST be 
 terminated as defined in ^RFC5246^.
@@ -522,7 +524,7 @@ The RESTCONF server MUST authenticate client access to any
 protected resource.   If the RESTCONF client is not authenticated,
 the server SHOULD send an HTTP response with
 "401 Unauthorized" status-line, as defined in Section 3.1 of
-^RFC7235^.
+^RFC7235^. The error-tag value "access-denied" is used in this case.
 
 To authenticate a client, a RESTCONF server MUST use TLS
 based client certificates (Section 7.4.6 of ^RFC5246^), or
@@ -651,10 +653,10 @@ In this example a custom "play" operation is supported:
    Response
    --------
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
    Cache-Control: no-cache
-   Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
+   Last-Modified: Sun, 22 Apr 2016 01:00:14 GMT
    Content-Type: application/yang-data+json
 
    { "operations" : { "example-jukebox:play" : [null] } }
@@ -733,7 +735,7 @@ query parameter (see ^content^).
 The server might respond:
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:30 GMT
+   Date: Mon, 23 Apr 2016 17:01:30 GMT
    Server: example-server
    Cache-Control: no-cache
    Content-Type: application/yang-data-xml
@@ -780,7 +782,7 @@ The server might respond
 (response wrapped for display purposes):
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:30 GMT
+   Date: Mon, 23 Apr 2016 17:01:30 GMT
    Server: example-server
    Cache-Control: no-cache
    Content-Type: application/yang-data-xml
@@ -1083,7 +1085,10 @@ Example URL:
 
 The "api-path" Augmented Backus-Naur Form (ABNF) syntax
 is used to construct RESTCONF
-path identifiers. The syntax for "api-identifier" and "key-value" MUST conform to the
+path identifiers.
+An identifier is not allowed to start with the case-insensitive
+string "XML", according to YANG identifier rules. 
+The syntax for "api-identifier" and "key-value" MUST conform to the
 JSON identifier encoding rules in Section 4 of ^I-D.ietf-netmod-yang-json^:
 
 
@@ -1169,6 +1174,19 @@ as follows:
    POST /restconf/data/module-A:interfaces/reset-all HTTP/1.1
    Server: example.com
 
+If the RPC operation is invoked without errors, and
+if the "rpc" or "action" statement has no "output" section, the
+response message MUST NOT include a message-body, and MUST send a "204
+No Content" status-line instead.
+
+All operation resources representing RPC operations
+supported by the server MUST be identified
+in the {+restconf}/operations subtree defined in ^restconf-operations^.
+Operation resources representing YANG actions are not
+identified in this subtree since they are invoked
+using a URI within the {+restconf}/data subtree.
+
+*** Encoding Operation Resource Input Parameters @example-ops-mod@
 
 If the "rpc" or "action" statement has an "input" section then
 instances of these input parameters are encoded
@@ -1189,51 +1207,6 @@ MAY be sent by the client in the request.
 If the "rpc" or "action" statement has no "input" section, the
 request message MUST NOT include a message-body.
 
-If the "rpc" or "action" statement has an "output" section then
-instances of these output parameters are encoded
-in the module namespace where the "rpc" or "action" statement is defined,
-in an XML element or JSON object named "output",
-which is in the module namespace where the "rpc"
-or "action" statement is defined.
-
-If the RPC operation is invoked without errors,
-and if the "rpc" or "action" statement has an "output" section and the 
-"output" object tree contains any child data nodes which are considered
-mandatory nodes, then a response message-body MUST be sent by the server in the response.
-
-If the RPC operation is invoked without errors,
-and if the "rpc" or "action" statement has an "output" section and the 
-"output" object tree does not contain any child nodes which are
-considered mandatory nodes, then a response message-body 
-MAY be sent by the server in the response.
-
-If the RPC operation is invoked without errors, and
-if the "rpc" or "action" statement has no "output" section, the
-response message MUST NOT include a message-body, and MUST send a "204
-No Content" status-line instead.
-
-If the RPC operation input is not valid, or the RPC operation is invoked but
-errors occur, then a message-body
-MUST be sent by the server, containing an "errors" resource,
-as defined in ^errors-media-type^. A detailed example of
-an operation resource  error response can be found in
-^op-resource-errors^.
-
-All operation resources representing RPC operations
-supported by the server MUST be identified
-in the {+restconf}/operations subtree defined in ^restconf-operations^.
-Operation resources representing YANG actions are not
-identified in this subtree since they are invoked
-using a URI within the {+restconf}/data subtree.
-
-*** Encoding Operation Resource Input Parameters @example-ops-mod@
-
-If the "rpc" or "action" statement has an "input" section, then
-the "input" node is provided in the message-body,
-corresponding to the YANG data definition statements
-within the "input" section.  The "input" node is defined
-to be in the namespace of the module containing the "rpc"
-or "action" statement.
 
 Examples:
 
@@ -1265,7 +1238,7 @@ to invoke the "reboot" RPC operation:
 The server might respond:
 
    HTTP/1.1 204 No Content
-   Date: Mon, 25 Apr 2012 11:01:00 GMT
+   Date: Mon, 25 Apr 2016 11:01:00 GMT
    Server: example-server
 
 The same example request message is shown here using JSON encoding:
@@ -1300,7 +1273,7 @@ to invoke the "reset" action (text wrap for display purposes):
 The server might respond:
 
    HTTP/1.1 204 No Content
-   Date: Mon, 25 Apr 2012 11:01:00 GMT
+   Date: Mon, 25 Apr 2016 11:01:00 GMT
    Server: example-server
 
 The same example request message is shown here using JSON encoding
@@ -1319,13 +1292,23 @@ The same example request message is shown here using JSON encoding
 
 *** Encoding Operation Resource Output Parameters
 
-If the "rpc" or "action" statement has an "output" section, then
-the "output" node is provided in the message-body,
-corresponding to the YANG data definition statements
-within the "output" section.
-The "output" node is defined
-to be in the namespace of the module containing the "rpc"
-or "action" statement.
+If the "rpc" or "action" statement has an "output" section then
+instances of these output parameters are encoded
+in the module namespace where the "rpc" or "action" statement is defined,
+in an XML element or JSON object named "output",
+which is in the module namespace where the "rpc"
+or "action" statement is defined.
+
+If the RPC operation is invoked without errors,
+and if the "rpc" or "action" statement has an "output" section and the 
+"output" object tree contains any child data nodes which are considered
+mandatory nodes, then a response message-body MUST be sent by the server in the response.
+
+If the RPC operation is invoked without errors,
+and if the "rpc" or "action" statement has an "output" section and the 
+"output" object tree does not contain any child nodes which are
+considered mandatory nodes, then a response message-body 
+MAY be sent by the server in the response.
 
 The request URI is not returned in the response.
 This URI might have context information required to associate
@@ -1350,7 +1333,7 @@ to invoke the "get-reboot-info" operation:
 The server might respond:
 
    HTTP/1.1 200 OK
-   Date: Mon, 25 Apr 2012 11:10:30 GMT
+   Date: Mon, 25 Apr 2016 11:10:30 GMT
    Server: example-server
    Content-Type: application/yang-data+json
 
@@ -1365,7 +1348,7 @@ The server might respond:
 The same response is shown here using XML encoding:
 
    HTTP/1.1 200 OK
-   Date: Mon, 25 Apr 2012 11:10:30 GMT
+   Date: Mon, 25 Apr 2016 11:10:30 GMT
    Server: example-server
    Content-Type: application/yang-data-xml
 
@@ -1391,7 +1374,7 @@ to invoke the "get-last-reset-time" action:
 The server might respond:
 
    HTTP/1.1 200 OK
-   Date: Mon, 25 Apr 2012 11:10:30 GMT
+   Date: Mon, 25 Apr 2016 11:10:30 GMT
    Server: example-server
    Content-Type: application/yang-data+json
 
@@ -1407,6 +1390,14 @@ The server might respond:
 If any errors occur while attempting to invoke the operation
 or action, then an "errors" media type is returned with the
 appropriate error status.
+
+If the RPC operation input is not valid, or the RPC operation is invoked but
+errors occur, then a message-body
+MUST be sent by the server, containing an "errors" resource,
+as defined in ^errors-media-type^. A detailed example of
+an operation resource  error response can be found in
+^op-resource-errors^.
+
 
 Using the "reboot" RPC operation from the example in
 ^example-ops-mod^,
@@ -1426,7 +1417,7 @@ the client might send the following POST request message:
 The server might respond with an "invalid-value" error:
 
    HTTP/1.1 400 Bad Request
-   Date: Mon, 25 Apr 2012 11:10:30 GMT
+   Date: Mon, 25 Apr 2016 11:10:30 GMT
    Server: example-server
    Content-Type: application/yang-data-xml
 
@@ -1444,7 +1435,7 @@ The server might respond with an "invalid-value" error:
 The same response is shown here in JSON encoding:
 
    HTTP/1.1 400 Bad Request
-   Date: Mon, 25 Apr 2012 11:10:30 GMT
+   Date: Mon, 25 Apr 2016 11:10:30 GMT
    Server: example-server
    Content-Type: application/yang-data+json
 
@@ -1537,7 +1528,7 @@ An "errors" YANG data template models a collection
 of error information that
 is sent as the message-body in a server response message,
 if an error occurs while processing a request message.
-It is not considered a resource type because no instances
+It is not considered as a resource type because no instances
 can be retrieved with a GET request.
 
 The "ietf-restconf" YANG module contains the "yang-errors"
@@ -1548,7 +1539,7 @@ RESTCONF error handling behavior is defined in ^error-reporting^.
 * Operations @operations@
 
 The RESTCONF protocol uses HTTP methods to identify
-the CRUD operation requested for a particular resource.
+the CRUD operations requested for a particular resource.
 
 The following table shows how the RESTCONF operations relate to
 NETCONF protocol operations and edit operations, which are
@@ -1571,7 +1562,7 @@ the DELETE method will fail. The PATCH method is equivalent to
 a "merge" operation when using a plain patch (see ^plain-patch^);
 other media-types may provide more granular control.
 
-Access control mechanisms MUST be used to limit what operations
+Access control mechanisms are used to limit what operations
 can be used.  In particular, RESTCONF is compatible with the
 NETCONF Access Control Model (NACM) ^RFC6536^, as there is a
 specific mapping between RESTCONF and NETCONF operations,
@@ -1609,6 +1600,7 @@ defined in ^RFC5789^.
 
 ** HEAD @head@
 
+The RESTCONF server MUST support the HEAD method.
 The HEAD method is sent by the client to
 retrieve just the header fields that would be returned
 for the comparable GET method, without the response message-body.
@@ -1627,6 +1619,7 @@ response message-body is included.
 
 ** GET @get@
 
+The RESTCONF server MUST support the GET method.
 The GET method is sent by the client to
 retrieve data and metadata for a resource.
 It is supported for all resource types, except operation
@@ -1638,8 +1631,11 @@ The server MUST NOT return any data resources for which the user
 does not have read privileges.
 If the user is not authorized to read the target resource, an error
 response containing a "401 Unauthorized" status-line SHOULD be
-returned.  A server MAY return a "404 Not Found" status-line, as
+returned.
+The error-tag value "access-denied" is returned in this case.
+A server MAY return a "404 Not Found" status-line, as
 described in section 6.5.3 in ^RFC7231^.
+The error-tag value  "invalid-value" is returned in this case.
 
 If the user is authorized to read some but not all of
 the target resource, the unauthorized content is omitted
@@ -1655,15 +1651,18 @@ a YANG leaf-list or list object
 identifies more than one instance, and XML encoding
 is used in the response, then an error response containing
 a "400 Bad Request" status-line MUST be returned by the server.
+The error-tag value "invalid-value" is used in this case.
 
 If a retrieval request for a data resource represents
 an instance that does not exist,
 then an error response containing a "404 Not Found" status-line
 MUST be returned by the server.
+The error-tag value "invalid-value" is used in this case.
 
 If the target resource of a retrieval request is for an operation
 resource
 then a "405 Method Not Allowed" status-line MUST be returned by the server.
+The error-tag value "operation-not-supported" is used in this case.
 
 Note that the way that access control is applied to data resources may
 not be completely compatible with HTTP caching.  The Last-Modified
@@ -1686,12 +1685,12 @@ XML representation of the a specific "album" resource:
 The server might respond:
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:02:40 GMT
+   Date: Mon, 23 Apr 2016 17:02:40 GMT
    Server: example-server
    Content-Type: application/yang-data-xml
    Cache-Control: no-cache
    ETag: "a74eefc993a2b"
-   Last-Modified: Mon, 23 Apr 2012 11:02:14 GMT
+   Last-Modified: Mon, 23 Apr 2016 11:02:14 GMT
 
    <album xmlns="http://example.com/ns/example-jukebox"
           xmlns:jbox="http://example.com/ns/example-jukebox">
@@ -1702,6 +1701,7 @@ The server might respond:
 
 ** POST @post@
 
+The RESTCONF server MUST support the POST method.
 The POST method is sent by the client to create a data resource
 or invoke an operation resource.
 The server uses the target resource media type
@@ -1736,11 +1736,14 @@ in the response in this case.
 
 If the data resource already exists, then the POST request MUST
 fail and a "409 Conflict" status-line MUST be returned.
+The error-tag value "resource-denied" is used in this case.
 
 If the user is not authorized to create the target resource,
 an error response containing a "403 Forbidden" status-line SHOULD be
-returned.  A server MAY return a "404 Not Found" status-line, as
+returned. The error-tag value "access-denied" is used in this case.
+A server MAY return a "404 Not Found" status-line, as
 described in section 6.5.3 in ^RFC7231^.
+The error-tag value "invalid-value" is used in this case.
 All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
@@ -1759,11 +1762,11 @@ If the resource is created, the server might respond as follows.  Note
 that the "Location" header field is wrapped for display purposes only:
 
    HTTP/1.1 201 Created
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
    Location: https://example.com/restconf/data/
        example-jukebox:jukebox
-   Last-Modified: Mon, 23 Apr 2012 17:01:00 GMT
+   Last-Modified: Mon, 23 Apr 2016 17:01:00 GMT
    ETag: "b3a3e673be2"
 
 Refer to ^ex-create^ for more resource creation examples.
@@ -1784,7 +1787,8 @@ no response message-body.
 If the user is not authorized to invoke the target operation,
 an error response containing
 a "403 Forbidden" status-line is returned to
-the client.  All other error responses are handled according to
+the client. The error-tag value "access-denied" is used in this case.
+All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
 Example:
@@ -1808,19 +1812,30 @@ A client might send a "play" request as follows:
 The server might respond:
 
    HTTP/1.1 204 No Content
-   Date: Mon, 23 Apr 2012 17:50:00 GMT
+   Date: Mon, 23 Apr 2016 17:50:00 GMT
    Server: example-server
 
 ** PUT @put@
 
+The RESTCONF server MUST support the PUT method.
 The PUT method is sent by the client to create or replace
 the target data resource. A request message-body MUST be present,
 representing the new data resource, or the server MUST return
 "400 Bad Request" status-line.
+The error-tag value "invalid-value" is used in this case.
 
-The only target resource media type that supports PUT is the data
-resource. The message-body is expected to contain the
-content used to create or replace the target resource.
+Both the POST and PUT methods can be used to create data resources.
+The difference is that for POST, the client does not provide
+the resource identifier for the resource that will be created.
+The target resource for the POST method for resource creation
+is the parent of the new resource. 
+The target resource for the PUT method for resource creation
+is the new resource.
+
+The PUT method MUST be supported for data and datastore resources.
+A PUT on the datastore resource is used to replace the entire contents
+of the datastore.  A PUT on a data resource only replaces that data resource
+within the datastore.
 
 The "insert" (^insert^) and "point" (^point^) query parameters MUST be
 supported by the PUT method for data resources.
@@ -1833,8 +1848,10 @@ is modified, a "204 No Content" status-line is returned.
 
 If the user is not authorized to create or replace the target resource
 an error response containing a "403 Forbidden" status-line SHOULD be
-returned.  A server MAY return a "404 Not Found" status-line, as
+returned. The error-tag value "access-denied" is used in this case.
+ A server MAY return a "404 Not Found" status-line, as
 described in section 6.5.3 in ^RFC7231^.
+The error-tag value "invalid-value" is used in this case.
 All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
@@ -1873,9 +1890,9 @@ for display purposes only:
 If the resource is updated, the server might respond:
 
    HTTP/1.1 204 No Content
-   Date: Mon, 23 Apr 2012 17:04:00 GMT
+   Date: Mon, 23 Apr 2016 17:04:00 GMT
    Server: example-server
-   Last-Modified: Mon, 23 Apr 2012 17:04:00 GMT
+   Last-Modified: Mon, 23 Apr 2016 17:04:00 GMT
    ETag: "b27480aeda4c"
 
 The same request is shown here using XML encoding:
@@ -1894,6 +1911,7 @@ The same request is shown here using XML encoding:
 
 ** PATCH @patch@
 
+The RESTCONF server MUST support the PATCH method.
 RESTCONF uses the HTTP PATCH method defined
 in ^RFC5789^ to provide an extensible framework for
 resource patching mechanisms.  It is optional to implement
@@ -1920,6 +1938,7 @@ If the user is not authorized to alter the target resource
 an error response containing a "403 Forbidden" status-line SHOULD be
 returned.  A server MAY return a "404 Not Found" status-line, as
 described in section 6.5.3 in ^RFC7231^.
+The error-tag value "invalid-value" is used in this case.
 All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
@@ -1967,30 +1986,29 @@ for display purposes only:
 If the field is updated, the server might respond:
 
    HTTP/1.1 204 No Content
-   Date: Mon, 23 Apr 2012 17:49:30 GMT
+   Date: Mon, 23 Apr 2016 17:49:30 GMT
    Server: example-server
-   Last-Modified: Mon, 23 Apr 2012 17:49:30 GMT
+   Last-Modified: Mon, 23 Apr 2016 17:49:30 GMT
    ETag: "b2788923da4c"
 
 ** DELETE @delete@
 
+The RESTCONF server MUST support the DELETE method.
 The DELETE method is used to delete the target resource.
 If the DELETE request succeeds, a "204 No Content" status-line
 is returned.
 
 If the user is not authorized to delete the target resource then
 an error response containing a "403 Forbidden" status-line SHOULD be
-returned.  A server MAY return a "404 Not Found" status-line, as
+returned. The error-tag value "access-denied" is returned in this case.
+A server MAY return a "404 Not Found" status-line, as
 described in section 6.5.3 in ^RFC7231^.
+The error-tag value "invalid-value" is returned in this case.
 All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
 If the target resource represents a YANG leaf-list or list, then the
 DELETE method SHOULD NOT delete more than one such instance.
-The server MAY delete more than one instance if
-a query parameter is used requesting this behavior.
-(Definition of this query parameter is outside the scope
-of this document.)
 
 Example:
 
@@ -2004,7 +2022,7 @@ the client might send:
 If the resource is deleted, the server might respond:
 
    HTTP/1.1 204 No Content
-   Date: Mon, 23 Apr 2012 17:49:40 GMT
+   Date: Mon, 23 Apr 2016 17:49:40 GMT
    Server: example-server
 
 ** Query Parameters @query-parameters@
@@ -2019,10 +2037,12 @@ resource used, in the request.
 - Each parameter can appear at most once in a request URI.
 - If more than one instance of a query parameter is present, then a "400 Bad Request"
 status-line MUST be returned by the server.
+The error-tag value "invalid-value" is returned in this case.
 - A default value may apply if the parameter is missing.
 - Query parameter names and values are case-sensitive
 - A server MUST return an error with a '400 Bad Request' status-line
 if a query parameter is unexpected.
+The error-tag value "invalid-value" is returned in this case.
 
 !! table RESTCONF Query Parameters
 !! head ! Name ! Methods !  Description
@@ -2452,7 +2472,8 @@ The "utf-8" character set is used for all messages.
 RESTCONF message content is sent in the HTTP message-body.
 
 Content is encoded in either JSON or XML format.
-A server MUST support XML or JSON encoding.
+A server MUST support one of either XML or JSON encoding.
+A server MAY support both XML and JSON encoding.
 XML encoding rules for data nodes are defined in ^I-D.ietf-netmod-rfc6020bis^.
 The same encoding rules are used for all XML content.
 JSON encoding rules are defined in ^I-D.ietf-netmod-yang-json^.
@@ -2519,7 +2540,7 @@ The server might respond as follows.
 
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
    Content-Type: application/yang-data-xml
 
@@ -2551,7 +2572,7 @@ The server might respond as follows.
 
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
    Content-Type: application/yang-data+json
 
@@ -2603,6 +2624,10 @@ The client MAY use the HEAD method to retrieve just
 the message header fields, which SHOULD include the "ETag"
 and "Last-Modified" header fields, if this metadata is maintained
 for the target resource.
+
+Note that the way that access control is applied to data resources
+the values in the Last-Modified and ETag headers maintained
+for a data resource may not be reliable, as described in ^get^.
 
 * Notifications @notifications@
 
@@ -2894,7 +2919,7 @@ for the "action" or "rpc" statement.
 !! table Mapping from error-tag to status code
 !! head ! error-tag ! status code
 !! row  ! in-use ! 409
-!! row  ! invalid-value ! 400 or 406
+!! row  ! invalid-value ! 400, 404 or 406
 !! row  ! (request) too-big ! 413
 !! row  ! (response) too-big ! 400
 !! row  ! missing-attribute ! 400
@@ -2903,13 +2928,13 @@ for the "action" or "rpc" statement.
 !! row  ! bad-element ! 400
 !! row  ! unknown-element ! 400
 !! row  ! unknown-namespace ! 400
-!! row  ! access-denied ! 403
+!! row  ! access-denied ! 401, 403
 !! row  ! lock-denied ! 409
 !! row  ! resource-denied ! 409
 !! row  ! rollback-failed ! 500
 !! row  ! data-exists ! 409
 !! row  ! data-missing ! 409
-!! row  ! operation-not-supported ! 501
+!! row  ! operation-not-supported ! 405 or 501
 !! row  ! operation-failed ! 412 or 500
 !! row  ! partial-operation ! 500
 !! row  ! malformed-message ! 400
@@ -2972,7 +2997,7 @@ in this example.
 The server might respond:
 
    HTTP/1.1 409 Conflict
-   Date: Mon, 23 Apr 2012 17:11:00 GMT
+   Date: Mon, 23 Apr 2016 17:11:00 GMT
    Server: example-server
    Content-Type: application/yang-data+json
 
@@ -3000,7 +3025,7 @@ The client might send:
 The server might respond (some lines wrapped for display purposes):
 
    HTTP/1.1 409 Conflict
-   Date: Mon, 23 Apr 2012 17:11:00 GMT
+   Date: Mon, 23 Apr 2016 17:11:00 GMT
    Server: example-server
    Content-Type: application/yang-data-xml
 
@@ -3491,9 +3516,15 @@ transmission in the clear and without integrity checking leaves
 devices open to classic eavesdropping and false data injection
 attacks.  Configuration information often contains passwords, user
 names, service descriptions, and topological information, all of
-which are sensitive.  Because of this, this protocol SHOULD be
-implemented carefully with adequate attention to all manner of attack
-one might expect to experience with other management interfaces.
+which are sensitive.
+There are many patterns of attack that have been observed
+through operational practice with existing management interfaces.
+It would be wise for implementers to research them,
+and take them into account when implementing this protocol.
+
+#Because of this, this protocol SHOULD be
+#implemented carefully with adequate attention to all manner of attack
+#one might expect to experience with other management interfaces.
 
 Different environments may well allow different rights prior to and
 then after authentication.  When an operation is not properly authorized,
@@ -3504,6 +3535,14 @@ security of the connection.  Note that it is possible for a client
 to detect configuration changes in data resources it is not authorized
 to access by monitoring changes in the ETag and Last-Modified
 header fields returned by the server for the datastore resource.
+
+A RESTCONF server implementation SHOULD attempt to prevent
+system disruption due to excessive resource consumption
+required to fulfill edit requests via the POST, PUT, and PATCH methods.
+It may be possible to construct
+an attack on such a RESTCONF server, which attempts to
+consume all available memory or other resource types.
+
 
 * Acknowledgements
 
@@ -3517,7 +3556,7 @@ their excellent technical reviews of this document:
 Mehmet Ersue, Mahesh Jethanandani, Qin Wu, Joe Clarke, Bert Wijnen,
 Ladislav Lhotka, Rodney Cummings, Frank Xialiang, Tom Petch, Robert Sparks,
 Balint Uveges, Randy Presuhn, Sue Hares, Mark Nottingham,
-Benoit Claise, and Dale Worley.
+Benoit Claise, Dale Worley, and Lionel Morand.
 
 Contributions to this material by Andy Bierman are based upon work
 supported by the United States Army,
@@ -3548,6 +3587,10 @@ https://github.com/netconf-wg/restconf/issues
 - changed media type definitions per review comments
 - added some clarifications and typos
 - added error-tag mapping for 406 and 412 errors
+- added clarifications based on ops-dir review by Lionel Morand
+- clarified PUT and POST differences for creating a data resource
+- clarify PUT for a datastore resource
+- added clarifications from Gen-Art review by Robert Sparks
 
 ** v13 - v14
 
@@ -3957,7 +4000,7 @@ date in the published ietf-yang-library YANG module, and remove this
 note.]
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
    Content-Type: application/yang-data+json
 
@@ -3984,7 +4027,7 @@ date in the published ietf-yang-library YANG module, and remove this
 note.]
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
    Cache-Control: no-cache
    Content-Type: application/yang-data-xml
@@ -4019,10 +4062,10 @@ note.]
 
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
    Cache-Control: no-cache
-   Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
+   Last-Modified: Sun, 22 Apr 2016 01:00:14 GMT
    Content-Type: application/yang-data+json
 
    {
@@ -4103,10 +4146,10 @@ The extra whitespace in 'capability' elements is
 for display purposes only.
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:02:00 GMT
+   Date: Mon, 23 Apr 2016 17:02:00 GMT
    Server: example-server
    Cache-Control: no-cache
-   Last-Modified: Sun, 22 Apr 2012 01:00:14 GMT
+   Last-Modified: Sun, 22 Apr 2016 01:00:14 GMT
    Content-Type: application/yang-data-xml
 
    <capabilities
@@ -4161,11 +4204,11 @@ Note that the "Location" header line is wrapped
 for display purposes only:
 
    HTTP/1.1 201 Created
-   Date: Mon, 23 Apr 2012 17:02:00 GMT
+   Date: Mon, 23 Apr 2016 17:02:00 GMT
    Server: example-server
    Location: https://example.com/restconf/data/
        example-jukebox:jukebox/library/artist=Foo%20Fighters
-   Last-Modified: Mon, 23 Apr 2012 17:02:00 GMT
+   Last-Modified: Mon, 23 Apr 2016 17:02:00 GMT
    ETag: "b3830f23a4c"
 
 To create a new "album" resource for this artist within the "jukebox"
@@ -4188,12 +4231,12 @@ as follows.  Note that the "Location" header line is wrapped
 for display purposes only:
 
    HTTP/1.1 201 Created
-   Date: Mon, 23 Apr 2012 17:03:00 GMT
+   Date: Mon, 23 Apr 2016 17:03:00 GMT
    Server: example-server
    Location: https://example.com/restconf/data/
        example-jukebox:jukebox/library/artist=Foo%20Fighters/
        album=Wasting%20Light
-   Last-Modified: Mon, 23 Apr 2012 17:03:00 GMT
+   Last-Modified: Mon, 23 Apr 2016 17:03:00 GMT
    ETag: "b8389233a4c"
 
 *** Detect Resource Entity Tag Change
@@ -4210,7 +4253,7 @@ updated.
        library/artist=Foo%20Fighters/album=Wasting%20Light/genre
        HTTP/1.1
    Host: example.com
-   If-Unmodified-Since: Mon, 23 Apr 2012 17:01:00 GMT
+   If-Unmodified-Since: Mon, 23 Apr 2016 17:01:00 GMT
    Content-Type: application/yang-data+json
 
    { "example-jukebox:genre" : "example-jukebox:alternative" }
@@ -4220,9 +4263,9 @@ since the time specified in the "If-Unmodified-Since"
 header.  The server might respond:
 
    HTTP/1.1 412 Precondition Failed
-   Date: Mon, 23 Apr 2012 19:01:00 GMT
+   Date: Mon, 23 Apr 2016 19:01:00 GMT
    Server: example-server
-   Last-Modified: Mon, 23 Apr 2012 17:45:00 GMT
+   Last-Modified: Mon, 23 Apr 2016 17:45:00 GMT
    ETag: "b34aed893a4c"
 
 *** Edit a Datastore Resource
@@ -4310,7 +4353,7 @@ The client might send:
 The server might respond:
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Date: Mon, 23 Apr 2016 17:11:30 GMT
    Server: example-server
    Cache-Control: no-cache
    Content-Type: application/yang-data+json
@@ -4347,9 +4390,9 @@ the content parameter value is "config".
 The server might respond:
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Date: Mon, 23 Apr 2016 17:11:30 GMT
    Server: example-server
-   Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
+   Last-Modified: Mon, 23 Apr 2016 13:01:20 GMT
    ETag: "eeeada438af"
    Cache-Control: no-cache
    Content-Type: application/yang-data+json
@@ -4384,7 +4427,7 @@ that configuration ancestors (if any) and list key leafs
 The server might respond:
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Date: Mon, 23 Apr 2016 17:11:30 GMT
    Server: example-server
    Cache-Control: no-cache
    Content-Type: application/yang-data+json
@@ -4434,7 +4477,7 @@ Note that some strings are wrapped for display purposes only.
 The server might respond:
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Date: Mon, 23 Apr 2016 17:11:30 GMT
    Server: example-server
    Cache-Control: no-cache
    Content-Type: application/yang-data+json
@@ -4510,7 +4553,7 @@ a given target resource, the value "1" is used.
 The server might respond:
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Date: Mon, 23 Apr 2016 17:11:30 GMT
    Server: example-server
    Cache-Control: no-cache
    Content-Type: application/yang-data+json
@@ -4531,7 +4574,7 @@ the value "3" is used.
 The server might respond:
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:11:30 GMT
+   Date: Mon, 23 Apr 2016 17:11:30 GMT
    Server: example-server
    Cache-Control: no-cache
    Content-Type: application/yang-data+json
@@ -4581,7 +4624,7 @@ note.]
 
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
    Content-Type: application/yang-data+json
 
@@ -4641,9 +4684,9 @@ for display purposes only:
 
 
    HTTP/1.1 201 Created
-   Date: Mon, 23 Apr 2012 13:01:20 GMT
+   Date: Mon, 23 Apr 2016 13:01:20 GMT
    Server: example-server
-   Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
+   Last-Modified: Mon, 23 Apr 2016 13:01:20 GMT
    Location: https://example.com/restconf/data/
        example-jukebox:jukebox/playlist=Foo-One/song=1
    ETag: "eeeada438af"
@@ -4676,9 +4719,9 @@ Request from client:
 Response from server:
 
    HTTP/1.1 204 No Content
-   Date: Mon, 23 Apr 2012 13:01:20 GMT
+   Date: Mon, 23 Apr 2016 13:01:20 GMT
    Server: example-server
-   Last-Modified: Mon, 23 Apr 2012 13:01:20 GMT
+   Last-Modified: Mon, 23 Apr 2016 13:01:20 GMT
    ETag: "abcada438af"
 
 *** "filter" Parameter @ex-filters@
@@ -4765,7 +4808,7 @@ Without query parameter:
 The server might respond as follows.
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
    Content-Type: application/yang-data+json
 
@@ -4792,7 +4835,7 @@ With query parameter:
 The server might respond as follows.
 
    HTTP/1.1 200 OK
-   Date: Mon, 23 Apr 2012 17:01:00 GMT
+   Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
    Content-Type: application/yang-data+json
 
