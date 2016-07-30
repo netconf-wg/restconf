@@ -293,6 +293,14 @@ is implemented in a device that does not have a NETCONF server:
                               |                 |
                               +-----------------+
 
+Note that there are no interactions at all between
+the NETCONF protocol and RESTCONF protocol.  It is possible
+that locks are in use on a RESTCONF server, even though
+RESTCONF cannot manipulate locks.  In such a case,
+the RESTCONF protocol will not be granted write access to
+data resources within a datastore.
+
+
 ** Data Model Driven API
 
 RESTCONF combines the simplicity of the HTTP protocol with the
@@ -350,8 +358,8 @@ the YANG data modeling language.  The server lists each YANG
 module it supports using the "ietf-yang-library"
 YANG module, defined in ^I-D.ietf-netconf-yang-library^.
 The server MUST implement the "ietf-yang-library" module,
-which MUST identify all the YANG modules used by the server.
-
+which MUST identify all the YANG modules used by the server,
+in the "modules-state/module" list.
 The conceptual datastore contents, data-model-specific
 operations and event notifications are identified by this set of
 YANG modules.
@@ -359,7 +367,7 @@ YANG modules.
 The classification of data as configuration or
 non-configuration is derived from the YANG "config" statement.
 Data ordering behavior is derived from the YANG "ordered-by"
-statement.
+statement. Non-configuration data is also called "state data".
 
 The RESTCONF datastore editing model is simple and direct,
 similar to the behavior of the :writable-running
@@ -370,7 +378,7 @@ resource is activated upon successful completion of the transaction.
 
 RESTCONF can be implemented on a device that supports NETCONF.
 
-If the device supports :writable-running, all edits to configuration
+If the NETCONF server supports :writable-running, all edits to configuration
 nodes in {+restconf}/data are performed in the running configuration
 datastore. The URI template "{+restconf}" is defined in ^uri-template^.
 
@@ -378,21 +386,22 @@ datastore. The URI template "{+restconf}" is defined in ^uri-template^.
 Otherwise, if the device supports :candidate, all edits to
 configuration nodes in {+restconf}/data are performed in the candidate
 configuration datastore.  The candidate MUST be automatically committed to
-running immediately after each successful edit. Any edits from other sources that are
-in the candidate datastore will also be committed.  If a confirmed-commit
-procedure is in progress, then this commit will act as the confirming commit.
-If the server is expecting a "persist-id" parameter to complete the confirmed
+running immediately after each successful edit. Any edits from other
+sources that are
+in the candidate datastore will also be committed. If a confirmed commit
+procedure is in progress by any NETCONF client, then this commit will act as the confirming commit.
+If the NETCONF server is expecting a "persist-id" parameter to complete the confirmed
 commit procedure then the RESTCONF edit operation MUST fail with a
-"409 Conflict" status-line.
+"409 Conflict" status-line. There error-tag "in-use" is returned in this case.
 
-If the device supports :startup, the device MUST automatically
+If the NETCONF server supports :startup, the RESTCONF server MUST automatically
 update the non-volatile "startup datastore", after the
-running datastore has been updated as
+running datastore has been altered as
 a consequence of a RESTCONF edit operation.
 
 If a datastore that would be modified by a RESTCONF operation has an active lock
 from a NETCONF client, the RESTCONF edit operation MUST fail with a "409 Conflict"
-status-line.
+status-line. There error-tag "in-use" is returned in this case.
 
 ** RESTCONF Extensibility
 
@@ -543,7 +552,7 @@ with the top-level API resource itself
 (^root-resource-discovery^). Each resource represents a manageable
 component within the device.
 
-A resource can be considered a collection of data and the
+A resource can be considered as a collection of data and the
 set of allowed methods on that data.  It can contain nested child
 resources.  The child resource types and methods allowed on them are
 data-model specific.
@@ -650,7 +659,8 @@ In this example a custom "play" operation is supported:
 
    { "operations" : { "example-jukebox:play" : [null] } }
 
-If the XRD contains more than one link relation, then only the
+If the Extensible Resource Descriptor (XRD)
+contains more than one link relation, then only the
 relation named "restconf" is relevant to this specification.
 
 ** RESTCONF Media Types
@@ -815,7 +825,7 @@ in RESTCONF, for datastore and data resources.
 The last change time is maintained and
 the "Last-Modified" (^RFC7232^, Section 2.2) header field is returned in the
 response for a retrieval request.
-The "If-Unmodified-Since" header field can be used
+The "If-Unmodified-Since" header field (^RFC7232^, Section 3.4) can be used
 in edit operation requests to cause the server
 to reject the request if the resource has been modified
 since the specified timestamp.
@@ -829,6 +839,9 @@ Last-modified timestamps for data resources are discussed in ^data-resource^.
 
 If the RESTCONF server is colocated with a NETCONF server, then the
 last-modified timestamp MUST represent the "running" datastore.
+Note that it is possible other protocols can cause the last-modified
+timestamp to be updated.  Such mechanisms are out of scope
+for this document.
 
 **** Entity tag
 
@@ -849,6 +862,9 @@ Entity tags for data resources are discussed in ^data-resource^.
 
 If the RESTCONF server is colocated with a NETCONF server, then this
 entity tag MUST represent the "running" datastore.
+Note that it is possible other protocols can cause the entity tag
+to be updated.  Such mechanisms are out of scope
+for this document.
 
 **** Update Procedure
 
@@ -912,12 +928,12 @@ This timestamp is only
 affected by configuration data resources, and MUST NOT be updated
 for changes to non-configuration data.
 
-For non-configuration data resources,
-the server MAY maintain a last-modified timestamp for the
-resource, and return the "Last-Modified" header field when it
-is retrieved with the GET or HEAD methods. The timestamps
-for non-configuration data resources are updated in an
-implementation-specific manner.
+#For non-configuration data resources,
+#the server MAY maintain a last-modified timestamp for the
+#resource, and return the "Last-Modified" header field when it
+#is retrieved with the GET or HEAD methods. The timestamps
+#for non-configuration data resources are updated in an
+#implementation-specific manner.
 
 *** Entity tag
 
@@ -942,12 +958,12 @@ If the RESTCONF server is colocated with a NETCONF server, then the
 entity tag for a configuration data resource MUST represent
 the instance within the "running" datastore.
 
-For non-configuration data resources,
-the server MAY maintain an entity tag for each
-resource, and return the "ETag" header field when it
-is retrieved with the GET or HEAD methods. The entity tags
-for non-configuration data resources are updated in an
-implementation-specific manner.
+#For non-configuration data resources,
+#the server MAY maintain an entity tag for each
+#resource, and return the "ETag" header field when it
+#is retrieved with the GET or HEAD methods. The entity tags
+#for non-configuration data resources are updated in an
+#implementation-specific manner.
 
 
 *** Encoding Data Resource Identifiers in the Request URI @uri-encoding@
@@ -962,7 +978,7 @@ is important, since applications will code to the YANG
 data model module, which uses static naming and defines an
 absolute path location for all data nodes.
 
-A RESTCONF data resource identifier is not an XPath expression.  It is
+A RESTCONF data resource identifier is
 encoded from left to right, starting with the top-level data node,
 according to the "api-path" rule in ^path-abnf^.  The node name of
 each ancestor of the target resource node is encoded in order, ending
@@ -1067,13 +1083,15 @@ Example URL:
 
 The "api-path" Augmented Backus-Naur Form (ABNF) syntax
 is used to construct RESTCONF
-path identifiers:
+path identifiers. The syntax for "api-identifier" and "key-value" MUST conform to the
+JSON identifier encoding rules in Section 4 of ^I-D.ietf-netmod-yang-json^:
+
 
     api-path = "/"  |
                ("/" api-identifier
                  0*("/" (api-identifier | list-instance )))
 
-    api-identifier = [module-name ":"] identifier   ;; note 1
+    api-identifier = [module-name ":"] identifier
 
     module-name = identifier
 
@@ -1088,10 +1106,8 @@ path identifiers:
     identifier  = (ALPHA / "_")
                   *(ALPHA / DIGIT / "_" / "-" / ".")
 
-Note 1: The syntax for "api-identifier" and "key-value" MUST conform to the
-JSON identifier encoding rules in Section 4 of ^I-D.ietf-netmod-yang-json^.
 
-*** Defaults Handling
+*** Default Handling
 
 RESTCONF requires that a server report its default handling mode
 (see ^defaults-uri^ for details).  If the optional "with-defaults" query
