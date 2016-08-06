@@ -236,6 +236,15 @@ For simplicity, all of the examples in this document assume
 Many of the examples throughout the document are based on the "example-jukebox"
 YANG module, defined in ^example-module^.
 
+Many protocol header lines within examples throughout the document
+are split into multiple lines for display purposes only.
+When a line ends with backslash ('\') as the
+last (non­whitespace) character,
+the line is wrapped for display purposes.  It is to be
+considered to be joined to the next line by deleting the
+backslash, the following line break,
+and the leading whitespace of the next line.
+
 *** Tree Diagrams
 
 A simplified graphical representation of the data model is used in
@@ -727,7 +736,7 @@ would retrieve only the non-configuration data nodes
 that exist within the "library" resource, using the "content"
 query parameter (see ^content^).
 
-   GET /restconf/data/example-jukebox:jukebox/library
+   GET /restconf/data/example-jukebox:jukebox/library\
        ?content=nonconfig  HTTP/1.1
    Host: example.com
    Accept: application/yang-data-xml
@@ -778,8 +787,7 @@ Example:
    Host: example.com
    Accept: application/yang-data-xml
 
-The server might respond
-(response wrapped for display purposes):
+The server might respond:
 
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2016 17:01:30 GMT
@@ -788,8 +796,8 @@ The server might respond
    Content-Type: application/yang-data-xml
 
    <yang-library-version
-     xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
-     2016-04-09
+     xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">\
+     2016-04-09\
    </yang-library-version>
 
 ** Datastore Resource @datastore-resource@
@@ -1059,9 +1067,9 @@ Examples:
 
 For the above YANG definition, the container "top" is defined in
 the "example-top" YANG module, and a target resource URI for leaf "X"
-would be encoded as follows (line wrapped for display purposes only):
+would be encoded as follows:
 
-    /restconf/data/example-top:top/list1=key1,key2,key3/
+    /restconf/data/example-top:top/list1=key1,key2,key3/\
        list2=key4,key5/X
 
 For the above YANG definition, a target resource URI for leaf-list "Y"
@@ -1259,10 +1267,10 @@ The same example request message is shown here using JSON encoding:
 Action Input Example:
 
 The client might send the following POST request message
-to invoke the "reset" action (text wrap for display purposes):
+to invoke the "reset" action:
 
-   POST /restconf/data/example-actions:interfaces/interface=eth0
-     /reset HTTP/1.1
+   POST /restconf/data/example-actions:interfaces/\
+      interface=eth0/reset HTTP/1.1
    Host: example.com
    Content-Type: application/yang-data-xml
 
@@ -1276,11 +1284,11 @@ The server might respond:
    Date: Mon, 25 Apr 2016 11:01:00 GMT
    Server: example-server
 
-The same example request message is shown here using JSON encoding
-(text wrap for display purposes):
+The same example request message is shown here using JSON encoding:
 
-   POST /restconf/data/example-actions:interfaces/interface=eth0
-     /reset HTTP/1.1
+
+   POST /restconf/data/example-actions:interfaces/\
+     interface=eth0/reset HTTP/1.1
    Host: example.com
    Content-Type: application/yang-data+json
 
@@ -1366,8 +1374,8 @@ is used for this example.
 The client might send the following POST request message
 to invoke the "get-last-reset-time" action:
 
-   POST /restconf/data/example-actions:interfaces/interface=eth0
-      /get-last-reset-time HTTP/1.1
+   POST /restconf/data/example-actions:interfaces/\
+      interface=eth0/get-last-reset-time HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
 
@@ -1398,7 +1406,6 @@ as defined in ^errors-media-type^. A detailed example of
 an operation resource  error response can be found in
 ^op-resource-errors^.
 
-
 Using the "reboot" RPC operation from the example in
 ^example-ops-mod^,
 the client might send the following POST request message:
@@ -1412,7 +1419,6 @@ the client might send the following POST request message:
      <message>Going down for system maintenance</message>
      <language>en-US</language>
    </input>
-
 
 The server might respond with an "invalid-value" error:
 
@@ -1466,8 +1472,8 @@ for this URL. The URL value shown below is just an example.
 
 The client might send the following GET request message:
 
-   GET /restconf/data/ietf-yang-library:modules-state/module=
-       example-jukebox,2015-04-04/schema HTTP/1.1
+   GET /restconf/data/ietf-yang-library:modules-state/\
+       module=example-jukebox,2015-04-04/schema HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
 
@@ -1487,8 +1493,8 @@ Next the client needs to retrieve the actual YANG schema.
 
 The client might send the following GET request message:
 
-   GET https://example.com/mymodules/example-jukebox/2015-04-04
-      HTTP/1.1
+   GET https://example.com/mymodules/example-jukebox/\
+      2015-04-04 HTTP/1.1
    Host: example.com
    Accept: application/yang
 
@@ -1677,7 +1683,7 @@ Example:
 The client might request the response header fields for an
 XML representation of the a specific "album" resource:
 
-   GET /restconf/data/example-jukebox:jukebox/
+   GET /restconf/data/example-jukebox:jukebox/\
       library/artist=Foo%20Fighters/album=Wasting%20Light  HTTP/1.1
    Host: example.com
    Accept: application/yang-data-xml
@@ -1758,13 +1764,12 @@ To create a new "jukebox" resource, the client might send:
    { "example-jukebox:jukebox" : {} }
 
 
-If the resource is created, the server might respond as follows.  Note
-that the "Location" header field is wrapped for display purposes only:
+If the resource is created, the server might respond as follows:
 
    HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
-   Location: https://example.com/restconf/data/
+   Location: https://example.com/restconf/data/\
        example-jukebox:jukebox
    Last-Modified: Mon, 23 Apr 2016 17:01:00 GMT
    ETag: "b3a3e673be2"
@@ -1868,11 +1873,9 @@ An "album" child resource defined in the "example-jukebox" YANG module
 is replaced or created if it does not already exist.
 
 To replace the "album" resource contents,
-the client might send as follows.
-Note that the request-line is wrapped
-for display purposes only:
+the client might send as follows:
 
-   PUT /restconf/data/example-jukebox:jukebox/
+   PUT /restconf/data/example-jukebox:jukebox/\
        library/artist=Foo%20Fighters/album=Wasting%20Light   HTTP/1.1
    Host: example.com
    Content-Type: application/yang-data+json
@@ -1897,7 +1900,7 @@ If the resource is updated, the server might respond:
 
 The same request is shown here using XML encoding:
 
-   PUT /restconf/data/example-jukebox:jukebox/
+   PUT /restconf/data/example-jukebox:jukebox/\
        library/artist=Foo%20Fighters/album=Wasting%20Light   HTTP/1.1
    Host: example.com
    Content-Type: application/yang-data-xml
@@ -1969,10 +1972,8 @@ Example:
 To replace just the "year" field in the "album" resource
 (instead of replacing the entire resource with the PUT method),
 the client might send a plain patch as follows.
-Note that the request-line is wrapped
-for display purposes only:
 
-   PATCH /restconf/data/example-jukebox:jukebox/
+   PATCH /restconf/data/example-jukebox:jukebox/\
        library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
    If-Match: "b8389233a4c"
@@ -2015,7 +2016,7 @@ Example:
 To delete a resource such as the "album" resource,
 the client might send:
 
-   DELETE /restconf/data/example-jukebox:jukebox/
+   DELETE /restconf/data/example-jukebox:jukebox/\
        library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
 
@@ -2562,7 +2563,7 @@ The value "ietf-netconf-with-defaults" is assigned for JSON metadata
 encoding.
 
 
-   GET /restconf/data/interfaces/interface=eth1
+   GET /restconf/data/interfaces/interface=eth1\
        ?with-defaults=report-all-tagged HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
@@ -2661,7 +2662,7 @@ For example:
 The client might send the following request:
 
 
-   GET /restconf/data/ietf-restconf-monitoring:restconf-state/
+   GET /restconf/data/ietf-restconf-monitoring:restconf-state/\
        streams HTTP/1.1
    Host: example.com
    Accept: application/yang-data-xml
@@ -2741,7 +2742,7 @@ For example:
 
 The client might send the following request:
 
-   GET /restconf/data/ietf-restconf-monitoring:restconf-state/
+   GET /restconf/data/ietf-restconf-monitoring:restconf-state/\
        streams/stream=NETCONF/access=xml/location HTTP/1.1
    Host: example.com
    Accept: application/yang-data-xml
@@ -2870,7 +2871,7 @@ An example SSE event notification encoded using JSON:
 Alternatively, since neither XML nor JSON are whitespace sensitive,
 the above messages can be encoded onto a single line.  For example:
 
-For example:  ('\' line wrapping added for formatting only)
+For example:
 
    XML:
 
@@ -2989,7 +2990,7 @@ encoding for the error message. No response
 message-body content is expected by the client
 in this example.
 
-   DELETE /restconf/data/example-jukebox:jukebox/
+   DELETE /restconf/data/example-jukebox:jukebox/\
       library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
@@ -3022,7 +3023,7 @@ The client might send:
    POST /restconf/data/example-jukebox:jukebox HTTP/1.1
    Host: example.com
 
-The server might respond (some lines wrapped for display purposes):
+The server might respond:
 
    HTTP/1.1 409 Conflict
    Date: Mon, 23 Apr 2016 17:11:00 GMT
@@ -3035,7 +3036,7 @@ The server might respond (some lines wrapped for display purposes):
        <error-tag>data-exists</error-tag>
        <error-path
          xmlns:rc="urn:ietf:params:xml:ns:yang:ietf-restconf"
-         xmlns:jbox="https://example.com/ns/example-jukebox">
+         xmlns:jbox="https://example.com/ns/example-jukebox">\
          /rc:restconf/rc:data/jbox:jukebox
        </error-path>
        <error-message>
@@ -3591,6 +3592,8 @@ https://github.com/netconf-wg/restconf/issues
 - clarified PUT and POST differences for creating a data resource
 - clarify PUT for a datastore resource
 - added clarifications from Gen-Art review by Robert Sparks
+- added linewrap convention in terminology and applied in many examples
+
 
 ** v13 - v14
 
@@ -4053,8 +4056,7 @@ from the server in JSON format:
    Accept: application/yang-data+json
 
 
-The server might respond as follows
-(some strings wrapped for display purposes):
+The server might respond as follows:
 
 [RFC Editor Note: Adjust the date for ietf-yang-library below to the
 date in the published ietf-yang-library YANG module, and remove this
@@ -4089,8 +4091,8 @@ note.]
          {
            "name" : "ietf-yang-library",
            "revision" : "2016-04-09",
-           "schema" : "https://example.com/modules/ietf-yang-
-             library/2016-04-09",
+           "schema" : "https://example.com/modules/\
+             ietf-yang-library/2016-04-09",
            "namespace" :
              "urn:ietf:params:xml:ns:yang:ietf-yang-library",
            "conformance-type" : "implement"
@@ -4135,7 +4137,7 @@ In this example the client is retrieving the capability information
 from the server in XML format, and the server supports all
 the RESTCONF query parameters, plus one vendor parameter:
 
-   GET /restconf/data/ietf-restconf-monitoring:restconf-state/
+   GET /restconf/data/ietf-restconf-monitoring:restconf-state/\
        capabilities  HTTP/1.1
    Host: example.com
    Accept: application/yang-data-xml
@@ -4199,24 +4201,22 @@ resource, the client might send the following request.
    }
 
 
-If the resource is created, the server might respond as follows.
-Note that the "Location" header line is wrapped
-for display purposes only:
+If the resource is created, the server might respond as follows:
+
 
    HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2016 17:02:00 GMT
    Server: example-server
-   Location: https://example.com/restconf/data/
+   Location: https://example.com/restconf/data/\
        example-jukebox:jukebox/library/artist=Foo%20Fighters
    Last-Modified: Mon, 23 Apr 2016 17:02:00 GMT
    ETag: "b3830f23a4c"
 
 To create a new "album" resource for this artist within the "jukebox"
-resource, the client might send the following request.
-Note that the request URI header line is wrapped
-for display purposes only:
+resource, the client might send the following request:
 
-   POST /restconf/data/example-jukebox:jukebox/
+
+   POST /restconf/data/example-jukebox:jukebox/\
        library/artist=Foo%20Fighters  HTTP/1.1
    Host: example.com
    Content-Type: application/yang-data-xml
@@ -4226,15 +4226,14 @@ for display purposes only:
      <year>2011</year>
    </album>
 
-If the resource is created, the server might respond
-as follows.  Note that the "Location" header line is wrapped
-for display purposes only:
+If the resource is created, the server might respond as follows:
+
 
    HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2016 17:03:00 GMT
    Server: example-server
-   Location: https://example.com/restconf/data/
-       example-jukebox:jukebox/library/artist=Foo%20Fighters/
+   Location: https://example.com/restconf/data/\
+       example-jukebox:jukebox/library/artist=Foo%20Fighters/\
        album=Wasting%20Light
    Last-Modified: Mon, 23 Apr 2016 17:03:00 GMT
    ETag: "b8389233a4c"
@@ -4249,9 +4248,9 @@ the following request to patch an "album" list entry
 with key value "Wasting Light". Only the "genre" field is being
 updated.
 
-   PATCH /restconf/data/example-jukebox:jukebox/
-       library/artist=Foo%20Fighters/album=Wasting%20Light/genre
-       HTTP/1.1
+   PATCH /restconf/data/example-jukebox:jukebox/\
+       library/artist=Foo%20Fighters/album=Wasting%20Light/\
+       genre HTTP/1.1
    Host: example.com
    If-Unmodified-Since: Mon, 23 Apr 2016 17:01:00 GMT
    Content-Type: application/yang-data+json
@@ -4301,10 +4300,9 @@ sending a PATCH to the datastore resource:
 *** Edit a Data Resource
 
 In this example, the client modifies one data nodes by
-sending a PATCH to the data resource (URI wrapped for
-display purposes only):
+sending a PATCH to the data resource:
 
-   PATCH /restconf/data/example-jukebox:jukebox/library/
+   PATCH /restconf/data/example-jukebox:jukebox/library/\
       artist=Nick%20Cave%20and%20the%Bad%20Seeds HTTP/1.1
    Host: example.com
    Content-Type: application/yang-data-xml
@@ -4345,7 +4343,7 @@ To retrieve all the child resources, the "content" parameter
 is set to "all", or omitted, since this is the default value.
 The client might send:
 
-   GET /restconf/data/example-events:events?content=all
+   GET /restconf/data/example-events:events?content=all\
        HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
@@ -4382,7 +4380,7 @@ the "content" parameter is set to "config".
 Note that the "ETag" and "Last-Modified" headers are only returned if
 the content parameter value is "config".
 
-   GET /restconf/data/example-events:events?content=config
+   GET /restconf/data/example-events:events?content=config\
        HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
@@ -4419,7 +4417,7 @@ the "content" parameter is set to "nonconfig". Note
 that configuration ancestors (if any) and list key leafs
 (if any) are also returned.  The client might send:
 
-   GET /restconf/data/example-events:events?content=nonconfig
+   GET /restconf/data/example-events:events?content=nonconfig\
        HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
@@ -4467,10 +4465,9 @@ Example 1: depth=unbounded
 
 To retrieve all the child resources, the "depth" parameter
 is not present or set to the default value "unbounded".
-Note that some strings are wrapped for display purposes only.
 
-   GET /restconf/data/example-jukebox:jukebox?depth=unbounded
-       HTTP/1.1
+   GET /restconf/data/example-jukebox:jukebox?\
+       depth=unbounded HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
 
@@ -4607,7 +4604,7 @@ by the server matches the target resource node (which is "data"
 in this example). The "module-set-id" leaf is not returned because it
 is not selected in the fields expression.
 
-   GET /restconf/data?fields=ietf-yang-library:modules-state/
+   GET /restconf/data?fields=ietf-yang-library:modules-state/\
        module(name;revision) HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
@@ -4664,7 +4661,7 @@ is being created.
 
 Request from client:
 
-   POST /restconf/data/example-jukebox:jukebox/
+   POST /restconf/data/example-jukebox:jukebox/\
        playlist=Foo-One?insert=first HTTP/1.1
    Host: example.com
    Content-Type: application/yang-data+json
@@ -4672,22 +4669,20 @@ Request from client:
    {
      "example-jukebox:song" : {
         "index" : 1,
-        "id" : "/example-jukebox:jukebox/library/
+        "id" : "/example-jukebox:jukebox/library/\
             artist=Foo%20Fighters/album=Wasting%20Light/song=Rope"
       }
    }
 
 
 Response from server.
-Note that the "Location" header line is wrapped
-for display purposes only:
 
 
    HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2016 13:01:20 GMT
    Server: example-server
    Last-Modified: Mon, 23 Apr 2016 13:01:20 GMT
-   Location: https://example.com/restconf/data/
+   Location: https://example.com/restconf/data/\
        example-jukebox:jukebox/playlist=Foo-One/song=1
    ETag: "eeeada438af"
 
@@ -4695,14 +4690,13 @@ for display purposes only:
 
 In this example, the client is inserting a new "song"
 resource within an "album" resource after another song.
-The request URI is split for display purposes only.
 
 Request from client:
 
-   POST /restconf/data/example-jukebox:jukebox/
-       library/artist=Foo%20Fighters/album=Wasting%20Light?
-       insert=after&point=%2Fexample-jukebox%3Ajukebox%2F
-       library%2Fartist%3DFoo%20Fighters%2Falbum%3D
+   POST /restconf/data/example-jukebox:jukebox/\
+       library/artist=Foo%20Fighters/album=Wasting%20Light?\
+       insert=after&point=%2Fexample-jukebox%3Ajukebox%2F\
+       library%2Fartist%3DFoo%20Fighters%2Falbum%3D\
        Wasting%20Light%2Fsong%3DBridge%20Burning   HTTP/1.1
    Host: example.com
    Content-Type: application/yang-data+json
@@ -4727,7 +4721,7 @@ Response from server:
 *** "filter" Parameter @ex-filters@
 
 The following URIs show some examples of notification filter
-specifications (lines wrapped for display purposes only):
+specifications:
 
    // filter = /event/event-class='fault'
    GET /streams/NETCONF?filter=%2Fevent%2Fevent-class%3D'fault'
@@ -4739,18 +4733,18 @@ specifications (lines wrapped for display purposes only):
    GET /streams/SNMP?filter=%2FlinkUp%7C%2FlinkDown
 
    // filter = /*/reporting-entity/card!='Ethernet0'
-   GET /streams/NETCONF?
+   GET /streams/NETCONF?\
       filter=%2F*%2Freporting-entity%2Fcard%21%3D'Ethernet0'
 
    // filter = /*/email-addr[contains(.,'company.com')]
-   GET /streams/critical-syslog?
+   GET /streams/critical-syslog?\
       filter=%2F*%2Femail-addr[contains(.%2C'company.com')]
 
    // Note: the module name is used as prefix.
    // filter = (/example-mod:event1/name='joe' and
    //           /example-mod:event1/status='online')
-   GET /streams/NETCONF?
-     filter=(%2Fexample-mod%3Aevent1%2Fname%3D'joe'%20and
+   GET /streams/NETCONF?\
+     filter=(%2Fexample-mod%3Aevent1%2Fname%3D'joe'%20and\
              %20%2Fexample-mod%3Aevent1%2Fstatus%3D'online')
 
    // To get notifications from just two modules (e.g., m1 + m2)
@@ -4827,7 +4821,7 @@ basic-mode is "trim".
 
 With query parameter:
 
-   GET /restconf/data/example:interfaces/interface=eth1
+   GET /restconf/data/example:interfaces/interface=eth1\
        ?with-defaults=report-all HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
