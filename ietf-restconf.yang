@@ -10,13 +10,13 @@ module ietf-restconf {
     "WG Web:   <http://tools.ietf.org/wg/netconf/>
      WG List:  <mailto:netconf@ietf.org>
 
-     Editor:   Andy Bierman
+     Author:   Andy Bierman
                <mailto:andy@yumaworks.com>
 
-     Editor:   Martin Bjorklund
+     Author:   Martin Bjorklund
                <mailto:mbj@tail-f.com>
 
-     Editor:   Kent Watsen
+     Author:   Kent Watsen
                <mailto:kwatsen@juniper.net>";
 
   description

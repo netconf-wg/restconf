@@ -778,7 +778,7 @@ This specification is an alternative to, but does not obsolete, the HTTP/1.1 mes
 <seriesInfo name='DOI' value='10.17487/RFC7589'/>
 </reference>
 
-  <reference anchor="I-D.ietf-netconf-yang-library">
+  <reference anchor="RFC7895">
       <front>
         <title>YANG Module Library</title>
         <author initials="A.B." surname="Bierman" fullname="Andy Bierman">
@@ -790,10 +790,10 @@ This specification is an alternative to, but does not obsolete, the HTTP/1.1 mes
         <author initials="K.W." surname="Watsen" fullname="Kent Watsen">
           <organization />
         </author>
-        <date year="2016" month="April"/>
+        <date year="2016" month="June"/>
       </front>
-      <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-library-06" />
-      <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-library-06"/>
+      <seriesInfo name="RFC" value="7895" />
+      <format type="TXT" target='http://www.rfc-editor.org/info/rfc7895' />
 </reference>
 
 <reference anchor="XPath" target="http://www.w3.org/TR/1999/REC-xpath-19991116">
