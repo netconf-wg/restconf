@@ -99,7 +99,7 @@ The following terms are defined in ^RFC7231^:
 
 The following terms are defined in ^RFC7232^:
 
-- entity tag
+- entity-tag
 
 *** YANG
 
@@ -128,7 +128,7 @@ The following terms are defined in ^RFC5277^:
 
 The following terms are used within this document:
 
-- API resource: the resource that models the RESTCONF entry point
+- API resource: the resource that models the RESTCONF root resource
 and the sub-resources to access YANG-defined content.
 It is defined with the YANG data template named "yang-api"
 in the "ietf-restconf" module.
@@ -215,7 +215,8 @@ with the media type "application/yang".
 the event stream resources available from the server.
 This information is defined in the "ietf-restconf-monitoring"
 module as the "stream" list. It can be retrieved using the
-target resource "{+restconf}/data/ietf-restconf-monitoring:restconf-state/streams/stream".
+target resource
+"{+restconf}/data/ietf-restconf-monitoring:restconf-state/streams/stream".
 The stream list contains information about each stream,
 such as the URL to retrieve the event stream data.
 
@@ -249,7 +250,7 @@ and supported with the "application/yang-data+json" media type.
 *** URI Template and Examples @uri-template@
 
 Throughout this document, the URI template ^RFC6570^ syntax
-"{+restconf}" is used to refer to the RESTCONF API entry point outside
+"{+restconf}" is used to refer to the RESTCONF root resource outside
 of an example.  See ^root-resource-discovery^ for details.
 
 For simplicity, all of the examples in this document assume
@@ -423,7 +424,7 @@ There are two extensibility mechanisms built into RESTCONF:
 This document defines version 1 of the RESTCONF protocol.
 If a future version of this protocol is defined, then that document
 will specify how the new version of RESTCONF is identified.
-It is expected that a different entry point will be used
+It is expected that a different RESTCONF root resource will be used
 which will be located using a different link relation
 (See ^root-resource-discovery^).
 
@@ -573,14 +574,18 @@ data-model-specific.
 A resource has a representation associated with a
 media type identifier, as represented
 by the "Content-Type" header field in the HTTP response message.
+A resource has one or more representations, each associated with a
+different media type.  When a representation of a resource is sent
+in an HTTP message, the associated media type is given in
+the "Content­Type" header.
 A resource can contain zero or more nested resources.
 A resource can be created and deleted independently of its
 parent resource, as long as the parent resource exists.
 
-All RESTCONF resource types are defined in this document except
-specific datastore contents, RPC operations, and event notifications.
-The syntax and semantics for these resource types are
-defined in YANG modules.
+#All RESTCONF resource types are defined in this document except
+#specific datastore contents, RPC operations, and event notifications.
+#The syntax and semantics for these resource types are
+#defined in YANG modules.
 
 The RESTCONF resources are accessed via a set of
 URIs defined in this document.
@@ -592,7 +597,7 @@ supported by the server.
 The RESTCONF protocol does not include a
 data resource discovery mechanism.  Instead, the definitions
 within the YANG modules advertised by the server
-are used to construct a predictable RPC operation or data
+are used to construct an RPC operation or data
 resource identifier.
 
 ** Root Resource Discovery @root-resource-discovery@
@@ -625,10 +630,12 @@ Example returning /restconf:
           <Link rel='restconf' href='/restconf'/>
       </XRD>
 
-After discovering the RESTCONF API root, the client MUST prepend it to
-any subsequent request to a RESTCONF resource.
+After discovering the RESTCONF API root, the client MUST use
+this value as the initial part of the path
+in the request URI, in any subsequent request for a RESTCONF resource.
+
 In this example, the client would use the path "/restconf"
-as the RESTCONF entry point.
+as the RESTCONF root resource.
 
 Example returning /top/restconf:
 
@@ -649,7 +656,7 @@ Example returning /top/restconf:
       </XRD>
 
 In this example, the client would use the path "/top/restconf"
-as the RESTCONF entry point.
+as the RESTCONF root resource.
 
 The client can now determine the
 operation resources supported by the the server.
@@ -676,6 +683,12 @@ If the Extensible Resource Descriptor (XRD)
 contains more than one link relation, then only the
 relation named "restconf" is relevant to this specification.
 
+Note that any given endpoint (host:port)
+can only support one RESTCONF server,
+due to the root resource discovery mechanism.
+This limits the number of RESTCONF servers that can run
+concurrently on a host, since each server must use a different port.
+
 ** RESTCONF Media Types
 
 The RESTCONF protocol defines two application specific media
@@ -690,29 +703,33 @@ The "application/yang-data+json" media-type is defined in ^yang-data-json^.
 
 ** API Resource @api-resource@
 
-The API resource contains the entry points for
+The API resource contains the RESTCONF root resource for
 the RESTCONF datastore and operation resources.
 It is the top-level resource located at {+restconf} and has the media type
 "application/yang-data-xml" or "application/yang-data+json".
 
 YANG Tree Diagram for an API Resource:
 
-  +---- restconf
+  +---- {+restconf}
         +---- data
-        +---- operations
+        | ...
+        +---- operations?
+        | ...
         +--ro yang-library-version    string
 
 
-The "yang-api" YANG data template is defined with the "yang-data" extension
+The "yang-api" YANG data template is defined using
+the "yang-data" extension
 in the "ietf-restconf" module, found in ^module^.
-It is used to specify the structure and syntax
+It specifies the structure and syntax
 of the conceptual child resources within the API resource.
 
 The API resource can be retrieved with the GET method.
 
-The {+restconf} entry point resource name used in responses
+The {+restconf} root resource name used in responses
+representing the root of the "ietf-restconf" module
 MUST identify the "ietf-restconf" YANG module.
-For example, a request to GET the entry point "/restconf"
+For example, a request to GET the root resource "/restconf"
 in JSON format will return a representation of
 the API resource named "ietf-restconf:restconf".
 
@@ -768,7 +785,7 @@ Any data-model-specific RPC operations defined in the YANG
 modules advertised by the server MUST be available as child nodes of
 this resource.
 
-The entry point for each RPC operation is represented as
+The access point for each RPC operation is represented as
 an empty leaf.  If an operation resource is retrieved,
 the empty leaf representation is returned by the server.
 
@@ -804,15 +821,14 @@ The server might respond:
 
 ** Datastore Resource @datastore-resource@
 
-The "{+restconf}/data" subtree represents the datastore resource type,
+The "{+restconf}/data" subtree represents the datastore resource,
 which is a collection of configuration data and state data nodes.
 The fragment field in the request URI has no defined purpose
 if the target resource is a datastore resource.
 
 This resource type is an abstraction of the system's underlying datastore
-implementation. It is used to simplify resource
-editing for the client. The RESTCONF datastore resource is a
-conceptual collection of all configuration and state data
+implementation. The client uses it to edit and retrieve data resources,
+as the conceptual root of all configuration and state data
 that is present on the device.
 
 Configuration edit transaction management and configuration persistence
@@ -820,17 +836,22 @@ are handled by the server and not controlled by the client.
 A datastore resource can be written directly with
 the POST and PATCH methods. Each RESTCONF edit of a datastore resource is
 saved to non-volatile storage by the server, if the server supports
-non-volatile storage of configuration data.
+non-volatile storage of configuration data,
+as described in ^netconf-coexistence^.
 
 If the datastore resource represented by the "{+restconf}/data" subtree
 is retrieved, then the datastore and its contents are returned
 by the server. The datastore is represented by a node named "data"
 in the "ietf-restconf" module namespace.
 
-*** Edit Collision Detection @edit-collision@
+*** Edit Collision Prevention @edit-collision@
 
-Two "edit collision detection" mechanisms are provided
-in RESTCONF, for datastore and data resources.
+Two edit collision detection and prevention mechanisms are provided
+in RESTCONF for the datastore resource: a timestamp and an entity-tag.
+Any change to configuration data resources updates the timestamp
+and entity tag of the datastore resource.
+In addition, the RESTCONF server will return an error if
+the datastore is locked by an external source (e.g., NETCONF server).
 
 **** Timestamp
 
@@ -850,38 +871,39 @@ for changes to non-configuration child data resources.
 Last-modified timestamps for data resources are discussed in ^data-resource^.
 
 If the RESTCONF server is colocated with a NETCONF server, then the
-last-modified timestamp MUST represent the "running" datastore.
+last-modified timestamp MUST be for the "running" datastore.
 Note that it is possible other protocols can cause the last-modified
 timestamp to be updated.  Such mechanisms are out of scope
 for this document.
 
-**** Entity tag
+**** Entity-Tag
 
-A unique opaque string is maintained and
-the "ETag" (^RFC7232^, Section 2.3) header field is returned in the
-response for a retrieval request.
-The "If-Match" header field can be used
-in edit operation requests to cause the server
-to reject the request if the resource entity tag
+The server MUST maintain a unique opaque entity­tag for the
+datastore resource and MUST return it in the "ETag" (^RFC7232^,
+Section 2.3) header in the response for a retrieval request.  The
+client MAY use an "If­Match" header in edit operation requests to
+cause the server to reject the request if the resource entity-tag
 does not match the specified value.
 
-The server MUST maintain an entity tag for the
+The server MUST maintain an entity-tag for the
 top-level {+restconf}/data resource.
-This entity tag is only
+This entity-tag is only
 affected by configuration data resources, and MUST NOT be updated
 for changes to non-configuration data.
-Entity tags for data resources are discussed in ^data-resource^.
+Entity-tags for data resources are discussed in ^data-resource^.
+Note that each representation (e.g. XML vs. JSON) requires a
+different entity-tag.
 
 If the RESTCONF server is colocated with a NETCONF server, then this
-entity tag MUST represent the "running" datastore.
-Note that it is possible other protocols can cause the entity tag
+entity-tag MUST be for the "running" datastore.
+Note that it is possible other protocols can cause the entity-tag
 to be updated.  Such mechanisms are out of scope
 for this document.
 
 **** Update Procedure
 
 Changes to configuration data resources affect the timestamp
-and entity tag to that resource, any ancestor data resources,
+and entity-tag for that resource, any ancestor data resources,
 and the datastore resource.
 
 For example, an edit to disable an interface might be
@@ -891,6 +913,7 @@ The "enabled" data node and its ancestors
 are considered to be changed. The datastore is considered to be
 changed when any top-level configuration data node is changed
 (e.g., "interfaces").
+
 
 ** Data Resource  @data-resource@
 
@@ -906,15 +929,10 @@ resource affect both the targeted data node and all
 its descendants, if any.
 
 A data resource can be retrieved with the GET method.
-Data resources are accessed via the "{+restconf}/data" entry point.
+Data resources are accessed via the "{+restconf}/data" URI.
 This sub-tree is used to retrieve and edit data resources.
 The fragment field in the request URI has no defined purpose
 if the target resource is a data resource.
-
-A configuration data resource can be altered by the client
-with some or all of the edit operations, depending on the
-target resource and the specific edit operation. Refer to ^operations^
-for more details on edit operations.
 
 *** Timestamp
 
@@ -947,40 +965,40 @@ for changes to non-configuration data.
 #for non-configuration data resources are updated in an
 #implementation-specific manner.
 
-*** Entity tag
+*** Entity-Tag
 
 For configuration data resources,
-the server SHOULD maintain a resource entity tag for each
+the server SHOULD maintain a resource entity-tag for each
 resource, and return the "ETag" header field when it
 is retrieved as the target resource with the GET or HEAD methods.
-If maintained, the resource entity tag MUST be updated
+If maintained, the resource entity-tag MUST be updated
 whenever the resource
 or any configuration resource within the resource is altered.
-If not maintained, then the resource entity tag for the datastore
+If not maintained, then the resource entity-tag for the datastore
 MUST be used instead.
 
 The "ETag" header field can be used by a
 RESTCONF client in subsequent requests, within the "If-Match"
 and "If-None-Match" header fields.
 
-This entity tag is only
+This entity-tag is only
 affected by configuration data resources, and MUST NOT be updated
 for changes to non-configuration data.
 If the RESTCONF server is colocated with a NETCONF server, then the
-entity tag for a configuration data resource MUST represent
+entity-tag for a configuration data resource MUST represent
 the instance within the "running" datastore.
 
 #For non-configuration data resources,
-#the server MAY maintain an entity tag for each
+#the server MAY maintain an entity-tag for each
 #resource, and return the "ETag" header field when it
-#is retrieved with the GET or HEAD methods. The entity tags
+#is retrieved with the GET or HEAD methods. The entity-tags
 #for non-configuration data resources are updated in an
 #implementation-specific manner.
 
 
 *** Encoding Data Resource Identifiers in the Request URI @uri-encoding@
 
-In YANG, data nodes are identified with an absolute
+In YANG, data nodes can be identified with an absolute
 XPath expression, defined in ^XPath^, starting
 from the document root to the target resource.
 In RESTCONF, URI-encoded path expressions are used instead.
@@ -995,8 +1013,9 @@ encoded from left to right, starting with the top-level data node,
 according to the "api-path" rule in ^path-abnf^.  The node name of
 each ancestor of the target resource node is encoded in order, ending
 with the node name for the target resource.  If a node in the path is
-defined in another module than its parent node, then module name
-followed by a colon character (":") is prepended to the node name in
+defined in another module than its parent node,
+or its parent is the datastore, then the module name
+followed by a colon character (":") MUST be prepended to the node name in
 the resource identifier.  See ^path-abnf^ for details.
 
 If a data node in the path expression is a YANG leaf-list node,
@@ -1004,12 +1023,20 @@ then the leaf-list value MUST be encoded according to the following rules:
 
 - The identifier for the leaf-list MUST be encoded
 using one path segment ^RFC3986^.
+
 - The path segment is constructed by having the leaf-list name,
 followed by an "=" character, followed by the leaf-list value.
 (e.g., /restconf/data/top-leaflist=fred).
+
+- The leaf-list value is specified as a string, using the
+canonical representation for the YANG data type.
+Any reserved characters MUST be
+percent-encoded, according to ^RFC3986^, section 2.1 and 2.5.
+
 - YANG 1.1 allows duplicate leaf-list values
 for non-configuration data. In this case there is no
-machinism to specify the exact matching leaf-list instance.
+mechanism to specify the exact matching leaf-list instance.
+
 - The comma (',') character is percent-encoded, even though
 multiple key values are not possible for a leaf-list.
 This is more consistent and avoids special processing rules.
@@ -1037,13 +1064,18 @@ character.
 canonical representation for the YANG data type.
 Any reserved characters MUST be
 percent-encoded, according to ^RFC3986^, section 2.1 and 2.5.
+The comma (',') character MUST be percent-encoded if it is
+present in the key value.
 
 - All the components in the "key" statement MUST be encoded.
 Partial instance identifiers are not supported.
 
-- Since missing key values are not allowed, two consecutive commas
-are interpreted as a zero-length string.
-(example: list=foo,,baz).
+- Missing key values are not allowed,
+so two consecutive commas are interpreted as
+a comma, followed by a zero-length string, followed by a comma.
+For example, "list1=foo,,baz" would be interpreted as a
+list named "list1" with 3 key values,
+and the second key value is a zero-length string.
 
 - Note that non-configuration lists are not required to define keys.
 In this case, a single list instance cannot be accessed.
@@ -1051,13 +1083,13 @@ In this case, a single list instance cannot be accessed.
 - The "list-instance" ABNF rule defined in ^path-abnf^
 represents the syntax of a list instance identifier.
 
-Resource URI values returned in Location header fields
-for data resources MUST identify the module name
-as specified in ^I-D.ietf-netmod-yang-json^, even
-if there are no conflicting local names when the resource
-is created. This ensures the correct resource will be identified
-even if the server loads a new module that the old client
-does not know about.
+#Resource URI values returned in Location header fields
+#for data resources MUST identify the module name
+#as specified in ^I-D.ietf-netmod-yang-json^, even
+#if there are no conflicting local names when the resource
+#is created. This ensures the correct resource will be identified
+#even if the server loads a new module that the old client
+#does not know about.
 
 Examples:
 
@@ -1103,17 +1135,25 @@ Example URL:
 **** ABNF For Data Resource Identifiers @path-abnf@
 
 The "api-path" Augmented Backus-Naur Form (ABNF) syntax
-is used to construct RESTCONF
-path identifiers.
+is used to construct RESTCONF path identifiers.
+Note that this syntax is used for all resources,
+and the API path starts with the RESTCONF root resource.
+Data resources are required to be identified under
+the subtree "+{restconf}/data".
+
 An identifier is not allowed to start with the case-insensitive
 string "XML", according to YANG identifier rules. 
 The syntax for "api-identifier" and "key-value" MUST conform to the
 JSON identifier encoding rules in Section 4 of ^I-D.ietf-netmod-yang-json^:
+The RESTCONF root resource path is required.
+Additional sub-resource identifiers are optional.
+The characters in a key value string are constrained,
+and some characters need to be percent-encoded,
+as described in ^uri-encoding^.
 
+    api-path = root ["/" (api-identifier | list-instance)]*
 
-    api-path = "/"  |
-               ("/" api-identifier
-                 0*("/" (api-identifier | list-instance )))
+    root = string  ;; replacement string for {+restconf}
 
     api-identifier = [module-name ":"] identifier
 
@@ -1121,7 +1161,7 @@ JSON identifier encoding rules in Section 4 of ^I-D.ietf-netmod-yang-json^:
 
     list-instance = api-identifier "=" key-value ["," key-value]*
 
-    key-value = string      ;; note 1
+    key-value = string  ;; constrained chars are percent-encoded
 
     string = <a quoted or unquoted string>
 
@@ -1173,7 +1213,7 @@ The <operation> field identifies the module name and rpc identifier
 string for the desired operation.
 
 For example, if "module-A" defined a "reset" rpc operation, then
-invoking the operation from "module-A" would be requested as follows:
+invoking the operation would be requested as follows:
 
    POST /restconf/operations/module-A:reset HTTP/1.1
    Server: example.com
@@ -1330,8 +1370,8 @@ considered mandatory nodes, then a response message-body
 MAY be sent by the server in the response.
 
 The request URI is not returned in the response.
-This URI might have context information required to associate
-the output to the specific "rpc" or "action"
+Knowledge of the request URI may be needed to associate
+the output with the specific "rpc" or "action"
 statement used in the request.
 
 Examples:
@@ -1531,16 +1571,16 @@ by the server only.  A client can retrieve a stream resource
 or initiate a long-poll server sent event stream,
 using the procedure specified in ^receive-notifs^.
 
-A notification stream functions according to the NETCONF
+An event stream functions according to the NETCONF
 Notifications specification ^RFC5277^. The available streams
 can be retrieved from the stream list,
-which specifies the syntax and semantics of a stream resource.
+which specifies the syntax and semantics of the stream resources.
 The fragment field in the request URI has no defined purpose
 if the target resource is an event stream resource.
 
 ** Errors YANG Data Template @errors-media-type@
 
-An "errors" YANG data template models a collection
+The "errors" YANG data template models a collection
 of error information that
 is sent as the message-body in a server response message,
 if an error occurs while processing a request message.
@@ -1558,8 +1598,8 @@ The RESTCONF protocol uses HTTP methods to identify
 the CRUD operations requested for a particular resource.
 
 The following table shows how the RESTCONF operations relate to
-NETCONF protocol operations and edit operations, which are
-identified with the NETCONF "nc:operation" attribute.
+NETCONF protocol operations and for the NETCONF <edit-config>
+operation, the "nc:operation" attribute.
 
 !! table CRUD Methods in RESTCONF
 !! head ! RESTCONF ! NETCONF
@@ -1582,8 +1622,8 @@ other media-types may provide more granular control.
 Access control mechanisms are used to limit what CRUD operations
 can be used.  In particular, RESTCONF is compatible with the
 NETCONF Access Control Model (NACM) ^RFC6536^, as there is a
-specific mapping between RESTCONF and NETCONF operations,
-defined in ^operations^.  The resource path needs
+specific mapping between RESTCONF and NETCONF operations.
+The resource path needs
 to be converted internally by the server to the corresponding
 YANG instance-identifier.  Using this information,
 the server can apply the NACM access control rules to RESTCONF
@@ -1596,7 +1636,8 @@ for any resources that the client is not authorized to access.
 #The server MUST NOT allow any operation to be applied
 #to multiple instances of a YANG list or leaf-list.
 
-Implementation of all methods (except PATCH) are defined in ^RFC7231^.
+Implementation of all methods (except PATCH ^RFC5789^)
+are defined in ^RFC7231^.
 This section defines the RESTCONF protocol usage for
 each HTTP method.
 
@@ -1619,12 +1660,13 @@ defined in ^RFC5789^.
 
 The RESTCONF server MUST support the HEAD method.
 The HEAD method is sent by the client to
-retrieve just the header fields that would be returned
+retrieve just the header fields
+(which contain the metadata for a resource) that would be returned
 for the comparable GET method, without the response message-body.
-It is supported for all resource types, except operation resources.
+It is supported for all resources that support the GET method.
 
 The request MUST contain a request URI
-that contains at least the entry point.
+that contains at least the root resource.
 The same query parameters supported by the GET method
 are supported by the HEAD method.
 
@@ -1642,7 +1684,7 @@ retrieve data and metadata for a resource.
 It is supported for all resource types, except operation
 resources.
 The request MUST contain a request URI
-that contains at least the entry point.
+that contains at least the root resource.
 
 The server MUST NOT return any data resources for which the user
 does not have read privileges.
@@ -1662,6 +1704,10 @@ is returned to the client.
 If any content is returned to the client, then the server MUST
 send a valid response message-body.  More than one element
 MUST NOT be returned for XML encoding.
+If multiple elements are sent in a JSON message-body,
+then they MUST be sent as a JSON array. In this case
+any timestamp or entity-tag returned in the response
+MUST be associated with the first element returned.
 
 If a retrieval request for a data resource representing
 a YANG leaf-list or list object
@@ -1877,8 +1923,10 @@ If the target resource represents a YANG leaf-list, then the
 PUT method MUST NOT change the value of the leaf-list instance.
 
 If the target resource represents a YANG list instance, then
-the PUT method MUST NOT change any key leaf values
-in the message-body representation.
+the key leaf values in message-body representation
+MUST be the same as the key leaf values in the request URI.
+The PUT method MUST NOT be used to change the key leaf
+values for a data resource instance.
 
 Example:
 
@@ -1968,7 +2016,7 @@ media type "application/yang-data-xml" or "application/yang-data+json".
 Plain patch can be used to create or update, but not delete, a child
 resource within the target resource.  Please see
 ^I-D.ietf-netconf-yang-patch^ for an alternate media-type supporting
-the ability to delete child resources:
+the ability to delete child resources.
 The YANG Patch Media Type allows multiple
 sub-operations (e.g., merge, delete) within a single PATCH method.
 
@@ -1976,8 +2024,13 @@ If the target resource represents a YANG leaf-list, then the
 PATCH method MUST NOT change the value of the leaf-list instance.
 
 If the target resource represents a YANG list instance, then
-the PATCH method MUST NOT change any key leaf values
-in the message-body representation.
+the key leaf values in message-body representation
+MUST be the same as the key leaf values in the request URI.
+The PATCH method MUST NOT be used to change the key leaf
+values for a data resource instance.
+
+After the plain patch is processed by the server.
+a response will be returned to the client, as specified in ^patch^.
 
 Example:
 
@@ -2027,7 +2080,7 @@ DELETE method to delete more than one such instance.
 
 Example:
 
-To delete a resource such as the "album" resource,
+To delete the "album" resource with the key "Wasting Light",
 the client might send:
 
    DELETE /restconf/data/example-jukebox:jukebox/\
@@ -2100,15 +2153,19 @@ This query parameter MUST be supported by the server.
 
 *** The "depth" Query Parameter @depth@
 
-The "depth" parameter is used to specify the number of nest levels
-returned in a response for a GET method.  The first nest-level
-consists of the requested data node itself.  If the "fields" parameter
-(^fields^) is used to select descendant data nodes, these nodes all
-have a depth value of 1.  This has the effect of including the
+The "depth" parameter is used to limit the depth of
+subtrees returned by the server.
+Data nodes with a depth value greater than the "depth" parameter
+are not returned in a response for a GET method.
+
+The requested data node has a depth level of '1'.
+If the "fields" parameter
+(^fields^) is used to select descendant data nodes, then these nodes
+and all their ancestor nodes have a depth value of 1.
+(This has the effect of including the
 nodes specified by the fields, even if the "depth" value is less
-than the actual depth level of the specified fields.
-Any child nodes which are contained within a
-parent node have a depth value that is 1 greater than its parent.
+than the actual depth level of the specified fields.)
+Any other child node has a depth value that is 1 greater than its parent.
 
 The value of the "depth" parameter is either an integer between 1 and
 65535, or the string "unbounded".  "unbounded" is the default.
@@ -2133,6 +2190,11 @@ The "fields" query parameter is used to optionally identify
 data nodes within the target resource to be retrieved in a
 GET method.  The client can use this parameter to retrieve
 a subset of all nodes in a resource.
+
+The server will return a message-body representing the
+target resource, with descendant nodes pruned as specified
+in the "fields-expr" value. The server does not return a set
+separate sub-resources.
 
 A value of the "fields" query parameter matches the
 following rule:
@@ -2175,8 +2237,9 @@ The "filter" parameter is used to indicate which subset of
 all possible events are of interest.  If not present, all
 events not precluded by other parameters will be sent.
 
-This parameter is only allowed for GET methods on a
-text/event-stream data resource.  A "400 Bad Request" status-line
+This parameter is only allowed for GET methods on an
+event stream resource.
+A "400 Bad Request" status-line
 is returned if used for other methods or resource types.
 
 The format of this parameter is an XPath 1.0 expression, and is
@@ -2284,7 +2347,7 @@ to ^RFC7231^.
 
 If this query parameter is supported by the server, then the
 "replay" query parameter URI MUST be listed in the "capability" leaf-list
-in ^mon-mod^. The "stop-time" query parameter MUST also be supported
+in ^mon-mod^, anf the "stop-time" query parameter MUST also be supported
 by the server.
 
 If the "replay-support" leaf has the value 'true' in the "stream"
@@ -2313,7 +2376,7 @@ Values in the future are valid.
 
 If this query parameter is supported by the server, then the
 "replay" query parameter URI MUST be listed in the "capability" leaf-list
-in ^mon-mod^. The "start-time" query parameter MUST also be supported
+in ^mon-mod^, and the "start-time" query parameter MUST also be supported
 by the server.
 
 If the "replay-support" leaf is present in the "stream"
@@ -2352,7 +2415,14 @@ Section 3.3 of ^RFC6243^.
 
 If the "with-defaults" parameter is set to "report-all-tagged"
 then the server MUST adhere to the defaults reporting behavior defined in
-Section 3.4 of ^RFC6243^.
+Section 3.4 of ^RFC6243^. Metadata is reported by the server
+as specified in ^restconf-metadata^. The XML encoding
+for the "default" attribute
+sent by the server for default nodes is defined in section 6 of ^RFC6243^.
+The JSON encoding for the "default" attribute MUST use the same
+values as defined in ^RFC6243^, but encoded according to the
+rules in ^I-D.ietf-netmod-yang-metadata^.  The module
+name "ietf-netconf-with-defaults" MUST be used for the "default" attribute.
 
 If the "with-defaults" parameter is not present
 then the server MUST adhere to the defaults reporting behavior defined in
@@ -2362,6 +2432,14 @@ defined in ^defaults-uri^.
 If the server includes the "with-defaults" query parameter URI in
 the "capability" leaf-list in ^mon-mod^, then the "with-defaults"
 query parameter MUST be supported.
+
+Since the server does not report the "also-supported" parameter
+as described in section 4.3 of ^RFC6243^, it is possible that some
+values for the "with-defaults" parameter will not be supported.
+If the server does not support the requested value of the "with-defaults"
+parameter,  the server MUST return a response with a
+"400 Bad Request" status-line.
+The error-tag value "invalid-value" is used in this case.
 
 * Messages @messages@
 
@@ -2393,7 +2471,7 @@ and the request URI, using the following conceptual fields:
     where:
 
       <OP> is the HTTP method
-      <restconf> is the RESTCONF entry point
+      <restconf> is the RESTCONF root resource
       <path> is the Target Resource URI
       <query> is the query parameter list
 
@@ -2457,7 +2535,8 @@ A server MAY support both XML and JSON encoding.
 XML encoding rules for data nodes are defined in ^I-D.ietf-netmod-rfc6020bis^.
 The same encoding rules are used for all XML content.
 JSON encoding rules are defined in ^I-D.ietf-netmod-yang-json^.
-JSON encoding of metadata is defined in ^I-D.ietf-netmod-yang-metadata^.
+Additional JSON encoding rules for metadata are defined
+in ^I-D.ietf-netmod-yang-metadata^.
 This encoding is valid JSON, but also has
 special encoding rules to identify module namespaces
 and provide consistent type processing of YANG data.
@@ -2468,7 +2547,8 @@ by the client.
 
 The server MUST support the "Accept" header field and "406 Not Acceptable"
 status-line, as defined in ^RFC7231^.
-Response output content encoding format is identified with the Accept
+The response output content encoding formats that the client
+will accept are identified with the Accept
 header field in the request. If it is not specified, the request
 input encoding format SHOULD be used, or the server MAY choose
 any supported content encoding format.
@@ -2489,17 +2569,17 @@ support any of the requested output encodings for a request,
 then it MUST return an error response with
 a '406 Not Acceptable' status-line.
 
-** RESTCONF Metadata
+** RESTCONF Metadata @restconf-metadata@
 
-The RESTCONF protocol needs to retrieve the same metadata that is
+The RESTCONF protocol needs support retrieval of the same metadata that is
 used in the NETCONF protocol.  Information about default leafs,
 last-modified timestamps, etc. are commonly used to annotate
 representations of the datastore contents.
 
-With the XML encoding, the metadata is encoded as attributes in XML.
+With the XML encoding, the metadata is encoded as attributes in XML,
+according to section 3.3 of ^W3C.REC-xml-20081126^.
 With the JSON encoding, the metadata is encoded as specified in
 ^I-D.ietf-netmod-yang-metadata^.
-
 
 The following examples are based on the example in ^with-defaults-example^.
 The "report-all-tagged" mode for the "with-defaults" query parameter
@@ -2507,7 +2587,7 @@ requires that a "default" attribute be returned for default nodes.
 This example shows that attribute for the "mtu" leaf .
 
 
-*** XML MetaData Encoding Example
+*** XML Metadata Encoding Example
 
 
    GET /restconf/data/interfaces/interface=eth1
@@ -2533,11 +2613,11 @@ The server might respond as follows.
    </interface>
 
 
-*** JSON MetaData Encoding Example
+*** JSON Metadata Encoding Example
 
 Note that RFC 6243 defines the "default" attribute with XSD, not YANG,
 so the YANG module name has to be assigned instead of derived
-from the YANG module name.
+from the YANG module.
 The value "ietf-netconf-with-defaults" is assigned for JSON metadata
 encoding.
 
@@ -2715,7 +2795,7 @@ The server will treat the connection as an event stream, using the
 Server Sent Events ^W3C.REC-eventsource-20150203^ transport strategy.
 
 The server MAY support query parameters for a GET method on this
-resource.  These parameters are specific to each notification stream.
+resource.  These parameters are specific to each event stream.
 
 For example:
 
@@ -2760,23 +2840,10 @@ the HTTP header field "Accept-Encoding".  For instance:
 
 *** NETCONF Event Stream
 
-The server SHOULD support the "NETCONF" notification stream
-defined in ^RFC5277^.  For this stream,
-RESTCONF notification subscription requests MAY specify parameters
-indicating the events it wishes to receive. These query parameters
-are optional to implement, and only available if the server supports
-them.
-
-!! table NETCONF Stream Query Parameters
-!! head ! Name ! Section ! Description
-!! row  ! start-time ! ^start-time^ ! replay event start time
-!! row  ! stop-time ! ^stop-time^ ! replay event stop time
-!! row  ! filter ! ^filter^ ! boolean content filter
-
-The semantics and syntax for these query parameters are
-defined in the sections listed above. The YANG definition
-MUST be converted to a URI-encoded string for use in the request URI.
-
+The server SHOULD support the "NETCONF" event stream
+defined in section 3.2.3 of ^RFC5277^.  For this stream,
+The server MAY support the "start-time", "stop-time",
+and "filter" query parameters, defined in ^query-parameters^.
 Refer to ^ex-filters^ for filter parameter examples.
 
 ** Receiving Event Notifications
@@ -2789,7 +2856,7 @@ The structure of the event data is based on the "notification"
 element definition in Section 4 of ^RFC5277^.
 It MUST conform to the schema for the "notification" element
 in Section 4 of ^RFC5277^, except the XML namespace for
-this element is defined as:
+the event data element is defined as:
 
   urn:ietf:params:xml:ns:yang:ietf-restconf
 
@@ -3030,7 +3097,7 @@ The "ietf-restconf" module defines conceptual definitions
 within an extension and two groupings, which are
 not meant to be implemented as datastore contents by a server.
 E.g., the "restconf" container is not intended to be implemented
-as a top-level data node (under the "/restconf/data" entry point).
+as a top-level data node (under the "/restconf/data" URI).
 
 Note that the "ietf-restconf" module does not have any
 protocol-accessible objects, so no YANG tree diagram is shown.
@@ -3043,7 +3110,7 @@ remove this note.
 * RESTCONF Monitoring
 
 The "ietf-restconf-monitoring" module provides information about
-the RESTCONF protocol capabilities and event notification streams
+the RESTCONF protocol capabilities and event streams
 available from the server.  A RESTCONF server MUST implement
 the "/restconf-state/capabilities" container in this module.
 
@@ -3147,9 +3214,9 @@ Example: (split for display purposes only)
 ** restconf-state/streams
 
 This optional container provides access to the
-event notification streams supported by the server.
+event streams supported by the server.
 The server MAY omit this container if no
-event notification streams are supported.
+event streams are supported.
 
 The server will populate this container with a stream list entry for
 each stream type it supports.  Each stream contains a leaf
@@ -3566,6 +3633,7 @@ https://github.com/netconf-wg/restconf/issues
 - added 'yang-data extension' term and clarified 'YANG data template' term
 - clarified that the fragment component is not part
 of the request URI, per HTTP
+- clarified request URI "api-path" syntax
 
 ** v14 to v15
 
@@ -3957,7 +4025,7 @@ This section shows some typical RESTCONF message exchanges.
 
 *** Retrieve the Top-level API Resource
 
-The client starts by retrieving the RESTCONF entry point:
+The client starts by retrieving the RESTCONF toot resource:
 
 
    GET /.well-known/host-meta HTTP/1.1
@@ -3978,7 +4046,7 @@ The server might respond:
 
 
 The client may then retrieve the top-level
-API resource, using the entry point "/restconf".
+API resource, using the root resource "/restconf".
 
    GET /restconf HTTP/1.1
    Host: example.com
@@ -4227,7 +4295,7 @@ If the resource is created, the server might respond as follows:
    Last-Modified: Mon, 23 Apr 2016 17:03:00 GMT
    ETag: "b8389233a4c"
 
-*** Detect Resource Entity Tag Change
+*** Detect Resource Entity-Tag Change
 
 In this example, the server just supports the
 datastore last-changed timestamp.
