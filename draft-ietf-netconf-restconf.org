@@ -504,19 +504,18 @@ use of X.509v3 based certificates is consistent with NETCONF over TLS
 
 ** Certificate Validation
 
-The RESTCONF client MUST either use X.509
-certificate path validation ^RFC5280^
-to verify the integrity of the RESTCONF server's TLS certificate,
-or match the presented X.509 certificate with locally configured
-certificate fingerprints.
-If X.509 certificate path
-validation fails and the presented X.509 certificate does not match a
-locally configured certificate fingerprint, the connection MUST be 
-terminated as defined in ^RFC5246^.
+The RESTCONF client MUST either use X.509 certificate path validation
+^RFC5280^ to verify the integrity of the RESTCONF server's TLS
+certificate, or match the server’s TLS certificate with a certificate
+obtained by a trusted mechanism (e.g. a pinned certificate).   If X.509
+certificate path validation fails, and the presented X.509 certificate
+does not match a certificate obtained by a trusted mechanism, the
+connection MUST be terminated, as described in Section 7.2.1 of
+^RFC5246^.
 
 # NOTE: the zero-touch explicity allows for a provisional session to
-# be established.  That is, is allows the client to blindly accept the
-# server's certificate.  It does this, but the requires that the data
+# be established.  That is, it allows the client to blindly accept the
+# server's certificate.  It does this, but then requires that the data
 # obtained from the server is signed.  I'm not sure is this section
 # needs to say anything about that though. - K.
 
