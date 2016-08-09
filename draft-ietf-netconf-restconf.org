@@ -2941,7 +2941,7 @@ as there are no meaningful values that could be used for them
 that would not be redundant to the contents of the notification itself.
 RESTCONF servers that do not send the "id" field also do not need
 to support the HTTP header field "Last-Event-Id".  RESTCONF servers that
-do send the "id" field MUST still support the "startTime" query
+do send the "id" field SHOULD support the "start-time" query
 parameter as the preferred means for a client to specify where to
 restart the event stream.
 
@@ -2949,15 +2949,15 @@ restart the event stream.
 
 HTTP status codes are used to report success or failure
 for RESTCONF operations.
-The <rpc-error> element returned in NETCONF error responses
-contains some useful information.  This error information
-is adapted for use in RESTCONF, and error information
-is returned for "4xx" and "5xx" class of status codes.
+The error information that NETCONF error responses contain in the
+<rpc­error> element is adapted for use in RESTCONF, and an <errors>
+data tree information is returned for "4xx" and "5xx" class of
+status codes.
 
 Since an operation resource is defined with a YANG "rpc"
 statement, and an action is defined with a YANG "action" statement,
-a mapping between the NETCONF <error-tag> value
-and the HTTP status code is needed.   The specific error-tag
+a mapping from the NETCONF <error-tag> value
+to the HTTP status code is needed.   The specific error-tag
 and response code to use are data-model-specific
 and might be contained in the YANG "description" statement
 for the "action" or "rpc" statement.
@@ -2991,15 +2991,16 @@ When an error occurs for a request message on any resource
 type, and the status code that will be returned is in the "4xx" range
 (except for status code "403 Forbidden"),
 then the server SHOULD send a response message-body containing
-the information described by the "yang-errors" YANG template definition
+the information described by the "yang-errors" YANG data template
 within the "ietf-restconf" module, found in ^module^.
-The Content-Type of this
-response message MUST be a subtype of application/yang-data
-(see example below).
+The Content­Type of this response message MUST be
+"application/yang­data", plus optionally a structured syntax name
+suffix.
 
-The client SHOULD specify the desired encoding for error messages
-by specifying the appropriate media-type in the Accept header field.
-If no error media is specified, then the media subtype (e.g., XML or JSON)
+The client SHOULD specify the desired encoding(s) for response
+messages by specifying the appropriate media­type(s) in the Accept
+header.  If the client did not specify an Accept header,
+then the media subtype (e.g., XML or JSON)
 of the request message SHOULD be used, or the server MAY choose
 any supported message encoding format. If there is no request message
 the server MUST select "application/yang-data-xml"
@@ -4024,7 +4025,7 @@ This section shows some typical RESTCONF message exchanges.
 
 *** Retrieve the Top-level API Resource
 
-The client starts by retrieving the RESTCONF toot resource:
+The client starts by retrieving the RESTCONF root resource:
 
 
    GET /.well-known/host-meta HTTP/1.1
@@ -4251,9 +4252,11 @@ resource, the client might send the following request.
    Content-Type: application/yang-data+json
 
    {
-     "example-jukebox:artist" : {
-       "name" : "Foo Fighters"
-     }
+     "example-jukebox:artist" : [
+       {
+         "name" : "Foo Fighters"
+       }
+     ]
    }
 
 
@@ -4723,11 +4726,13 @@ Request from client:
    Content-Type: application/yang-data+json
 
    {
-     "example-jukebox:song" : {
-        "index" : 1,
-        "id" : "/example-jukebox:jukebox/library/\
-            artist=Foo%20Fighters/album=Wasting%20Light/song=Rope"
-      }
+     "example-jukebox:song" : [
+        {
+          "index" : 1,
+          "id" : "/example-jukebox:jukebox/library/\
+             artist=Foo%20Fighters/album=Wasting%20Light/song=Rope"
+        }
+      ]
    }
 
 
@@ -4758,12 +4763,14 @@ Request from client:
    Content-Type: application/yang-data+json
 
    {
-     "example-jukebox:song" : {
-       "name" : "Rope",
-       "location" : "/media/foo/a7/rope.mp3",
-       "format" : "MP3",
-       "length" : 259
-     }
+     "example-jukebox:song" : [
+       {
+         "name" : "Rope",
+         "location" : "/media/foo/a7/rope.mp3",
+         "format" : "MP3",
+         "length" : 259
+       }
+     ]
    }
 
 Response from server:
