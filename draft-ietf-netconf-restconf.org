@@ -276,9 +276,10 @@ diagrams is as follows:
 
 - Brackets "[" and "]" enclose list keys.
 - Abbreviations before data node names: "rw" means configuration
- data (read-write) and "ro" state data (read-only).
+data (read-write), "ro" state data (read-only), and "x"
+operation resource (executable)
 - Symbols after data node names: "?" means an optional node, "!" means
- a presence container, and "*" denotes a list and leaf-list.
+a presence container, and "*" denotes a list and leaf-list.
 - Parentheses enclose choice and case nodes, and case nodes are also
 marked with a colon (":").
 - Ellipsis ("...") stands for contents of subtrees that are not shown.
@@ -3000,8 +3001,8 @@ suffix.
 The client SHOULD specify the desired encoding(s) for response
 messages by specifying the appropriate media­type(s) in the Accept
 header.  If the client did not specify an Accept header,
-then the media subtype (e.g., XML or JSON)
-of the request message SHOULD be used, or the server MAY choose
+then the same structured syntax name suffix
+used in the request message SHOULD be used, or the server MAY choose
 any supported message encoding format. If there is no request message
 the server MUST select "application/yang-data-xml"
 or "application/yang-data+json", depending on server preference.
@@ -3032,9 +3033,8 @@ an "lock-denied" error that can occur if a NETCONF
 client has locked a datastore. The RESTCONF client
 is attempting to delete a data resource.  Note that
 an Accept header field is used to specify the desired
-encoding for the error message. No response
-message-body content is expected by the client
-in this example.
+encoding for the error message. There would be no response
+message-body content if this operation was successful.
 
    DELETE /restconf/data/example-jukebox:jukebox/\
       library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
@@ -3111,10 +3111,11 @@ remove this note.
 
 The "ietf-restconf-monitoring" module provides information about
 the RESTCONF protocol capabilities and event streams
-available from the server.  A RESTCONF server MUST implement
-the "/restconf-state/capabilities" container in this module.
+available from the server.
+A RESTCONF server MUST implement the "ietf-restconf-monitoring" module.
 
-YANG Tree Diagram for "ietf-restconf-monitoring" module:
+
+YANG tree diagram for "ietf-restconf-monitoring" module:
 
    +--ro restconf-state
       +--ro capabilities
@@ -3173,18 +3174,18 @@ optional query parameter that it supports.
 
 *** The "defaults" Protocol Capability URI @defaults-uri@
 
-This URI identifies the defaults handling mode that is used by the
+This URI identifies the "basic-mode" defaults handling mode that is used by the
 server for processing default leafs in requests for data resources.
-A parameter named "basic-mode" is required for this capability URI.
-The "basic-mode" definitions are specified in the "With-Defaults
-Capability for NETCONF" ^RFC6243^.
+This protocol capability URI MUST be supported by the server, and
+MUST be listed in the "capability" leaf-list in ^mon-mod^.
 
 !! table RESTCONF defaults capability URI
 !! head ! Name ! URI
 !! row  ! defaults ! urn:ietf:params:restconf:capability:defaults:1.0
 
-This protocol capability URI MUST be supported by the server, and
-MUST be listed in the "capability" leaf-list in ^mon-mod^.
+The URI MUST contain a query parameter named "basic-mode"
+with one of the values listed below:
+
 
 
 | Value     | Description                                         |
@@ -3193,6 +3194,9 @@ MUST be listed in the "capability" leaf-list in ^mon-mod^.
 | trim       | Values set to the YANG default-stmt value are default |
 | explicit     | Values set by the client are never considered default |
 
+
+The "basic-mode" definitions are specified in the "With-Defaults
+Capability for NETCONF" ^RFC6243^.
 
 If the "basic-mode" is set to "report-all" then the server MUST
 adhere to the defaults handling behavior defined in
@@ -3248,12 +3252,7 @@ Implementation is mandatory for RESTCONF servers.
 All YANG modules and submodules used by the server MUST
 be identified in the YANG module library.
 
-** modules-state
-
-This mandatory container holds the identifiers
-for the YANG data model modules supported by the server.
-
-*** modules-state/module
+** modules-state/module
 
 This mandatory list contains one entry
 for each YANG data model module supported by the server.
@@ -3262,6 +3261,11 @@ YANG module that is used by the server.
 
 The contents of this list are defined in
 the "module" YANG list statement in ^RFC7895^.
+
+Note that there are no protocol accessible objects in the "ietf-restconf"
+module to implement, but it is possible that a server will
+list the "ietf-restconf" module in the YANG library
+if it is imported (directly or indirectly) by an implemented module.
 
 * IANA Considerations @iana@
 
@@ -3542,12 +3546,19 @@ provides the means to restrict access for particular NETCONF users
 to a pre-configured subset of all available NETCONF protocol
 operations and content.
 
+The lowest RESTCONF layer is HTTPS, and the mandatory­to­implement 
+secure transport is TLS ^RFC5246^.  The RESTCONF protocol uses the 
+NETCONF access control model ^RFC6536^, which provides the means to 
+restrict access for particular RESTCONF users to a preconfigured 
+subset of all available RESTCONF protocol operations and content. 
+
 This section provides security considerations for the resources
 defined by the RESTCONF protocol.  Security considerations for
 HTTPS are defined in ^RFC7230^. RESTCONF does not specify
-which YANG modules a server needs to support.
-Security considerations for the
-YANG-defined content manipulated by RESTCONF can be found in the documents
+which YANG modules a server needs to support, except the
+"ietf-restconf-monitoring" module.
+Security considerations for the other
+modules manipulated by RESTCONF can be found in the documents
 defining those YANG modules.
 
 This document does not require use of a specific client authentication
@@ -4003,7 +4014,7 @@ YANG Tree Diagram for "example-jukebox" Module
 
   rpcs:
 
-   +---x play
+  +---x play
       +--ro input
          +--ro playlist       string
          +--ro song-number    uint32
@@ -4016,8 +4027,8 @@ YANG Tree Diagram for "example-jukebox" Module
 * RESTCONF Message Examples @main-examples@
 
 The examples within this document use the normative
-YANG module defined in ^module^ and the non-normative
-example YANG module defined in ^example-module^.
+YANG module "ietf-restconf" defined in ^module^ and the non-normative
+example YANG module "example-jukebox" defined in ^example-module^.
 
 This section shows some typical RESTCONF message exchanges.
 
@@ -4079,7 +4090,7 @@ the "Accept" header can be used, as in this example request:
    Host: example.com
    Accept: application/yang-data-xml
 
-The server will return the same response either way,
+The server will return the same conceptual data either way,
 which might be as follows :
 
 [RFC Editor Note: Adjust the date for ietf-yang-library below to the
@@ -4301,9 +4312,9 @@ If the resource is created, the server might respond as follows:
 
 In this example, the server just supports the
 datastore last-changed timestamp.
-The client has previously retrieved the "Last-Modified"
-header and has some value cached to provide in
-the following request to patch an "album" list entry
+After the previous request, the client has cached the "Last-Modified"
+header and the Location header from the response
+to provide in the following request to patch an "album" list entry
 with key value "Wasting Light". Only the "genre" field is being
 updated.
 
@@ -4311,7 +4322,7 @@ updated.
        library/artist=Foo%20Fighters/album=Wasting%20Light/\
        genre HTTP/1.1
    Host: example.com
-   If-Unmodified-Since: Mon, 23 Apr 2016 17:01:00 GMT
+   If-Unmodified-Since: Mon, 23 Apr 2016 17:03:00 GMT
    Content-Type: application/yang-data+json
 
    { "example-jukebox:genre" : "example-jukebox:alternative" }
@@ -4328,8 +4339,9 @@ header.  The server might respond:
 
 *** Edit a Datastore Resource
 
-In this example, the client modifies two different data nodes by
-sending a PATCH to the datastore resource:
+In this example, the client modifies 2 "artist"
+resources by adding an "album" sub-resource to each one,
+by sending a PATCH for the datastore resource:
 
    PATCH /restconf/data HTTP/1.1
    Host: example.com
@@ -4341,8 +4353,8 @@ sending a PATCH to the datastore resource:
          <artist>
            <name>Foo Fighters</name>
            <album>
-             <name>Wasting Light</name>
-             <year>2011</year>
+             <name>One by One</name>
+             <year>2012</year>
            </album>
          </artist>
          <artist>
@@ -4358,8 +4370,8 @@ sending a PATCH to the datastore resource:
 
 *** Edit a Data Resource
 
-In this example, the client modifies one data nodes by
-sending a PATCH to the data resource:
+In this example, the client modifies one data node by
+adding an "album" sub-resource by sending a PATCH for the data resource:
 
    PATCH /restconf/data/example-jukebox:jukebox/library/\
       artist=Nick%20Cave%20and%20the%Bad%20Seeds HTTP/1.1
@@ -4600,7 +4612,7 @@ The server might respond:
 Example 2: depth=1
 
 To determine if 1 or more resource instances exist for
-a given target resource, the value "1" is used.
+a given target resource, the value one is used.
 
    GET /restconf/data/example-jukebox:jukebox?depth=1 HTTP/1.1
    Host: example.com
@@ -4818,41 +4830,26 @@ specifications:
 
 *** "start-time" Parameter
 
+The following URI shows an example of the "start-time" query parameter:
+
    // start-time = 2014-10-25T10:02:00Z
    GET /streams/NETCONF?start-time=2014-10-25T10%3A02%3A00Z
 
 *** "stop-time" Parameter
 
+The following URI shows an example of the "stop-time" query parameter:
+
+   // start-time = 2014-10-25T10:02:00Z
    // stop-time = 2014-10-25T12:31:00Z
-   GET /mystreams/NETCONF?stop-time=2014-10-25T12%3A31%3A00Z
+   GET /mystreams/NETCONF?start-time=2014-10-25T10%3A02%3A00Z\
+      &stop-time=2014-10-25T12%3A31%3A00Z
 
 *** "with-defaults" Parameter @with-defaults-example@
 
-The following YANG module is assumed for this example.
+Assume the server implements the module "example" defined in 
+Appendix A.1 of ^RFC6243^.  Assume the server's datastore is as 
+defined in Appendix A.2 of ^RFC6243^. 
 
-  module example-interface {
-    prefix "exif";
-    namespace "urn:example.com:params:xml:ns:yang:example-interface";
-
-    container interfaces {
-      list interface {
-        key name;
-        leaf name { type string; }
-        leaf mtu { type uint32; }
-        leaf status {
-          config false;
-          type enumeration {
-            enum up;
-            enum down;
-            enum testing;
-          }
-        }
-      }
-    }
-  }
-
-Assume the same data model as defined in Appendix A.1 of ^RFC6243^.
-Assume the same data set as defined in Appendix A.2 of ^RFC6243^.
 If the server defaults-uri basic-mode is "trim", the the
 following request for interface "eth1" might be as follows:
 

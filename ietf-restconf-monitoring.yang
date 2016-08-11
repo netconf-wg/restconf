@@ -96,6 +96,7 @@ module ietf-restconf-monitoring {
 
         leaf replay-support {
           type boolean;
+          default false;
           description
             "Indicates if replay buffer supported for this stream.
              If 'true', then the server MUST support the 'start-time'

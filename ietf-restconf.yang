@@ -59,44 +59,47 @@ module ietf-restconf {
   }
 
   extension yang-data {
-   argument name {
-     yin-element true;
-   }
-   description
-     "This extension is used to specify a YANG data template which
-      represents conceptual data defined in YANG. It is
-      intended to describe hierarchical data independent of
-      protocol context or specific message encoding format.
-      Data definition statements within this extension specify
-      the generic syntax for the specific YANG data template.
+    argument name {
+      yin-element true;
+    }
+    description
+      "This extension is used to specify a YANG data template which
+       represents conceptual data defined in YANG. It is
+       intended to describe hierarchical data independent of
+       protocol context or specific message encoding format.
+       Data definition statements within a yang-data extension
+       specify the generic syntax for the specific YANG data
+       template, whose name is the argument of the yang-data
+       extension statement.
 
-      Note that this extension does not define a media-type.
-      A specification using this extension MUST specify the
-      message encoding rules, including the content media type.
+       Note that this extension does not define a media-type.
+       A specification using this extension MUST specify the
+       message encoding rules, including the content media type.
 
-      The mandatory 'name' parameter value identifies the YANG
-      data template that is being defined. It contains the
-      template name.
+       The mandatory 'name' parameter value identifies the YANG
+       data template that is being defined. It contains the
+       template name.
 
-      This extension is ignored unless it appears as a top-level
-      statement. It SHOULD contain data definition statements
-      that result in exactly one container data node definition.
-      This allows compliant translation to an XML instance
-      document for each YANG data template.
+       This extension is ignored unless it appears as a top-level
+       statement. It MUST contain data definition statements
+       that result in exactly one container data node definition.
+       An instance of a YANG data template can thus be translated
+       into an XML instance document, whose top­level element
+       corresponds to the top­level container. 
 
-      The module name and namespace value for the YANG module using
-      the extension statement is assigned to instance document data
-      conforming to the data definition statements within
-      this extension.
+       The module name and namespace value for the YANG module using
+       the extension statement is assigned to instance document data
+       conforming to the data definition statements within
+       this extension.
 
-      The sub-statements of this extension MUST follow the
-      'data-def-stmt' rule in the YANG ABNF.
+       The sub-statements of this extension MUST follow the
+       'data-def-stmt' rule in the YANG ABNF.
 
-      The XPath document root is the extension statement itself,
-      such that the child nodes of the document root are
-      represented by the data-def-stmt sub-statements within
-      this extension. This conceptual document is the context
-      for the following YANG statements:
+       The XPath document root is the extension statement itself,
+       such that the child nodes of the document root are
+       represented by the data-def-stmt sub-statements within
+       this extension. This conceptual document is the context
+       for the following YANG statements:
 
          - must-stmt
          - when-stmt
@@ -108,17 +111,16 @@ module ietf-restconf {
          - ordered-by
          - instance-identifier data type
 
-      The following data-def-stmt sub-statements have special
-      meaning when used within a yang-data-resource extension
-      statement.
+       The following data-def-stmt sub-statements are constrained
+       when used within a yang-data-resource extension statement.
 
-      - The list-stmt is not required to have a key-stmt defined.
-      - The if-feature-stmt is ignored if present.
-      - The config-stmt is ignored if present.
-      - The available identity values for any 'identityref'
-        leaf or leaf-list nodes is limited to the module
-        containing this extension statement, and the modules
-        imported into that module.
+         - The list-stmt is not required to have a key-stmt defined.
+         - The if-feature-stmt is ignored if present.
+         - The config-stmt is ignored if present.
+         - The available identity values for any 'identityref'
+           leaf or leaf-list nodes is limited to the module
+           containing this extension statement, and the modules
+           imported into that module.
       ";
   }
 
@@ -206,30 +208,28 @@ module ietf-restconf {
 
   grouping restconf {
     description
-      "Conceptual container representing the
-       application/yang-api resource type.";
+      "Conceptual grouping representing the RESTCONF
+       root resource.";
 
     container restconf {
       description
-        "Conceptual container representing the
-         application/yang-api resource type.";
+        "Conceptual container representing the RESTCONF
+         root resource.";
 
       container data {
         description
-          "Container representing the application/yang-datastore
-           resource type. Represents the conceptual root of all
-           state data and configuration data supported by
-           the server.  The child nodes of this container can be
-           any data resource (application/yang-data), which are
-           defined as top-level data nodes from the YANG modules
-           advertised by the server in the ietf-restconf-monitoring
-           module.";
+          "Container representing the datastore resource.
+           Represents the conceptual root of all state data
+           and configuration data supported by the server.
+           The child nodes of this container can be any data
+           resource which are defined as top-level data nodes
+           from the YANG modules advertised by the server in
+           the ietf-yang-library module.";
       }
 
       container operations {
         description
-          "Container for all operation resources
-           (application/yang-operation),
+          "Container for all operation resources.
 
            Each resource is represented as an empty leaf with the
            name of the RPC operation from the YANG rpc statement.
