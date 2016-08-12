@@ -206,9 +206,6 @@ the "capability" leaf-list defined in ^mon-mod^.
 a YANG schema with the GET method. It has a representation
 with the media type "application/yang".
 
- a resource that has a representation with the media type
-"application/yang".  
-
 - server: a RESTCONF server
 
 - stream list: the set of data resource instances that describe
@@ -253,16 +250,14 @@ Throughout this document, the URI template ^RFC6570^ syntax
 "{+restconf}" is used to refer to the RESTCONF root resource outside
 of an example.  See ^root-resource-discovery^ for details.
 
-For simplicity, all of the examples in this document assume
-"/restconf" as the discovered RESTCONF API root path.
-
+For simplicity, all of the examples in this document use "/restconf"
+as the discovered RESTCONF API root path.
 Many of the examples throughout the document are based on the "example-jukebox"
 YANG module, defined in ^example-module^.
 
 Many protocol header lines within examples throughout the document
 are split into multiple lines for display purposes only.
-When a line ends with backslash ('\') as the
-last (non­whitespace) character,
+When a line ends with backslash ('\') as the last character,
 the line is wrapped for display purposes.  It is to be
 considered to be joined to the next line by deleting the
 backslash, the following line break,
@@ -448,10 +443,10 @@ fictitious version 2.
    Content-Type: application/xrd+xml
    Content-Length: nnn
 
-      <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
-          <Link rel='restconf' href='/restconf'/>
-          <Link rel='restconf2' href='/restconf2'/>
-      </XRD>
+   <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
+       <Link rel='restconf' href='/restconf'/>
+       <Link rel='restconf2' href='/restconf2'/>
+   </XRD>
 
 
 RESTCONF also supports a server-defined list of optional capabilities,
@@ -626,9 +621,9 @@ Example returning /restconf:
    Content-Type: application/xrd+xml
    Content-Length: nnn
 
-      <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
-          <Link rel='restconf' href='/restconf'/>
-      </XRD>
+   <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
+       <Link rel='restconf' href='/restconf'/>
+   </XRD>
 
 After discovering the RESTCONF API root, the client MUST use
 this value as the initial part of the path
@@ -651,9 +646,9 @@ Example returning /top/restconf:
    Content-Type: application/xrd+xml
    Content-Length: nnn
 
-      <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
-          <Link rel='restconf' href='/top/restconf'/>
-      </XRD>
+   <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
+       <Link rel='restconf' href='/top/restconf'/>
+   </XRD>
 
 In this example, the client would use the path "/top/restconf"
 as the RESTCONF root resource.
