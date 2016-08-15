@@ -572,7 +572,7 @@ by the "Content-Type" header field in the HTTP response message.
 A resource has one or more representations, each associated with a
 different media type.  When a representation of a resource is sent
 in an HTTP message, the associated media type is given in
-the "Content­Type" header.
+the "Content-Type" header.
 A resource can contain zero or more nested resources.
 A resource can be created and deleted independently of its
 parent resource, as long as the parent resource exists.
@@ -873,10 +873,10 @@ for this document.
 
 **** Entity-Tag
 
-The server MUST maintain a unique opaque entity­tag for the
+The server MUST maintain a unique opaque entity-tag for the
 datastore resource and MUST return it in the "ETag" (^RFC7232^,
 Section 2.3) header in the response for a retrieval request.  The
-client MAY use an "If­Match" header in edit operation requests to
+client MAY use an "If-Match" header in edit operation requests to
 cause the server to reject the request if the resource entity-tag
 does not match the specified value.
 
@@ -2946,7 +2946,7 @@ restart the event stream.
 HTTP status codes are used to report success or failure
 for RESTCONF operations.
 The error information that NETCONF error responses contain in the
-<rpc­error> element is adapted for use in RESTCONF, and an <errors>
+<rpc-error> element is adapted for use in RESTCONF, and an <errors>
 data tree information is returned for "4xx" and "5xx" class of
 status codes.
 
@@ -2989,12 +2989,12 @@ type, and the status code that will be returned is in the "4xx" range
 then the server SHOULD send a response message-body containing
 the information described by the "yang-errors" YANG data template
 within the "ietf-restconf" module, found in ^module^.
-The Content­Type of this response message MUST be
-"application/yang­data", plus optionally a structured syntax name
+The Content-Type of this response message MUST be
+"application/yang-data", plus optionally a structured syntax name
 suffix.
 
 The client SHOULD specify the desired encoding(s) for response
-messages by specifying the appropriate media­type(s) in the Accept
+messages by specifying the appropriate media-type(s) in the Accept
 header.  If the client did not specify an Accept header,
 then the same structured syntax name suffix
 used in the request message SHOULD be used, or the server MAY choose
@@ -3541,7 +3541,7 @@ provides the means to restrict access for particular NETCONF users
 to a pre-configured subset of all available NETCONF protocol
 operations and content.
 
-The lowest RESTCONF layer is HTTPS, and the mandatory­to­implement 
+The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement 
 secure transport is TLS ^RFC5246^.  The RESTCONF protocol uses the 
 NETCONF access control model ^RFC6536^, which provides the means to 
 restrict access for particular RESTCONF users to a preconfigured 

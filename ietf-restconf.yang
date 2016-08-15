@@ -84,8 +84,8 @@ module ietf-restconf {
        statement. It MUST contain data definition statements
        that result in exactly one container data node definition.
        An instance of a YANG data template can thus be translated
-       into an XML instance document, whose top­level element
-       corresponds to the top­level container. 
+       into an XML instance document, whose top-level element
+       corresponds to the top-level container. 
 
        The module name and namespace value for the YANG module using
        the extension statement is assigned to instance document data
