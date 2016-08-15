@@ -255,7 +255,8 @@ as the discovered RESTCONF API root path.
 Many of the examples throughout the document are based on the "example-jukebox"
 YANG module, defined in ^example-module^.
 
-Many protocol header lines within examples throughout the document
+Many protocol header lines and message-body text
+within examples throughout the document
 are split into multiple lines for display purposes only.
 When a line ends with backslash ('\') as the last character,
 the line is wrapped for display purposes.  It is to be
@@ -431,14 +432,14 @@ in its host-meta data.
 In this example, the server supports both RESTCONF version 1 and a
 fictitious version 2.
 
-   Request
-   -------
+The client might send:
+
    GET /.well-known/host-meta HTTP/1.1
    Host: example.com
    Accept: application/xrd+xml
 
-   Response
-   --------
+The server might respond:
+
    HTTP/1.1 200 OK
    Content-Type: application/xrd+xml
    Content-Length: nnn
@@ -609,14 +610,14 @@ using the <Link> element containing the "restconf" attribute :
 
 Example returning /restconf:
 
-   Request
-   -------
+The client might send:
+
    GET /.well-known/host-meta HTTP/1.1
    Host: example.com
    Accept: application/xrd+xml
 
-   Response
-   --------
+The server might respond:
+
    HTTP/1.1 200 OK
    Content-Type: application/xrd+xml
    Content-Length: nnn
@@ -634,14 +635,14 @@ as the RESTCONF root resource.
 
 Example returning /top/restconf:
 
-   Request
-   -------
+The client might send:
+
    GET /.well-known/host-meta HTTP/1.1
    Host: example.com
    Accept: application/xrd+xml
 
-   Response
-   --------
+The server might respond:
+
    HTTP/1.1 200 OK
    Content-Type: application/xrd+xml
    Content-Length: nnn
@@ -657,14 +658,14 @@ The client can now determine the
 operation resources supported by the the server.
 In this example a custom "play" operation is supported:
 
-   Request
-   -------
+The client might send:
+
    GET /top/restconf/operations HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
 
-   Response
-   --------
+The server might respond:
+
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
@@ -789,11 +790,8 @@ Operation resources are defined in ^operation-resource^.
 *** {+restconf}/yang-library-version  @library-version@
 
 This mandatory leaf identifies the revision date of the "ietf-yang-library"
-YANG module that is implemented by this server.
-
-[RFC Editor Note: Adjust the date for ietf-yang-library below to the
-date in the published ietf-yang-library YANG module, and remove this
-note.]
+YANG module that is implemented by this server.  Note that the
+revision date for the module version found in ^RFC7895^ is used.
 
 Example:
 
@@ -811,7 +809,7 @@ The server might respond:
 
    <yang-library-version
      xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">\
-     2016-04-09\
+     2016-06-21\
    </yang-library-version>
 
 ** Datastore Resource @datastore-resource@
@@ -1519,7 +1517,7 @@ for this URL. The URL value shown below is just an example.
 The client might send the following GET request message:
 
    GET /restconf/data/ietf-yang-library:modules-state/\
-       module=example-jukebox,2015-04-04/schema HTTP/1.1
+       module=example-jukebox,2016-08-15/schema HTTP/1.1
    Host: example.com
    Accept: application/yang-data+json
 
@@ -1532,7 +1530,7 @@ The server might respond:
 
    {
      "ietf-yang-library:schema" :
-      "https://example.com/mymodules/example-jukebox/2015-04-04"
+      "https://example.com/mymodules/example-jukebox/2016-08-15"
    }
 
 Next the client needs to retrieve the actual YANG schema.
@@ -1540,7 +1538,7 @@ Next the client needs to retrieve the actual YANG schema.
 The client might send the following GET request message:
 
    GET https://example.com/mymodules/example-jukebox/\
-      2015-04-04 HTTP/1.1
+      2016-08-15 HTTP/1.1
    Host: example.com
    Accept: application/yang
 
@@ -2453,7 +2451,7 @@ for generic URIs in ^RFC3986^.
 A RESTCONF operation is derived from the HTTP method
 and the request URI, using the following conceptual fields:
 
-        <OP> /<restconf>/<path>?<query>
+     <OP> /<restconf>/<path>?<query>
 
        ^       ^        ^       ^
        |       |        |       |
@@ -3100,7 +3098,7 @@ protocol-accessible objects, so no YANG tree diagram is shown.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2016-07-07.yang"
+!! include-figure ietf-restconf.yang extract-to="ietf-restconf@2016-08-15.yang"
 
 * RESTCONF Monitoring
 
@@ -3236,7 +3234,7 @@ are used by this module for some type definitions.
 RFC Ed.: update the date below with the date of RFC publication and
 remove this note.
 
-!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2016-07-07.yang"
+!! include-figure ietf-restconf-monitoring.yang extract-to="ietf-restconf-monitoring@2016-08-15.yang"
 
 * YANG Module Library
 
@@ -3640,6 +3638,7 @@ https://github.com/netconf-wg/restconf/issues
 - clarified that the fragment component is not part
 of the request URI, per HTTP
 - clarified request URI "api-path" syntax
+- clarified many examples
 
 ** v14 to v15
 
@@ -4074,7 +4073,7 @@ note.]
      "ietf-restconf:restconf" : {
        "data" : {},
        "operations" : {},
-       "yang-library-version" : "2016-04-09"
+       "yang-library-version" : "2016-06-21"
      }
    }
 
@@ -4101,7 +4100,7 @@ note.]
    <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <data/>
      <operations/>
-     <yang-library-version>2016-04-09</yang-library-version>
+     <yang-library-version>2016-06-21</yang-library-version>
    </restconf>
 
 *** Retrieve The Server Module Information
@@ -4153,9 +4152,9 @@ note.]
          },
          {
            "name" : "ietf-yang-library",
-           "revision" : "2016-04-09",
+           "revision" : "2016-06-21",
            "schema" : "https://example.com/modules/\
-             ietf-yang-library/2016-04-09",
+             ietf-yang-library/2016-06-21",
            "namespace" :
              "urn:ietf:params:xml:ns:yang:ietf-yang-library",
            "conformance-type" : "implement"
@@ -4206,9 +4205,7 @@ the RESTCONF query parameters, plus one vendor parameter:
    Accept: application/yang-data-xml
 
 
-The server might respond as follows.
-The extra whitespace in 'capability' elements is
-for display purposes only.
+The server might respond as follows:
 
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2016 17:02:00 GMT
@@ -4219,30 +4216,30 @@ for display purposes only.
 
    <capabilities
        xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
-    <capability>
-     urn:ietf:params:restconf:capability:defaults:1.0?
-        basic-mode=explicit
+    <capability>\
+     urn:ietf:params:restconf:capability:defaults:1.0?\
+        basic-mode=explicit\
     </capability>
-    <capability>
-     urn:ietf:params:restconf:capability:with-defaults:1.0
+    <capability>\
+     urn:ietf:params:restconf:capability:with-defaults:1.0\
     </capability>
-    <capability>
-     urn:ietf:params:restconf:capability:depth:1.0
+    <capability>\
+     urn:ietf:params:restconf:capability:depth:1.0\
     </capability>
-    <capability>
-     urn:ietf:params:restconf:capability:fields:1.0
+    <capability>\
+     urn:ietf:params:restconf:capability:fields:1.0\
     </capability>
-    <capability>
-     urn:ietf:params:restconf:capability:filter:1.0
+    <capability>\
+     urn:ietf:params:restconf:capability:filter:1.0\
     </capability>
-    <capability>
-     urn:ietf:params:restconf:capability:start-time:1.0
+    <capability>\
+     urn:ietf:params:restconf:capability:start-time:1.0\
     </capability>
-    <capability>
-     urn:ietf:params:restconf:capability:stop-time:1.0
+    <capability>\
+     urn:ietf:params:restconf:capability:stop-time:1.0\
     </capability>
-    <capability>
-     http://example.com/capabilities/myparam
+    <capability>\
+     http://example.com/capabilities/myparam\
     </capability>
    </capabilities>
 
@@ -4334,15 +4331,32 @@ header.  The server might respond:
 
 *** Edit a Datastore Resource
 
-In this example, the client modifies 2 "artist"
-resources by adding an "album" sub-resource to each one,
-by sending a PATCH for the datastore resource:
+In this example, assume there is a top-level data resource
+named "system" from the example-system module, 
+and this container has a child leaf
+called "enable-jukebox-streaming":
+
+   container system {
+     leaf enable-jukebox-streaming {
+       type boolean;
+     }
+   }
+
+
+In this example PATCH is used by the client
+to modify 2 top-level resources at
+once, in order to enable jukebox streaming
+and add an "album" sub-resource to eachof 2 "artist" resources:
+
 
    PATCH /restconf/data HTTP/1.1
    Host: example.com
    Content-Type: application/yang-data-xml
 
    <data xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
+     <system xmlns="http://example.com/ns/example-system">
+       <enable-jukebox-streaming>true</enable-jukebox-streaming>
+     </system>
      <jukebox xmlns="http://example.com/ns/example-jukebox">
        <library>
          <artist>

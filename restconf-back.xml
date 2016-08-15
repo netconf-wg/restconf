@@ -666,7 +666,7 @@ This document describes a method for invoking and running the Network Configurat
 </reference>
 
 
-
+<!--
 <reference anchor="W3C.REC-html5-20141028" target="http://www.w3.org/TR/2014/REC-html5-20141028">
 <front>
 <title>HTML5</title>
@@ -696,6 +696,7 @@ This document describes a method for invoking and running the Network Configurat
 <seriesInfo name="World Wide Web Consortium Recommendation" value="REC-html5-20141028"/>
 <format type="HTML" target="http://www.w3.org/TR/2014/REC-html5-20141028"/>
 </reference>
+ -->
 
 <reference anchor="RFC7159" target="http://www.rfc-editor.org/info/rfc7159">
 <front>

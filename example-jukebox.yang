@@ -6,7 +6,7 @@ module example-jukebox {
    organization "Example, Inc.";
    contact "support at example.com";
    description "Example Jukebox Data Model Module";
-   revision "2015-04-04" {
+   revision "2016-08-15" {
      description "Initial version.";
      reference "example.com document 1-4673";
    }
