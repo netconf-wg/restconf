@@ -4383,7 +4383,7 @@ In this example, the client modifies one data node by
 adding an "album" sub-resource by sending a PATCH for the data resource:
 
    PATCH /restconf/data/example-jukebox:jukebox/library/\
-      artist=Nick%20Cave%20and%20the%Bad%20Seeds HTTP/1.1
+      artist=Nick%20Cave%20and%20the%20Bad%20Seeds HTTP/1.1
    Host: example.com
    Content-Type: application/yang-data-xml
 
