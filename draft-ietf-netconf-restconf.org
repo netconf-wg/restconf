@@ -303,36 +303,6 @@ an HTTP interface that follows
 Representational State Transfer (REST) principles ^rest-dissertation^,
 and is compatible with the NETCONF datastore model.
 
-The following figure shows the system components if a RESTCONF server
-is co-located with a NETCONF server:
-
-      +-----------+           +-----------------+
-      |  Web app  | <-------> |                 |
-      +-----------+  RESTCONF | network device  |
-                              |                 |
-      +-----------+           |   +-----------+ |
-      | NETCONF   | <-------> |   | datastore | |
-      | Client    |  NETCONF  |   |           | |
-      +-----------+           |   +-----------+ |
-                              +-----------------+
-
-
-The following figure shows the system components if a RESTCONF server
-is implemented in a device that does not have a NETCONF server:
-
-      +-----------+           +-----------------+
-      |  Web app  | <-------> |                 |
-      +-----------+  RESTCONF | network device  |
-                              |                 |
-                              +-----------------+
-
-Note that there are no interactions at all between
-the NETCONF protocol and RESTCONF protocol.  It is possible
-that locks are in use on a RESTCONF server, even though
-RESTCONF cannot manipulate locks.  In such a case,
-the RESTCONF protocol will not be granted write access to
-data resources within a datastore.
-
 ** Data Model Driven API
 
 RESTCONF combines the simplicity of the HTTP protocol with the
@@ -385,10 +355,39 @@ is activated upon successful completion of the edit.
 RESTCONF can be implemented on a device that supports
 the NETCONF protocol.
 
+The following figure shows the system components if a RESTCONF server
+is co-located with a NETCONF server:
+
+      +-----------+           +-----------------+
+      |  Web app  | <-------> |                 |
+      +-----------+  RESTCONF | network device  |
+                              |                 |
+      +-----------+           |   +-----------+ |
+      | NETCONF   | <-------> |   | datastore | |
+      | Client    |  NETCONF  |   |           | |
+      +-----------+           |   +-----------+ |
+                              +-----------------+
+
+
+The following figure shows the system components if a RESTCONF server
+is implemented in a device that does not have a NETCONF server:
+
+      +-----------+           +-----------------+
+      |  Web app  | <-------> |                 |
+      +-----------+  RESTCONF | network device  |
+                              |                 |
+                              +-----------------+
+
+Note that there are no interactions at all between
+the NETCONF protocol and RESTCONF protocol.  It is possible
+that locks are in use on a RESTCONF server, even though
+RESTCONF cannot manipulate locks.  In such a case,
+the RESTCONF protocol will not be granted write access to
+data resources within a datastore.
+
 If the NETCONF server supports :writable-running, all edits to configuration
 nodes in {+restconf}/data are performed in the running configuration
 datastore. The URI template "{+restconf}" is defined in ^uri-template^.
-
 
 Otherwise, if the device supports :candidate, all edits to
 configuration nodes in {+restconf}/data are performed in the candidate
@@ -843,7 +842,7 @@ Two edit collision detection and prevention mechanisms are provided
 in RESTCONF for the datastore resource: a timestamp and an entity-tag.
 Any change to configuration data resources updates the timestamp
 and entity tag of the datastore resource.
-In addition, the RESTCONF server will return an error if
+In addition, the RESTCONF server MUST return an error if
 the datastore is locked by an external source (e.g., NETCONF server).
 
 **** Timestamp
@@ -1757,6 +1756,8 @@ The server might respond:
      <year>2011</year>
    </album>
 
+Refer to ^ex-get^ for more resource retrieval examples.
+
 ** POST @post@
 
 The RESTCONF server MUST support the POST method.
@@ -2436,7 +2437,7 @@ The error-tag value "invalid-value" is used in this case.
 
 * Messages @messages@
 
-The RESTCONF protocol uses HTTP entities for messages.
+The RESTCONF protocol uses HTTP messages.
 A single HTTP message corresponds to a single protocol method.
 Most messages can perform a single task on a single resource,
 such as retrieving a resource or editing a resource.
@@ -3627,6 +3628,10 @@ The Space & Terrestrial Communications Directorate (S&TCD).
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
 
+** v16 to v17
+
+- various clarifications from NETCONF WG mailing list
+
 ** v15 to v16
 
 - changed media type application/yang-data to application/yang-data-xml
@@ -4026,7 +4031,7 @@ example YANG module "example-jukebox" defined in ^example-module^.
 
 This section shows some typical RESTCONF message exchanges.
 
-** Resource Retrieval Examples
+** Resource Retrieval Examples @ex-get@
 
 *** Retrieve the Top-level API Resource
 
