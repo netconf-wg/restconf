@@ -13,7 +13,7 @@ within a networking device, in a modular and extensible manner.
 
 This document defines an HTTP ^RFC7230^ based protocol called
 RESTCONF, for configuring data defined in YANG version 1 ^RFC6020^ or
-YANG version 1.1 ^I-D.ietf-netmod-rfc6020bis^, using the datastore
+YANG version 1.1 ^RFC7950^, using the datastore
 concepts defined in NETCONF ^RFC6241^.
 
 NETCONF defines configuration datastores and
@@ -103,7 +103,7 @@ The following terms are defined in ^RFC7232^:
 
 *** YANG
 
-The following terms are defined in ^I-D.ietf-netmod-rfc6020bis^:
+The following terms are defined in ^RFC7950^:
 
 - action
 - container
@@ -238,10 +238,10 @@ Each YANG data template is defined with the "yang-data" extension,
 found in ^module^. Representations of instances conforming to
 a particular YANG data template can be defined for YANG.
 The XML representation is defined in
-YANG version 1.1 ^I-D.ietf-netmod-rfc6020bis^, and
+YANG version 1.1 ^RFC7950^, and
 supported with the "application/yang-data-xml"  media type.
 The JSON representation is defined in
-JSON Encoding of Data Modeled with YANG ^I-D.ietf-netmod-yang-json^,
+JSON Encoding of Data Modeled with YANG ^RFC7951^,
 and supported with the "application/yang-data+json" media type.
 
 *** URI Template and Examples @uri-template@
@@ -1077,7 +1077,7 @@ represents the syntax of a list instance identifier.
 
 #Resource URI values returned in Location header fields
 #for data resources MUST identify the module name
-#as specified in ^I-D.ietf-netmod-yang-json^, even
+#as specified in ^RFC7951^, even
 #if there are no conflicting local names when the resource
 #is created. This ensures the correct resource will be identified
 #even if the server loads a new module that the old client
@@ -1136,7 +1136,7 @@ the subtree "+{restconf}/data".
 An identifier is not allowed to start with the case-insensitive
 string "XML", according to YANG identifier rules. 
 The syntax for "api-identifier" and "key-value" MUST conform to the
-JSON identifier encoding rules in Section 4 of ^I-D.ietf-netmod-yang-json^:
+JSON identifier encoding rules in Section 4 of ^RFC7951^:
 The RESTCONF root resource path is required.
 Additional sub-resource identifiers are optional.
 The characters in a key value string are constrained,
@@ -2415,7 +2415,7 @@ for the "default" attribute
 sent by the server for default nodes is defined in section 6 of ^RFC6243^.
 The JSON encoding for the "default" attribute MUST use the same
 values as defined in ^RFC6243^, but encoded according to the
-rules in ^I-D.ietf-netmod-yang-metadata^.  The module
+rules in ^RFC7952^.  The module
 name "ietf-netconf-with-defaults" MUST be used for the "default" attribute.
 
 If the "with-defaults" parameter is not present
@@ -2526,11 +2526,11 @@ RESTCONF message content is sent in the HTTP message-body.
 Content is encoded in either JSON or XML format.
 A server MUST support one of either XML or JSON encoding.
 A server MAY support both XML and JSON encoding.
-XML encoding rules for data nodes are defined in ^I-D.ietf-netmod-rfc6020bis^.
+XML encoding rules for data nodes are defined in ^RFC7950^.
 The same encoding rules are used for all XML content.
-JSON encoding rules are defined in ^I-D.ietf-netmod-yang-json^.
+JSON encoding rules are defined in ^RFC7951^.
 Additional JSON encoding rules for metadata are defined
-in ^I-D.ietf-netmod-yang-metadata^.
+in ^RFC7952^.
 This encoding is valid JSON, but also has
 special encoding rules to identify module namespaces
 and provide consistent type processing of YANG data.
@@ -2573,7 +2573,7 @@ representations of the datastore contents.
 With the XML encoding, the metadata is encoded as attributes in XML,
 according to section 3.3 of ^W3C.REC-xml-20081126^.
 With the JSON encoding, the metadata is encoded as specified in
-^I-D.ietf-netmod-yang-metadata^.
+^RFC7952^.
 
 The following examples are based on the example in ^with-defaults-example^.
 The "report-all-tagged" mode for the "with-defaults" query parameter
@@ -3335,13 +3335,10 @@ registry ^RFC6020^:
 
    Optional parameters: None
 
-  // RFC Ed.: replace draft-ietf-netmod-rfc6020bis with
-  // the actual RFC reference for YANG 1.1, and remove this note.
-
    Encoding considerations: 8-bit
       Each conceptual YANG data node is encoded according to the
       XML Encoding Rules and Canonical Format for the specific
-      YANG data node type defined in [draft-ietf-netmod-rfc6020bis].
+      YANG data node type defined in [RFC7950].
 
   // RFC Ed.: replace 'NN' in Section NN of [RFCXXXX] with the
   // section number for Security Considerations
@@ -3413,18 +3410,10 @@ registry ^RFC6020^:
 
    Optional parameters: None
 
-  // RFC Ed.: replace draft-ietf-netmod-yang-json with
-  // the actual RFC reference for JSON Encoding of YANG Data,
-  //  and remove this note.
-
-  // RFC Ed.: replace draft-ietf-netmod-yang-metadata with
-  // the actual RFC reference for JSON Encoding of YANG Data,
-  //  and remove this note.
-
    Encoding considerations: 8-bit
       Each conceptual YANG data node is encoded according to
-      [draft-ietf-netmod-yang-json]. A data annotation is
-      encoded according to [draft-ietf-netmod-yang-metadata]
+      [RFC7951]. A data annotation is encoded according to
+      [RFC7952].
 
   // RFC Ed.: replace 'NN' in Section NN of [RFCXXXX] with the
   // section number for Security Considerations
@@ -3631,6 +3620,7 @@ https://github.com/netconf-wg/restconf/issues
 ** v16 to v17
 
 - various clarifications from NETCONF WG mailing list
+- updated YANG 1.1 and YANG/JSON references to RFC numbers
 
 ** v15 to v16
 

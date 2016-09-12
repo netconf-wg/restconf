@@ -460,20 +460,6 @@ specifications of each URI scheme.
     <format type="TXT" octets="324178" target="http://www.rfc-editor.org/rfc/rfc6020.txt"/>
   </reference>
 
-<reference anchor="I-D.ietf-netmod-rfc6020bis">
-  <front>
-    <title>The YANG 1.1 Data Modeling Language</title>
-    <author initials="M" surname="Bjorklund" fullname="Martin Bjorklund">
-      <organization/>
-    </author>
-    <date month="June" day="17" year="2016"/>
-    <abstract>
-      <t>YANG is a data modeling language used to model configuration data, state data, remote procedure calls, and notifications for network management protocols like the Network Configuration Protocol (NETCONF).</t>
-    </abstract>
-  </front>
-  <seriesInfo name="Internet-Draft" value="draft-ietf-netmod-rfc6020bis-14"/>
-  <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-netmod-rfc6020bis-14.txt"/>
-</reference>
 
   <reference anchor='RFC6241'>
       <front>
@@ -564,35 +550,6 @@ This document describes a method for invoking and running the Network Configurat
 	<date year='2012' month='March'/>
       </front>
       <seriesInfo name='RFC' value='6570'/>
-  </reference>
-
-  <reference anchor="I-D.ietf-netmod-yang-json">
-    <front>
-      <title>JSON Encoding of Data Modeled with YANG</title>
-      <author initials="L." surname="Lhotka" fullname="L. Lhotka">
-	<organization>CZ.NIC</organization>
-      </author>
-      <date year="2016" day="28" month="March"/>
-    </front>
-    <seriesInfo name="Internet-Draft"
-                value="draft-ietf-netmod-yang-json-10"/>
-    <format type='TXT'
-    target='http://www.ietf.org/id/draft-ietf-netmod-yang-json-10.txt'/>
-  </reference>
-
-
-  <reference anchor="I-D.ietf-netmod-yang-metadata">
-    <front>
-      <title>Defining and Using Metadata with YANG</title>
-      <author initials="L." surname="Lhotka" fullname="L. Lhotka">
-	<organization>CZ.NIC</organization>
-      </author>
-      <date year="2016" day="21" month="March"/>
-    </front>
-    <seriesInfo name="Internet-Draft"
-                value="draft-ietf-netmod-yang-metadata-07"/>
-    <format type='TXT'
-    target='http://www.ietf.org/id/draft-ietf-netmod-yang-metadata-07.txt'/>
   </reference>
 
 <reference anchor="RFC6415">
@@ -812,6 +769,56 @@ This specification is an alternative to, but does not obsolete, the HTTP/1.1 mes
       <format type="HTML" target="http://www.w3.org/TR/1999/REC-xpath-19991116"/>
 </reference>
 
+<reference anchor="RFC7950" target="http://www.rfc-editor.org/info/rfc7950">
+<front>
+<title>The YANG 1.1 Data Modeling Language</title>
+<author initials="M." surname="Bjorklund" fullname="M. Bjorklund" role="editor">
+<organization/>
+</author>
+<date year="2016" month="August"/>
+<abstract>
+<t>
+YANG is a data modeling language used to model configuration data, state data, Remote Procedure Calls, and notifications for network management protocols. This document describes the syntax and semantics of version 1.1 of the YANG language. YANG version 1.1 is a maintenance release of the YANG language, addressing ambiguities and defects in the original specification. There are a small number of backward incompatibilities from YANG version 1. This document also specifies the YANG mappings to the Network Configuration Protocol (NETCONF).
+</t>
+</abstract>
+</front>
+<seriesInfo name="RFC" value="7950"/>
+<seriesInfo name="DOI" value="10.17487/RFC7950"/>
+</reference>
+
+<reference anchor="RFC7951" target="http://www.rfc-editor.org/info/rfc7951">
+<front>
+<title>JSON Encoding of Data Modeled with YANG</title>
+<author initials="L." surname="Lhotka" fullname="L. Lhotka">
+<organization/>
+</author>
+<date year="2016" month="August"/>
+<abstract>
+<t>
+This document defines encoding rules for representing configuration data, state data, parameters of Remote Procedure Call (RPC) operations or actions, and notifications defined using YANG as JavaScript Object Notation (JSON) text.
+</t>
+</abstract>
+</front>
+<seriesInfo name="RFC" value="7951"/>
+<seriesInfo name="DOI" value="10.17487/RFC7951"/>
+</reference>
+
+<reference anchor="RFC7952" target="http://www.rfc-editor.org/info/rfc7952">
+<front>
+<title>Defining and Using Metadata with YANG</title>
+<author initials="L." surname="Lhotka" fullname="L. Lhotka">
+<organization/>
+</author>
+<date year="2016" month="August"/>
+<abstract>
+<t>
+This document defines a YANG extension that allows for defining metadata annotations in YANG modules. The document also specifies XML and JSON encoding of annotations and other rules for annotating instances of YANG data nodes.
+</t>
+</abstract>
+</front>
+<seriesInfo name="RFC" value="7952"/>
+<seriesInfo name="DOI" value="10.17487/RFC7952"/>
+</reference>
 
 </references>
 
