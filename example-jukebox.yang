@@ -196,10 +196,7 @@ module example-jukebox {
              "An arbitrary integer index for this playlist song.";
          }
          leaf id {
-           type leafref {
-             path "/jbox:jukebox/jbox:library/jbox:artist/" +
-                  "jbox:album/jbox:song/jbox:name";
-           }
+           type instance-identifier;
            mandatory true;
            description
              "Song identifier. Must identify an instance of

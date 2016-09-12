@@ -4007,7 +4007,7 @@ YANG Tree Diagram for "example-jukebox" Module
       |  +--rw description?   string
       |  +--rw song* [index]
       |     +--rw index    uint32
-      |     +--rw id       leafref
+      |     +--rw id       instance-identifier
       +--rw player
          +--rw gap?   decimal64
 
@@ -4602,17 +4602,17 @@ The server might respond:
            "song" : [
              {
                "index" : 1,
-               "id" : "https://example.com/restconf/data/
-                     example-jukebox:jukebox/library/artist=
-                     Foo%20Fighters/album=Wasting%20Light/
-                     song=Rope"
+               "id" : "/example-jukebox:jukebox/library\
+                  /artist[name='Foo Figthers']\
+                  /album[name='Wasting Light']\
+                  /song[name=Rope']"
              },
              {
                "index" : 2,
-               "id" : "https://example.com/restconf/data/
-                     example-jukebox:jukebox/library/artist=
-                     Foo%20Fighters/album=Wasting%20Light/song=
-                     Bridge%20Burning"
+               "id" : "/example-jukebox:jukebox/library\
+                  /artist[name='Foo Figthers']\
+                  /album[name='Wasting Light']\
+                  /song[name=Bridge Burning']"
              }
            ]
          }
@@ -4755,15 +4755,15 @@ Request from client:
      "example-jukebox:song" : [
         {
           "index" : 1,
-          "id" : "/example-jukebox:jukebox/library/\
-             artist=Foo%20Fighters/album=Wasting%20Light/song=Rope"
+          "id" : "/example-jukebox:jukebox/library\
+             /artist[name='Foo Figthers']\
+             /album[name='Wasting Light']\
+             /song[name=Rope']"
         }
       ]
    }
 
-
-Response from server.
-
+Response from server:
 
    HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2016 13:01:20 GMT
@@ -4775,36 +4775,38 @@ Response from server.
 
 *** "point" Parameter
 
-In this example, the client is inserting a new "song"
-resource within an "album" resource after another song.
+In this example, the client is inserting a new song entry in the
+"Foo-One" playlist after the first song.
 
 Request from client:
 
    POST /restconf/data/example-jukebox:jukebox/\
-       library/artist=Foo%20Fighters/album=Wasting%20Light?\
-       insert=after&point=%2Fexample-jukebox%3Ajukebox%2F\
-       library%2Fartist%3DFoo%20Fighters%2Falbum%3D\
-       Wasting%20Light%2Fsong%3DBridge%20Burning HTTP/1.1
+       playlist=Foo-One?insert=after&point=\
+       %2Fexample-jukebox%3Ajukebox\
+       %2Fplaylist%3DFoo-One%2Fsong%3D1 HTTP/1.1
    Host: example.com
    Content-Type: application/yang-data+json
 
    {
      "example-jukebox:song" : [
-       {
-         "name" : "Rope",
-         "location" : "/media/foo/a7/rope.mp3",
-         "format" : "MP3",
-         "length" : 259
-       }
-     ]
+        {
+          "index" : 2,
+          "id" : "/example-jukebox:jukebox/library\
+             /artist[name='Foo Figthers']\
+             /album[name='Wasting Light']\
+             /song[name=Bridge Burning']"
+        }
+      ]
    }
 
 Response from server:
 
-   HTTP/1.1 204 No Content
+   HTTP/1.1 201 Created
    Date: Mon, 23 Apr 2016 13:01:20 GMT
    Server: example-server
    Last-Modified: Mon, 23 Apr 2016 13:01:20 GMT
+   Location: https://example.com/restconf/data/\
+       example-jukebox:jukebox/playlist=Foo-One/song=2
    ETag: "abcada438af"
 
 *** "filter" Parameter @ex-filters@
