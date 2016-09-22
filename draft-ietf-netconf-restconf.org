@@ -182,7 +182,7 @@ the patch type in use.
 defined in ^plain-patch^,
 that can be used for simple merge operations.
 It is specified by a request Content-Type of
-"application/yang-data-xml" or "application/yang-data+json".
+"application/yang-data+xml" or "application/yang-data+json".
 
 - query parameter: a parameter (and its value if any),
 encoded within the query component of the request URI.
@@ -239,7 +239,7 @@ found in ^module^. Representations of instances conforming to
 a particular YANG data template can be defined for YANG.
 The XML representation is defined in
 YANG version 1.1 ^RFC7950^, and
-supported with the "application/yang-data-xml"  media type.
+supported with the "application/yang-data+xml"  media type.
 The JSON representation is defined in
 JSON Encoding of Data Modeled with YANG ^RFC7951^,
 and supported with the "application/yang-data+json" media type.
@@ -693,7 +693,7 @@ to the schema for a particular YANG construct.
 This document defines media types for XML and JSON serialization
 of YANG data.  Other documents MAY define other media types for
 different serializations of YANG data.
-The "application/yang-data-xml" media-type is defined in ^yang-data-xml^.
+The "application/yang-data+xml" media-type is defined in ^yang-data-xml^.
 The "application/yang-data+json" media-type is defined in ^yang-data-json^.
 
 ** API Resource @api-resource@
@@ -701,7 +701,7 @@ The "application/yang-data+json" media-type is defined in ^yang-data-json^.
 The API resource contains the RESTCONF root resource for
 the RESTCONF datastore and operation resources.
 It is the top-level resource located at {+restconf} and has the media type
-"application/yang-data-xml" or "application/yang-data+json".
+"application/yang-data+xml" or "application/yang-data+json".
 
 YANG Tree Diagram for an API Resource:
 
@@ -753,7 +753,7 @@ query parameter (see ^content^).
    GET /restconf/data/example-jukebox:jukebox/library\
        ?content=nonconfig HTTP/1.1
    Host: example.com
-   Accept: application/yang-data-xml
+   Accept: application/yang-data+xml
 
 The server might respond:
 
@@ -761,7 +761,7 @@ The server might respond:
    Date: Mon, 23 Apr 2016 17:01:30 GMT
    Server: example-server
    Cache-Control: no-cache
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <library xmlns="https://example.com/ns/example-jukebox">
      <artist-count>42</artist-count>
@@ -796,7 +796,7 @@ Example:
 
    GET /restconf/yang-library-version HTTP/1.1
    Host: example.com
-   Accept: application/yang-data-xml
+   Accept: application/yang-data+xml
 
 The server might respond:
 
@@ -804,7 +804,7 @@ The server might respond:
    Date: Mon, 23 Apr 2016 17:01:30 GMT
    Server: example-server
    Cache-Control: no-cache
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <yang-library-version
      xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">\
@@ -1278,7 +1278,7 @@ to invoke the "reboot" RPC operation:
 
    POST /restconf/operations/example-ops:reboot HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <input xmlns="https://example.com/ns/example-ops">
     <delay>600</delay>
@@ -1315,7 +1315,7 @@ to invoke the "reset" action:
    POST /restconf/data/example-actions:interfaces/\
       interface=eth0/reset HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <input xmlns="https://example.com/ns/example-actions">
      <delay>600</delay>
@@ -1401,7 +1401,7 @@ The same response is shown here using XML encoding:
    HTTP/1.1 200 OK
    Date: Mon, 25 Apr 2016 11:10:30 GMT
    Server: example-server
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <output xmlns="https://example.com/ns/example-ops">
      <reboot-time>30</reboot-time>
@@ -1455,7 +1455,7 @@ the client might send the following POST request message:
 
    POST /restconf/operations/example-ops:reboot HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <input xmlns="https://example.com/ns/example-ops">
      <delay>-33</delay>
@@ -1468,7 +1468,7 @@ The server might respond with an "invalid-value" error:
    HTTP/1.1 400 Bad Request
    Date: Mon, 25 Apr 2016 11:10:30 GMT
    Server: example-server
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <errors xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <error>
@@ -1737,14 +1737,14 @@ XML representation of the a specific "album" resource:
    GET /restconf/data/example-jukebox:jukebox/\
       library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
-   Accept: application/yang-data-xml
+   Accept: application/yang-data+xml
 
 The server might respond:
 
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2016 17:02:40 GMT
    Server: example-server
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
    Cache-Control: no-cache
    ETag: "a74eefc993a2b"
    Last-Modified: Mon, 23 Apr 2016 11:02:14 GMT
@@ -1958,7 +1958,7 @@ The same request is shown here using XML encoding:
    PUT /restconf/data/example-jukebox:jukebox/\
        library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <album xmlns="http://example.com/ns/example-jukebox"
           xmlns:jbox="http://example.com/ns/example-jukebox">
@@ -2005,7 +2005,7 @@ the procedures defined in ^error-reporting^.
 The plain patch mechanism merges the contents of the message-body with
 the target resource.  The message-body for a plain patch
 MUST be present and MUST be represented by the
-media type "application/yang-data-xml" or "application/yang-data+json".
+media type "application/yang-data+xml" or "application/yang-data+json".
 
 Plain patch can be used to create or update, but not delete, a child
 resource within the target resource.  Please see
@@ -2036,7 +2036,7 @@ the client might send a plain patch as follows.
        library/artist=Foo%20Fighters/album=Wasting%20Light HTTP/1.1
    Host: example.com
    If-Match: "b8389233a4c"
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <album xmlns="http://example.com/ns/example-jukebox">
     <year>2011</year>
@@ -2587,7 +2587,7 @@ This example shows that attribute for the "mtu" leaf .
    GET /restconf/data/interfaces/interface=eth1
        ?with-defaults=report-all-tagged HTTP/1.1
    Host: example.com
-   Accept: application/yang-data-xml
+   Accept: application/yang-data+xml
 
 
 The server might respond as follows.
@@ -2596,7 +2596,7 @@ The server might respond as follows.
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <interface
      xmlns="urn:example.com:params:xml:ns:yang:example-interface">
@@ -2718,14 +2718,14 @@ The client might send the following request:
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/\
        streams HTTP/1.1
    Host: example.com
-   Accept: application/yang-data-xml
+   Accept: application/yang-data+xml
 
 
 The server might send the following response:
 
 
    HTTP/1.1 200 OK
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <streams
      xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
@@ -2798,13 +2798,13 @@ The client might send the following request:
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/\
        streams/stream=NETCONF/access=xml/location HTTP/1.1
    Host: example.com
-   Accept: application/yang-data-xml
+   Accept: application/yang-data+xml
 
 
 The server might send the following response:
 
    HTTP/1.1 200 OK
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <location
      xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
@@ -2835,7 +2835,13 @@ the HTTP header field "Accept-Encoding".  For instance:
 *** NETCONF Event Stream
 
 The server SHOULD support the "NETCONF" event stream
-defined in section 3.2.3 of ^RFC5277^.  For this stream,
+defined in section 3.2.3 of ^RFC5277^.
+The notification messages for this stream are encoded in XML.
+
+The server MAY support additional streams which represent
+the semantic content of the NETCONF event stream, but
+using a representation with a different media type.
+
 The server MAY support the "start-time", "stop-time",
 and "filter" query parameters, defined in ^query-parameters^.
 Refer to ^ex-filters^ for filter parameter examples.
@@ -2843,26 +2849,30 @@ Refer to ^ex-filters^ for filter parameter examples.
 ** Receiving Event Notifications
 
 RESTCONF notifications are encoded according to the
-definition of the event stream.  The NETCONF stream
-defined in ^RFC5277^ is encoded in XML format.
+definition of the event stream.
 
 The structure of the event data is based on the "notification"
 element definition in Section 4 of ^RFC5277^.
 It MUST conform to the schema for the "notification" element
-in Section 4 of ^RFC5277^, except the XML namespace for
-the event data element is defined as:
+in Section 4 of ^RFC5277^ using the XML namespace
+as defined in the XSD as follows:
 
-  urn:ietf:params:xml:ns:yang:ietf-restconf
+  urn:ietf:params:xml:ns:netconf:notification:1.0
 
 For JSON encoding purposes, the module name for
 the "notification" element is "ietf-restconf".
 
 Two child nodes within the "notification" container
 are expected, representing the event time and
-the event payload.  The "event-time" node is
-defined within the "ietf-restconf" module namespace.
+the event payload.  The "eventTime" node is
+defined within the same XML namespace as the
+"notification" element. It is defined to be
+within the "ietf-restconf" module namespace
+for JSON encoding purposes.
+
 The name and namespace of the payload element are determined
-by the YANG module containing the notification-stmt.
+by the YANG module containing the notification-stmt
+representing the notification message.
 
 In the following example, the YANG module "example-mod"
 is used:
@@ -2883,8 +2893,8 @@ is used:
 An example SSE event notification encoded using XML:
 
    data: <notification
-   data:    xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
-   data:    <event-time>2013-12-21T00:01:00Z</event-time>
+   data:    xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+   data:    <eventTime>2013-12-21T00:01:00Z</eventTime>
    data:    <event xmlns="http://example.com/event/1.0">
    data:       <event-class>fault</event-class>
    data:       <reporting-entity>
@@ -2898,7 +2908,7 @@ An example SSE event notification encoded using JSON:
 
    data: {
    data:   "ietf-restconf:notification" : {
-   data:     "event-time" : "2013-12-21T00:01:00Z",
+   data:     "eventTime" : "2013-12-21T00:01:00Z",
    data:     "example-mod:event" : {
    data:       "event-class" : "fault",
    data:       "reporting-entity" : { "card" : "Ethernet0" },
@@ -2915,15 +2925,15 @@ For example:
 
    XML:
 
-   data: <notification xmlns="urn:ietf:params:xml:ns:yang:ietf-rest\
-   conf"><event-time>2013-12-21T00:01:00Z</event-time><event xmlns="\
-   http://example.com/event/1.0"><event-class>fault</event-class><re\
-   portingEntity><card>Ethernet0</card></reporting-entity><severity>\
-   major</severity></event></notification>
+   data: <notification xmlns="urn:ietf:params:xml:ns:netconf:notif\
+   ication:1.0"><eventTime>2013-12-21T00:01:00Z</eventTime><event \
+   xmlns="http://example.com/event/1.0"><event-class>fault</event-\
+   class><reportingEntity><card>Ethernet0</card></reporting-entity>\
+   <severity>major</severity></event></notification>
 
    JSON:
 
-   data: {"ietf-restconf:notification":{"event-time":"2013-12-21\
+   data: {"ietf-restconf:notification":{"eventTime":"2013-12-21\
    T00:01:00Z","example-mod:event":{"event-class": "fault","repor\
    tingEntity":{"card":"Ethernet0"},"severity":"major"}}}
 
@@ -2998,7 +3008,7 @@ header.  If the client did not specify an Accept header,
 then the same structured syntax name suffix
 used in the request message SHOULD be used, or the server MAY choose
 any supported message encoding format. If there is no request message
-the server MUST select "application/yang-data-xml"
+the server MUST select "application/yang-data+xml"
 or "application/yang-data+json", depending on server preference.
 All of the examples
 in this document, except for the one below, assume
@@ -3068,7 +3078,7 @@ The server might respond:
    HTTP/1.1 409 Conflict
    Date: Mon, 23 Apr 2016 17:11:00 GMT
    Server: example-server
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <errors xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <error>
@@ -3324,7 +3334,7 @@ registry ^RFC6020^:
 
 ** Media Types @media-types@
 
-*** Media Type application/yang-data-xml @yang-data-xml@
+*** Media Type application/yang-data+xml @yang-data-xml@
 
 
    Type name: application
@@ -3370,7 +3380,8 @@ registry ^RFC6020^:
      that utilize YANG defined data structures.
 
    Fragment identifier considerations: The fragment field in the
-      request URI has no defined purpose.
+      request URI has no defined purpose.  All YANG data nodes are
+      accessible as resources using the path in the request URI.
 
    Additional information:
 
@@ -3621,6 +3632,9 @@ https://github.com/netconf-wg/restconf/issues
 
 - various clarifications from NETCONF WG mailing list
 - updated YANG 1.1 and YANG/JSON references to RFC numbers
+- fixed notification namespace and eventTime name bug
+- changed media type application/yang-data-xml to application/yang-data+xml
+- update fragment identifier considerations section for application/yang-data+xml
 
 ** v15 to v16
 
@@ -4077,7 +4091,7 @@ the "Accept" header can be used, as in this example request:
 
    GET /restconf HTTP/1.1
    Host: example.com
-   Accept: application/yang-data-xml
+   Accept: application/yang-data+xml
 
 The server will return the same conceptual data either way,
 which might be as follows :
@@ -4090,7 +4104,7 @@ note.]
    Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
    Cache-Control: no-cache
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <restconf xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <data/>
@@ -4197,7 +4211,7 @@ the RESTCONF query parameters, plus one vendor parameter:
    GET /restconf/data/ietf-restconf-monitoring:restconf-state/\
        capabilities HTTP/1.1
    Host: example.com
-   Accept: application/yang-data-xml
+   Accept: application/yang-data+xml
 
 
 The server might respond as follows:
@@ -4207,7 +4221,7 @@ The server might respond as follows:
    Server: example-server
    Cache-Control: no-cache
    Last-Modified: Sun, 22 Apr 2016 01:00:14 GMT
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <capabilities
        xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
@@ -4276,7 +4290,7 @@ resource, the client might send the following request:
    POST /restconf/data/example-jukebox:jukebox/\
        library/artist=Foo%20Fighters HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <album xmlns="http://example.com/ns/example-jukebox">
      <name>Wasting Light</name>
@@ -4346,7 +4360,7 @@ and add an "album" sub-resource to eachof 2 "artist" resources:
 
    PATCH /restconf/data HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <data xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <system xmlns="http://example.com/ns/example-system">
@@ -4380,7 +4394,7 @@ adding an "album" sub-resource by sending a PATCH for the data resource:
    PATCH /restconf/data/example-jukebox:jukebox/library/\
       artist=Nick%20Cave%20and%20the%20Bad%20Seeds HTTP/1.1
    Host: example.com
-   Content-Type: application/yang-data-xml
+   Content-Type: application/yang-data+xml
 
    <artist xmlns="http://example.com/ns/example-jukebox">
      <name>Nick Cave and the Bad Seeds</name>
