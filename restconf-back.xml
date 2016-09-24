@@ -695,7 +695,7 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
 <format type="TXT" octets="18275" target="http://www.rfc-editor.org/rfc/rfc7320.txt"/>
 </reference>
 
-
+<!--
 <reference anchor="RFC7540" target="http://www.rfc-editor.org/info/rfc7540">
 <front>
 <title>Hypertext Transfer Protocol Version 2 (HTTP/2)</title>
@@ -721,7 +721,7 @@ This specification is an alternative to, but does not obsolete, the HTTP/1.1 mes
 <seriesInfo name="RFC" value="7540"/>
 <seriesInfo name="DOI" value="10.17487/RFC7540"/>
 </reference>
-
+ -->
 
 <reference  anchor='RFC7589' target='http://www.rfc-editor.org/info/rfc7589'>
 <front>

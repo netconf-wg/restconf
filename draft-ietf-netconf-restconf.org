@@ -481,10 +481,14 @@ integrity and confidentiality. A RESTCONF server MUST support the TLS
 protocol ^RFC5246^.  The RESTCONF protocol MUST NOT be used over HTTP
 without using the TLS protocol.
 
-HTTP/2 ^RFC7540^ MAY be used for RESTCONF.
-The server MUST respond using a single HTTP/2 stream for all client
-requests from a stream.  The server MAY respond using same HTTP/2 stream
-that was used for the corresponding request.
+RESTCONF does not require a specific version of HTTP.
+However, it is RECOMMENDED that at least HTTP/1.1 ^RFC7230^
+be supported by all implementations.
+
+#HTTP/2 ^RFC7540^ MAY be used for RESTCONF.
+#The server MUST respond using a single HTTP/2 stream for all client
+#requests from a stream.  The server MAY respond using same HTTP/2 stream
+#that was used for the corresponding request.
 
 
 ** HTTPS with X.509v3 Certificates
@@ -815,8 +819,6 @@ The server might respond:
 
 The "{+restconf}/data" subtree represents the datastore resource,
 which is a collection of configuration data and state data nodes.
-The fragment field in the request URI has no defined purpose
-if the target resource is a datastore resource.
 
 This resource type is an abstraction of the system's underlying datastore
 implementation. The client uses it to edit and retrieve data resources,
@@ -923,8 +925,6 @@ its descendants, if any.
 A data resource can be retrieved with the GET method.
 Data resources are accessed via the "{+restconf}/data" URI.
 This sub-tree is used to retrieve and edit data resources.
-The fragment field in the request URI has no defined purpose
-if the target resource is a data resource.
 
 *** Timestamp
 
@@ -1116,7 +1116,7 @@ The following example shows how reserved characters are
 percent-encoded within a key value.  The value of "key1" contains a
 comma, single-quote, double-quote, colon, double-quote, space, and
 forward slash. (,'":" /).  Note that double-quote is not a reserved
-characters and does not need to be percent-encoded.  The value of
+character and does not need to be percent-encoded.  The value of
 "key2" is the empty string, and the value of "key3" is the string
 "foo".
 
@@ -1155,7 +1155,7 @@ as described in ^uri-encoding^.
 
     key-value = string  ;; constrained chars are percent-encoded
 
-    string = <a quoted or unquoted string>
+    string = <an unquoted string>
 
     ;; An identifier MUST NOT start with
     ;; (('X'|'x') ('M'|'m') ('L'|'l'))
@@ -1194,8 +1194,6 @@ An operation resource represents an RPC operation
 defined with the YANG "rpc" statement or a data-model-specific
 action defined with a YANG "action" statement.
 It is invoked using a POST method on the operation resource.
-The fragment field in the request URI has no defined purpose
-if the target resource is an operation resource.
 
 An RPC operation is invoked as:
 
@@ -1567,8 +1565,6 @@ An event stream functions according to the NETCONF
 Notifications specification ^RFC5277^. The available streams
 can be retrieved from the stream list,
 which specifies the syntax and semantics of the stream resources.
-The fragment field in the request URI has no defined purpose
-if the target resource is an event stream resource.
 
 ** Errors YANG Data Template @errors-media-type@
 
@@ -1584,7 +1580,7 @@ YANG data template, that specifies the syntax and
 semantics of an "errors" container within a RESTCONF response.
 RESTCONF error handling behavior is defined in ^error-reporting^.
 
-* Operations @operations@
+* RESTCONF Methods @operations@
 
 The RESTCONF protocol uses HTTP methods to identify
 the CRUD operations requested for a particular resource.
@@ -2188,7 +2184,7 @@ a subset of all nodes in a resource.
 The server will return a message-body representing the
 target resource, with descendant nodes pruned as specified
 in the "fields-expr" value. The server does not return a set
-separate sub-resources.
+of separate sub-resources.
 
 A value of the "fields" query parameter matches the
 following rule:
@@ -2731,20 +2727,19 @@ The server might send the following response:
      xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
       <stream>
          <name>NETCONF</name>
-         <description>default NETCONF event stream
-         </description>
+         <description>default NETCONF event stream</description>
          <replay-support>true</replay-support>
-         <replay-log-creation-time>
-            2007-07-08T00:00:00Z
+         <replay-log-creation-time>\
+            2007-07-08T00:00:00Z\
          </replay-log-creation-time>
          <access>
             <encoding>xml</encoding>
-            <location>https://example.com/streams/NETCONF
+            <location>https://example.com/streams/NETCONF\
             </location>
          </access>
          <access>
             <encoding>json</encoding>
-            <location>https://example.com/streams/NETCONF-JSON
+            <location>https://example.com/streams/NETCONF-JSON\
             </location>
          </access>
       </stream>
@@ -2759,16 +2754,15 @@ The server might send the following response:
       </stream>
       <stream>
          <name>syslog-critical</name>
-         <description>Critical and higher severity
-         </description>
+         <description>Critical and higher severity</description>
          <replay-support>true</replay-support>
          <replay-log-creation-time>
             2007-07-01T00:00:00Z
          </replay-log-creation-time>
          <access>
             <encoding>xml</encoding>
-            <location>
-              https://example.com/streams/syslog-critical
+            <location>\
+              https://example.com/streams/syslog-critical\
             </location>
          </access>
       </stream>
@@ -2807,8 +2801,8 @@ The server might send the following response:
    Content-Type: application/yang-data+xml
 
    <location
-     xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">
-     https://example.com/streams/NETCONF
+     xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring">\
+     https://example.com/streams/NETCONF\
    </location>
 
 
@@ -3379,8 +3373,8 @@ registry ^RFC6020^:
      data parsers used within a protocol or automation tool
      that utilize YANG defined data structures.
 
-   Fragment identifier considerations: The fragment field in the
-      request URI has no defined purpose.  All YANG data nodes are
+   Fragment identifier considerations: Fragment identifiers for
+      this type are not defined.  All YANG data nodes are
       accessible as resources using the path in the request URI.
 
    Additional information:
@@ -3635,6 +3629,7 @@ https://github.com/netconf-wg/restconf/issues
 - fixed notification namespace and eventTime name bug
 - changed media type application/yang-data-xml to application/yang-data+xml
 - update fragment identifier considerations section for application/yang-data+xml
+- clarify HTTP version requirements
 
 ** v15 to v16
 
@@ -4355,7 +4350,7 @@ called "enable-jukebox-streaming":
 In this example PATCH is used by the client
 to modify 2 top-level resources at
 once, in order to enable jukebox streaming
-and add an "album" sub-resource to eachof 2 "artist" resources:
+and add an "album" sub-resource to each of 2 "artist" resources:
 
 
    PATCH /restconf/data HTTP/1.1
