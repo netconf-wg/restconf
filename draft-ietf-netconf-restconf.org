@@ -1143,25 +1143,7 @@ The characters in a key value string are constrained,
 and some characters need to be percent-encoded,
 as described in ^uri-encoding^.
 
-    api-path = root ["/" (api-identifier | list-instance)]*
-
-    root = string  ;; replacement string for {+restconf}
-
-    api-identifier = [module-name ":"] identifier
-
-    module-name = identifier
-
-    list-instance = api-identifier "=" key-value ["," key-value]*
-
-    key-value = string  ;; constrained chars are percent-encoded
-
-    string = <an unquoted string>
-
-    ;; An identifier MUST NOT start with
-    ;; (('X'|'x') ('M'|'m') ('L'|'l'))
-    identifier  = (ALPHA / "_")
-                  *(ALPHA / DIGIT / "_" / "-" / ".")
-
+!! include-figure api-path.abnf
 
 *** Default Handling
 

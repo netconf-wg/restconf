@@ -1,0 +1,17 @@
+api-path = root *("/" (api-identifier / list-instance))
+
+root = string  ;; replacement string for {+restconf}
+
+api-identifier = [module-name ":"] identifier
+
+module-name = identifier
+
+list-instance = api-identifier "=" key-value *("," key-value)
+
+key-value = string  ;; constrained chars are percent-encoded
+
+string = <an unquoted string>
+
+identifier  = (ALPHA / "_")
+              *(ALPHA / DIGIT / "_" / "-" / ".")
+

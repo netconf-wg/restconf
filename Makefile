@@ -52,11 +52,12 @@ validate:
 	pyang example-jukebox.yang
 	pyang example-ops.yang
 	pyang example-actions.yang
+	abnfgen -y 0 api-path.abnf > /dev/null
 
 $(next).xml: $(draft).xml
 	sed -e"s/$(basename $<)-latest/$(basename $@)/" $< > $@
 
-$(draft).xml: restconf-back.xml ietf-restconf.yang \
+$(draft).xml: restconf-back.xml api-path.abnf ietf-restconf.yang \
 		ietf-restconf-monitoring.yang \
 		example-jukebox.yang example-ops.yang
 
