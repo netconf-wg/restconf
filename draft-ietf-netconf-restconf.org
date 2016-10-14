@@ -478,8 +478,8 @@ any reliable transport-layer protocol.  RESTCONF is defined on top of
 HTTP, but due to the sensitive nature of the information conveyed,
 RESTCONF requires that the transport-layer protocol provides both data
 integrity and confidentiality. A RESTCONF server MUST support the TLS
-protocol ^RFC5246^.  The RESTCONF protocol MUST NOT be used over HTTP
-without using the TLS protocol.
+protocol ^RFC5246^, , and SHOULD adhere to ^RFC7525^.  The RESTCONF
+protocol MUST NOT be used over HTTP without using the TLS protocol.
 
 RESTCONF does not require a specific version of HTTP.
 However, it is RECOMMENDED that at least HTTP/1.1 ^RFC7230^
@@ -537,10 +537,14 @@ the server SHOULD send an HTTP response with
 "401 Unauthorized" status-line, as defined in Section 3.1 of
 ^RFC7235^. The error-tag value "access-denied" is used in this case.
 
-To authenticate a client, a RESTCONF server MUST use TLS
-based client certificates (Section 7.4.6 of ^RFC5246^), or
-MUST use any HTTP authentication scheme defined in the
-HTTP Authentication Scheme Registry (Section 5.1 in ^RFC7235^).
+To authenticate a client, a RESTCONF server SHOULD require TLS
+client certificate based authentication (Section 7.4.6 of ^RFC5246^).
+If certificate based authentication is not feasible (e.g. because
+one cannot build the required PKI for clients) then an HTTP
+authentication MAY be used. In the latter case, one of the HTTP
+authentication schemes defined in the HTTP Authentication Scheme
+Registry (Section 5.1 in ^RFC7235^) MUST be used.
+
 A server MAY also support the combination of both client
 certificates and an HTTP client authentication scheme,
 with the determination of how to process this combination
@@ -3507,6 +3511,25 @@ This document registers several capability identifiers in
 
 * Security Considerations
 
+Section 2.1 states “A RESTCONF server MUST support the TLS
+protocol [RFC5246]”.  This language leaves open the possibility
+that a RESTCONF server might also support future versions of the
+TLS protocol.   Of specific concern, TLS 1.3 [draft-ietf-tls-tls13]
+introduces support for 0-RTT handshakes that can lead to security
+issues for REST APIs, as described in the Appendix of the TLS 1.3
+RFC.  It is therefore RECOMMENDED that RESTCONF servers do not
+support 0-RTT at all (not even for idempotent requests) until an
+update to this RFC guides otherwise.
+
+Section 2.5 recommends TLS client certificate based authentication,
+but allows the use of any authentication scheme defined in the HTTP
+Authentication Scheme Registry.  Implementations need to be aware
+that the strength of these methods vary greatly, and that some may be
+considered experimental.  Selection of any of these schemes SHOULD
+be performed after reading the Security Considerations section of
+the RFC associated with the scheme’s registry entry.
+
+
 The "ietf-restconf-monitoring" YANG module defined in this memo
 is designed to be accessed via the NETCONF protocol ^RFC6241^.
 The lowest NETCONF layer is the secure transport layer,
@@ -3516,11 +3539,12 @@ provides the means to restrict access for particular NETCONF users
 to a pre-configured subset of all available NETCONF protocol
 operations and content.
 
-The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement 
-secure transport is TLS ^RFC5246^.  The RESTCONF protocol uses the 
-NETCONF access control model ^RFC6536^, which provides the means to 
-restrict access for particular RESTCONF users to a preconfigured 
-subset of all available RESTCONF protocol operations and content. 
+# why is the following here? -commenting out for now (Kent 2016/10/14)
+#The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement 
+#secure transport is TLS ^RFC5246^.  The RESTCONF protocol uses the 
+#NETCONF access control model ^RFC6536^, which provides the means to 
+#restrict access for particular RESTCONF users to a preconfigured 
+#subset of all available RESTCONF protocol operations and content. 
 
 This section provides security considerations for the resources
 defined by the RESTCONF protocol.  Security considerations for
@@ -3531,13 +3555,13 @@ Security considerations for the other
 modules manipulated by RESTCONF can be found in the documents
 defining those YANG modules.
 
-This document does not require use of a specific client authentication
-mechanism or authorization model, but it does require that a client 
-authentication mechanism and authorization model is used whenever a
-client accesses a protected resource.  Client authentication MUST be
-implemented using client certificates or MUST be implemented using an
-HTTP authentication scheme.  Client authorization MAY be configured
-using the NETCONF Access Control Model (NACM) ^RFC6536^.
+# removing cruft (Kent 2016/10/14)
+#This document does not require use of a specific client authentication
+#mechanism or authorization model, but it does require that a client 
+#authentication mechanism and authorization model is used whenever a
+#client accesses a protected resource.  Client authentication MUST be
+#implemented using client certificates or MUST be implemented using an
+#HTTP authentication scheme. 
 
 Configuration information is by its very nature sensitive.  Its
 transmission in the clear and without integrity checking leaves

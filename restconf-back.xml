@@ -695,6 +695,21 @@ Section 1.1.1 of RFC 3986 defines URI syntax as "a federated and extensible nami
 <format type="TXT" octets="18275" target="http://www.rfc-editor.org/rfc/rfc7320.txt"/>
 </reference>
 
+  <reference  anchor='RFC7525' target='http://www.rfc-editor.org/info/rfc7525'>
+  <front>
+  <title>Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)</title>
+  <author initials='Y.' surname='Sheffer' fullname='Y. Sheffer'><organization /></author>
+  <author initials='R.' surname='Holz' fullname='R. Holz'><organization /></author>
+  <author initials='P.' surname='Saint-Andre' fullname='P. Saint-Andre'><organization /></author>
+  <date year='2015' month='May' />
+  <abstract><t>Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS) are widely used to protect data exchanged over application protocols such as HTTP, SMTP, IMAP, POP, SIP, and XMPP.  Over the last few years, several serious attacks on TLS have emerged, including attacks on its most commonly used cipher suites and their modes of operation.  This document provides recommendations for improving the security of deployed services that use TLS and DTLS. The recommendations are applicable to the majority of use cases.</t></abstract>
+  </front>
+  <seriesInfo name='BCP' value='195'/>
+  <seriesInfo name='RFC' value='7525'/>
+  <seriesInfo name='DOI' value='10.17487/RFC7525'/>
+  </reference>
+
+
 <!--
 <reference anchor="RFC7540" target="http://www.rfc-editor.org/info/rfc7540">
 <front>
