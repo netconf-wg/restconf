@@ -286,7 +286,7 @@ marked with a colon (":").
 RESTCONF does not need to mirror the full functionality of the NETCONF
 protocol, but it does need to be compatible with NETCONF.  RESTCONF
 achieves this by implementing a subset of the interaction capabilities
-provided by the NETCONF protocol, for instance, by eliminating 
+provided by the NETCONF protocol, for instance, by eliminating
 datastores and explicit locking.
 
 RESTCONF uses HTTP methods to implement the equivalent of NETCONF
@@ -478,7 +478,7 @@ any reliable transport-layer protocol.  RESTCONF is defined on top of
 HTTP, but due to the sensitive nature of the information conveyed,
 RESTCONF requires that the transport-layer protocol provides both data
 integrity and confidentiality. A RESTCONF server MUST support the TLS
-protocol ^RFC5246^, , and SHOULD adhere to ^RFC7525^.  The RESTCONF
+protocol ^RFC5246^, and SHOULD adhere to ^RFC7525^.  The RESTCONF
 protocol MUST NOT be used over HTTP without using the TLS protocol.
 
 RESTCONF does not require a specific version of HTTP.
@@ -497,7 +497,7 @@ Given the nearly ubiquitous support for HTTP over TLS ^RFC7230^,
 RESTCONF implementations MUST support the "https" URI scheme, which
 has the IANA assigned default port 443.
 
-RESTCONF servers MUST present an X.509v3 based certificate when 
+RESTCONF servers MUST present an X.509v3 based certificate when
 establishing a TLS connection with a RESTCONF client.  The
 use of X.509v3 based certificates is consistent with NETCONF over TLS
 ^RFC7589^.
@@ -507,7 +507,7 @@ use of X.509v3 based certificates is consistent with NETCONF over TLS
 The RESTCONF client MUST either use X.509 certificate path validation
 ^RFC5280^ to verify the integrity of the RESTCONF server's TLS
 certificate, or match the server’s TLS certificate with a certificate
-obtained by a trusted mechanism (e.g. a pinned certificate).   If X.509
+obtained by a trusted mechanism (e.g., a pinned certificate).   If X.509
 certificate path validation fails, and the presented X.509 certificate
 does not match a certificate obtained by a trusted mechanism, the
 connection MUST be terminated, as described in Section 7.2.1 of
@@ -539,7 +539,7 @@ the server SHOULD send an HTTP response with
 
 To authenticate a client, a RESTCONF server SHOULD require TLS
 client certificate based authentication (Section 7.4.6 of ^RFC5246^).
-If certificate based authentication is not feasible (e.g. because
+If certificate based authentication is not feasible (e.g., because
 one cannot build the required PKI for clients) then an HTTP
 authentication MAY be used. In the latter case, one of the HTTP
 authentication schemes defined in the HTTP Authentication Scheme
@@ -889,7 +889,7 @@ This entity-tag is only
 affected by configuration data resources, and MUST NOT be updated
 for changes to non-configuration data.
 Entity-tags for data resources are discussed in ^data-resource^.
-Note that each representation (e.g. XML vs. JSON) requires a
+Note that each representation (e.g., XML vs. JSON) requires a
 different entity-tag.
 
 If the RESTCONF server is colocated with a NETCONF server, then this
@@ -1138,7 +1138,7 @@ Data resources are required to be identified under
 the subtree "+{restconf}/data".
 
 An identifier is not allowed to start with the case-insensitive
-string "XML", according to YANG identifier rules. 
+string "XML", according to YANG identifier rules.
 The syntax for "api-identifier" and "key-value" MUST conform to the
 JSON identifier encoding rules in Section 4 of ^RFC7951^:
 The RESTCONF root resource path is required.
@@ -1230,13 +1230,13 @@ in an XML element or JSON object named "input",
 which is in the module namespace where the "rpc"
 or "action" statement is defined.
 
-If the "rpc" or "action" statement has an "input" section and the 
+If the "rpc" or "action" statement has an "input" section and the
 "input" object tree contains any child data nodes which are considered
 mandatory nodes, then a message-body MUST be sent by the client in the request.
 
-If the "rpc" or "action" statement has an "input" section and the 
+If the "rpc" or "action" statement has an "input" section and the
 "input" object tree does not contain any child nodes which are
-considered mandatory nodes, then a message-body 
+considered mandatory nodes, then a message-body
 MAY be sent by the client in the request.
 
 If the "rpc" or "action" statement has no "input" section, the
@@ -1335,14 +1335,14 @@ which is in the module namespace where the "rpc"
 or "action" statement is defined.
 
 If the RPC operation is invoked without errors,
-and if the "rpc" or "action" statement has an "output" section and the 
+and if the "rpc" or "action" statement has an "output" section and the
 "output" object tree contains any child data nodes which are considered
 mandatory nodes, then a response message-body MUST be sent by the server in the response.
 
 If the RPC operation is invoked without errors,
-and if the "rpc" or "action" statement has an "output" section and the 
+and if the "rpc" or "action" statement has an "output" section and the
 "output" object tree does not contain any child nodes which are
-considered mandatory nodes, then a response message-body 
+considered mandatory nodes, then a response message-body
 MAY be sent by the server in the response.
 
 The request URI is not returned in the response.
@@ -1868,7 +1868,7 @@ Both the POST and PUT methods can be used to create data resources.
 The difference is that for POST, the client does not provide
 the resource identifier for the resource that will be created.
 The target resource for the POST method for resource creation
-is the parent of the new resource. 
+is the parent of the new resource.
 The target resource for the PUT method for resource creation
 is the new resource.
 
@@ -3511,15 +3511,15 @@ This document registers several capability identifiers in
 
 * Security Considerations
 
-Section 2.1 states “A RESTCONF server MUST support the TLS
-protocol [RFC5246]”.  This language leaves open the possibility
-that a RESTCONF server might also support future versions of the
-TLS protocol.   Of specific concern, TLS 1.3 [draft-ietf-tls-tls13]
-introduces support for 0-RTT handshakes that can lead to security
-issues for REST APIs, as described in the Appendix of the TLS 1.3
-RFC.  It is therefore RECOMMENDED that RESTCONF servers do not
-support 0-RTT at all (not even for idempotent requests) until an
-update to this RFC guides otherwise.
+Section 2.1 states "A RESTCONF server MUST support the TLS protocol
+[RFC5246]".  This language leaves open the possibility that a RESTCONF
+server might also support future versions of the TLS protocol.  Of
+specific concern, TLS 1.3 ^I-D.ietf-tls-tls13^ introduces support for
+0-RTT handshakes that can lead to security issues for REST APIs, as
+described in the Appendix of the TLS 1.3 specification.  It is
+therefore RECOMMENDED that RESTCONF servers do not support 0-RTT at
+all (not even for idempotent requests) until an update to this RFC
+guides otherwise.
 
 Section 2.5 recommends TLS client certificate based authentication,
 but allows the use of any authentication scheme defined in the HTTP
@@ -3540,11 +3540,11 @@ to a pre-configured subset of all available NETCONF protocol
 operations and content.
 
 # why is the following here? -commenting out for now (Kent 2016/10/14)
-#The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement 
-#secure transport is TLS ^RFC5246^.  The RESTCONF protocol uses the 
-#NETCONF access control model ^RFC6536^, which provides the means to 
-#restrict access for particular RESTCONF users to a preconfigured 
-#subset of all available RESTCONF protocol operations and content. 
+#The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement
+#secure transport is TLS ^RFC5246^.  The RESTCONF protocol uses the
+#NETCONF access control model ^RFC6536^, which provides the means to
+#restrict access for particular RESTCONF users to a preconfigured
+#subset of all available RESTCONF protocol operations and content.
 
 This section provides security considerations for the resources
 defined by the RESTCONF protocol.  Security considerations for
@@ -3557,11 +3557,11 @@ defining those YANG modules.
 
 # removing cruft (Kent 2016/10/14)
 #This document does not require use of a specific client authentication
-#mechanism or authorization model, but it does require that a client 
+#mechanism or authorization model, but it does require that a client
 #authentication mechanism and authorization model is used whenever a
 #client accesses a protected resource.  Client authentication MUST be
 #implemented using client certificates or MUST be implemented using an
-#HTTP authentication scheme. 
+#HTTP authentication scheme.
 
 Configuration information is by its very nature sensitive.  Its
 transmission in the clear and without integrity checking leaves
@@ -4342,7 +4342,7 @@ header.  The server might respond:
 *** Edit a Datastore Resource
 
 In this example, assume there is a top-level data resource
-named "system" from the example-system module, 
+named "system" from the example-system module,
 and this container has a child leaf
 called "enable-jukebox-streaming":
 
@@ -4867,9 +4867,9 @@ The following URI shows an example of the "stop-time" query parameter:
 
 *** "with-defaults" Parameter @with-defaults-example@
 
-Assume the server implements the module "example" defined in 
-Appendix A.1 of ^RFC6243^.  Assume the server's datastore is as 
-defined in Appendix A.2 of ^RFC6243^. 
+Assume the server implements the module "example" defined in
+Appendix A.1 of ^RFC6243^.  Assume the server's datastore is as
+defined in Appendix A.2 of ^RFC6243^.
 
 If the server defaults-uri basic-mode is "trim", the the
 following request for interface "eth1" might be as follows:

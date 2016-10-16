@@ -868,6 +868,20 @@ the Design of Network-based Software Architectures</title>
       <seriesInfo name="Internet-Draft" value="draft-ietf-netconf-yang-patch-08" />
       <format type="TXT" target="https://tools.ietf.org/html/draft-ietf-netconf-yang-patch-08"/>
 </reference>
+<reference anchor="I-D.ietf-tls-tls13">
+  <front>
+    <title>The Transport Layer Security (TLS) Protocol Version 1.3</title>
+    <author initials="E" surname="Rescorla" fullname="Eric Rescorla">
+      <organization/>
+    </author>
+    <date month="September" day="22" year="2016"/>
+    <abstract>
+      <t>This document specifies version 1.3 of the Transport Layer Security (TLS) protocol.  TLS allows client/server applications to communicate over the Internet in a way that is designed to prevent eavesdropping, tampering, and message forgery.</t>
+    </abstract>
+  </front>
+  <seriesInfo name="Internet-Draft" value="draft-ietf-tls-tls13-16"/>
+  <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-tls-tls13-16.txt"/>
+</reference>
 
 
 </references>
