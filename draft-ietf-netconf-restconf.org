@@ -469,7 +469,7 @@ new resource types require a new revision of the RESTCONF protocol.
 
 ### END OF INTRODUCTION
 
-* Transport Protocol Requirements
+* Transport Protocol
 
 ** Integrity and Confidentiality
 
@@ -522,12 +522,12 @@ connection MUST be terminated, as described in Section 7.2.1 of
 
 ** Authenticated Server Identity
 
-# The RESTCONF client MUST carefully examine the certificate presented
-# by the RESTCONF server to determine if it meets the client's
-# expectations.
-The RESTCONF client MUST check the identity of the
-server according to Section 6 of ^RFC6125^, including processing the
-outcome as described in Section 6.6 of ^RFC6125^.
+# revised after Alexey's DISCUSS (new text below)
+#The RESTCONF client MUST check the identity of the
+#server according to Section 6 of ^RFC6125^, including processing the
+#outcome as described in Section 6.6 of ^RFC6125^.
+The RESTCONF client MUST check the identity of the server according
+to Section 3.1 of ^RFC2818^.
 
 ** Authenticated Client Identity
 
@@ -3512,7 +3512,7 @@ This document registers several capability identifiers in
 * Security Considerations
 
 Section 2.1 states "A RESTCONF server MUST support the TLS protocol
-[RFC5246]".  This language leaves open the possibility that a RESTCONF
+^RFC5246^".  This language leaves open the possibility that a RESTCONF
 server might also support future versions of the TLS protocol.  Of
 specific concern, TLS 1.3 ^I-D.ietf-tls-tls13^ introduces support for
 0-RTT handshakes that can lead to security issues for REST APIs, as
@@ -3539,12 +3539,13 @@ provides the means to restrict access for particular NETCONF users
 to a pre-configured subset of all available NETCONF protocol
 operations and content.
 
-# why is the following here? -commenting out for now (Kent 2016/10/14)
-#The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement
-#secure transport is TLS ^RFC5246^.  The RESTCONF protocol uses the
-#NETCONF access control model ^RFC6536^, which provides the means to
-#restrict access for particular RESTCONF users to a preconfigured
-#subset of all available RESTCONF protocol operations and content.
+# why is the following here? - it's not phrased as a security
+# consideration and is redundant to Section 2.5 (Kent 2016/10/14)
+The lowest RESTCONF layer is HTTPS, and the mandatory-to-implement
+secure transport is TLS ^RFC5246^.  The RESTCONF protocol uses the
+NETCONF access control model ^RFC6536^, which provides the means to
+restrict access for particular RESTCONF users to a preconfigured
+subset of all available RESTCONF protocol operations and content.
 
 This section provides security considerations for the resources
 defined by the RESTCONF protocol.  Security considerations for
@@ -3554,14 +3555,6 @@ which YANG modules a server needs to support, except the
 Security considerations for the other
 modules manipulated by RESTCONF can be found in the documents
 defining those YANG modules.
-
-# removing cruft (Kent 2016/10/14)
-#This document does not require use of a specific client authentication
-#mechanism or authorization model, but it does require that a client
-#authentication mechanism and authorization model is used whenever a
-#client accesses a protected resource.  Client authentication MUST be
-#implemented using client certificates or MUST be implemented using an
-#HTTP authentication scheme.
 
 Configuration information is by its very nature sensitive.  Its
 transmission in the clear and without integrity checking leaves
@@ -3627,6 +3620,12 @@ The Space & Terrestrial Communications Directorate (S&TCD).
 
 The RESTCONF issue tracker can be found here:
 https://github.com/netconf-wg/restconf/issues
+
+
+** v17 to v18
+
+- addressed Stephen's and Kathleen's comments affecting Kent's sections
+- addressed Alexey's DISCUSS item #1
 
 ** v16 to v17
 
