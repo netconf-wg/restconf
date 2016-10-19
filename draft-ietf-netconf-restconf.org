@@ -4068,11 +4068,6 @@ API resource, using the root resource "/restconf".
 
 The server might respond as follows:
 
-[RFC Editor Note: Adjust the date (2016-04-09)
-for ietf-yang-library below to the
-date in the published ietf-yang-library YANG module, and remove this
-note.]
-
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
@@ -4095,10 +4090,6 @@ the "Accept" header can be used, as in this example request:
 
 The server will return the same conceptual data either way,
 which might be as follows :
-
-[RFC Editor Note: Adjust the date for ietf-yang-library below to the
-date in the published ietf-yang-library YANG module, and remove this
-note.]
 
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2016 17:01:00 GMT
@@ -4129,11 +4120,6 @@ from the server in JSON format:
 
 The server might respond as follows:
 
-[RFC Editor Note: Adjust the date for ietf-yang-library below to the
-date in the published ietf-yang-library YANG module, and remove this
-note.]
-
-
    HTTP/1.1 200 OK
    Date: Mon, 23 Apr 2016 17:01:00 GMT
    Server: example-server
@@ -4154,7 +4140,7 @@ note.]
            "deviation" : [
              {
                "name" : "foo-dev",
-               "revision" "2012-02-16"
+               "revision" : "2012-02-16"
              }
            ],
            "conformance-type" : "implement"
@@ -4585,13 +4571,13 @@ The server might respond:
                      "location" :
                        "/media/foo/a7/wasting-light.mp3",
                      "format" : "MP3",
-                     "length" " 286
+                     "length" : 286
                    },
                    {
                      "name" : "Rope",
                      "location" : "/media/foo/a7/rope.mp3",
                      "format" : "MP3",
-                     "length" " 259
+                     "length" : 259
                    }
                  ]
                }
@@ -4700,10 +4686,6 @@ is not selected in the fields expression.
 
 The server might respond as follows.
 
-[RFC Editor Note: Adjust the date for ietf-yang-library below to the
-date in the published ietf-yang-library YANG module, and remove this
-note.]
-
 [RFC Editor Note: Adjust the date for ietf-restconf-monitoring below to the
 date in the published ietf-restconf-monitoring YANG module, and remove this
 note.]
@@ -4732,7 +4714,7 @@ note.]
            },
            {
              "name" : "ietf-yang-library",
-             "revision" : "2016-04-09"
+             "revision" : "2016-06-21"
            },
            {
              "name" : "ietf-yang-types",
