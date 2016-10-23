@@ -378,8 +378,8 @@ is implemented in a device that does not have a NETCONF server:
                               |                 |
                               +-----------------+
 
-Note that there are no interactions at all between
-the NETCONF protocol and RESTCONF protocol.  It is possible
+There are interactions between the NETCONF protocol and RESTCONF protocol
+related to edit operations.  It is possible
 that locks are in use on a RESTCONF server, even though
 RESTCONF cannot manipulate locks.  In such a case,
 the RESTCONF protocol will not be granted write access to
@@ -395,7 +395,8 @@ configuration datastore.  The candidate MUST be automatically committed to
 running immediately after each successful edit. Any edits from other
 sources that are
 in the candidate datastore will also be committed. If a confirmed commit
-procedure is in progress by any NETCONF client, then this commit will act as the confirming commit.
+procedure is in progress by any NETCONF client, then any new commit
+will act as the confirming commit.
 If the NETCONF server is expecting a "persist-id" parameter to complete the confirmed
 commit procedure then the RESTCONF edit operation MUST fail with a
 "409 Conflict" status-line. There error-tag "in-use" is returned in this case.
@@ -1033,8 +1034,8 @@ percent-encoded, according to ^RFC3986^, section 2.1 and 2.5.
 for non-configuration data. In this case there is no
 mechanism to specify the exact matching leaf-list instance.
 
-- The comma (',') character is percent-encoded, even though
-multiple key values are not possible for a leaf-list.
+- The comma (',') character is percent-encoded ^RFC3986^,
+even though multiple key values are not possible for a leaf-list.
 This is more consistent and avoids special processing rules.
 
 If a data node in the path expression is a YANG list node,
@@ -1626,7 +1627,7 @@ The server MUST implement this method.
 # could be extracted from the YANG modules and the RESTCONF
 # protocol specification.
 
-If the PATCH method is supported, then the "Accept-Patch" header field MUST
+The "Accept-Patch" header field MUST
 be supported and returned in the response to the OPTIONS request, as
 defined in ^RFC5789^.
 
@@ -1826,8 +1827,10 @@ no response message-body.
 
 If the user is not authorized to invoke the target operation,
 an error response containing
-a "403 Forbidden" status-line is returned to
-the client. The error-tag value "access-denied" is used in this case.
+a "403 Forbidden" status-line SHOULD be
+returned. The error-tag value "access-denied" is used in this case.
+A server MAY return a "404 Not Found" status-line, as
+described in section 6.5.3 in ^RFC7231^.
 All other error responses are handled according to
 the procedures defined in ^error-reporting^.
 
@@ -1949,18 +1952,22 @@ The same request is shown here using XML encoding:
      <year>2011</year>
    </album>
 
+Refer to ^replace-datastore-ex^ for an example using the PUT method
+to replace the contents of the datastore resource.
+
 ** PATCH @patch@
 
-The RESTCONF server MUST support the PATCH method.
-RESTCONF uses the HTTP PATCH method defined
-in ^RFC5789^ to provide an extensible framework for
-resource patching mechanisms.  It is optional to implement
-by the server.  Each patch mechanism needs a unique
-media type.  Zero or more patch media types MAY be supported
-by the server.  The media types supported by a server can be
+The RESTCONF server MUST support the PATCH method for
+a plain patch, and MAY support additional media types.
+The PATCH media types supported by a server can be
 discovered by the client by sending an OPTIONS request,
 and examining the Accept-Patch header field in the response.
 (see ^options^).
+
+RESTCONF uses the HTTP PATCH method defined
+in ^RFC5789^ to provide an extensible framework for
+resource patching mechanisms.
+Each patch mechanism needs a unique media type.
 
 This document defines one patch mechanism (^plain-patch^). Another
 patch mechanism, the YANG PATCH mechanism, is defined in
@@ -2005,7 +2012,7 @@ MUST be the same as the key leaf values in the request URI.
 The PATCH method MUST NOT be used to change the key leaf
 values for a data resource instance.
 
-After the plain patch is processed by the server.
+After the plain patch is processed by the server
 a response will be returned to the client, as specified in ^patch^.
 
 Example:
@@ -2218,7 +2225,7 @@ event stream resource.
 A "400 Bad Request" status-line
 is returned if used for other methods or resource types.
 
-The format of this parameter is an XPath 1.0 expression, and is
+The format of this parameter is an XPath 1.0 expression ^XPath^, and is
 evaluated in the following context:
 
 -  The set of namespace declarations is the set of
@@ -2508,6 +2515,9 @@ RESTCONF message content is sent in the HTTP message-body.
 Content is encoded in either JSON or XML format.
 A server MUST support one of either XML or JSON encoding.
 A server MAY support both XML and JSON encoding.
+A client will need to support both XML and JSON to interoperate with all
+RESTCONF servers.
+
 XML encoding rules for data nodes are defined in ^RFC7950^.
 The same encoding rules are used for all XML content.
 JSON encoding rules are defined in ^RFC7951^.
@@ -2547,7 +2557,7 @@ a '406 Not Acceptable' status-line.
 
 ** RESTCONF Metadata @restconf-metadata@
 
-The RESTCONF protocol needs support retrieval of the same metadata that is
+The RESTCONF protocol needs to support retrieval of the same metadata that is
 used in the NETCONF protocol.  Information about default leafs,
 last-modified timestamps, etc. are commonly used to annotate
 representations of the datastore contents.
@@ -2646,7 +2656,7 @@ since these ranges do not represent error conditions.
 Since the datastore contents change at unpredictable times,
 responses from a RESTCONF server generally SHOULD NOT be cached.
 
-The server SHOULD include a "Cache-Control" header field in every response
+The server MUST include a "Cache-Control" header field in every response
 that specifies whether the response should be cached.
 
 Instead of relying on HTTP caching, the client SHOULD track the "ETag"
@@ -3319,7 +3329,7 @@ registry ^RFC6020^:
 
    Type name: application
 
-   Subtype name: yang-data
+   Subtype name: yang-data+xml
 
    Required parameters: None
 
@@ -3624,8 +3634,10 @@ https://github.com/netconf-wg/restconf/issues
 
 ** v17 to v18
 
-- addressed Stephen's and Kathleen's comments affecting Kent's sections
-- addressed Alexey's DISCUSS item #1
+- addressed IESG review comments and clarifications
+- addressed Alexey's DISCUSS items
+- made Cache-Control MUST support, not SHOULD support
+- add example for PUT on a datastore
 
 ** v16 to v17
 
@@ -4352,6 +4364,38 @@ and add an "album" sub-resource to each of 2 "artist" resources:
      <system xmlns="http://example.com/ns/example-system">
        <enable-jukebox-streaming>true</enable-jukebox-streaming>
      </system>
+     <jukebox xmlns="http://example.com/ns/example-jukebox">
+       <library>
+         <artist>
+           <name>Foo Fighters</name>
+           <album>
+             <name>One by One</name>
+             <year>2012</year>
+           </album>
+         </artist>
+         <artist>
+           <name>Nick Cave and the Bad Seeds</name>
+           <album>
+             <name>Tender Prey</name>
+             <year>1988</year>
+           </album>
+         </artist>
+       </library>
+     </jukebox>
+   </data>
+
+*** Replace a Datastore Resource @replace-datastore-ex@
+
+In this example, the entire configuration datastore contents
+are being replaced. Any child nodes not present in the <data> element
+but present in the server will be deleted.
+
+
+   PUT /restconf/data HTTP/1.1
+   Host: example.com
+   Content-Type: application/yang-data+xml
+
+   <data xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">
      <jukebox xmlns="http://example.com/ns/example-jukebox">
        <library>
          <artist>
