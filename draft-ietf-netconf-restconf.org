@@ -3377,7 +3377,7 @@ registry ^RFC6020^:
 
      Deprecated alias names for this type: N/A
      Magic number(s): N/A
-     File extension(s): .xml
+     File extension(s): None
      Macintosh file type code(s): "TEXT"
 
   // RFC Ed.: replace XXXX with actual RFC number and remove this
@@ -3452,7 +3452,7 @@ registry ^RFC6020^:
 
      Deprecated alias names for this type: N/A
      Magic number(s): N/A
-     File extension(s): .json
+     File extension(s): None
      Macintosh file type code(s): "TEXT"
 
   // RFC Ed.: replace XXXX with actual RFC number and remove this
@@ -3518,6 +3518,23 @@ This document registers several capability identifiers in
 
   :with-defaults
       urn:ietf:params:restconf:capability:with-defaults:1.0
+
+** Registration of "restconf" URN sub-namespace
+
+IANA has registered a new URN sub-namespace within the IETF URN
+Sub-namespace for Registered Protocol Parameter Identifiers
+defined in ^RFC3553^.
+
+   Registry Name: restconf
+
+   Specification: RFC XXXX
+   // RFC Ed.: replace XXXX with RFC number and remove this note
+
+   Repository: RESTCONF Capability URNs registry (Section 11.4)
+
+   Index value:  Sub-parameters MUST be specified in UTF-8, using
+       standard URI encoding where necessary.
+
 
 * Security Considerations
 
@@ -3638,6 +3655,8 @@ https://github.com/netconf-wg/restconf/issues
 - addressed Alexey's DISCUSS items
 - made Cache-Control MUST support, not SHOULD support
 - add example for PUT on a datastore
+- add IANA section for "restconf" URN sub-namespace
+- clarify media type file extensions
 
 ** v16 to v17
 
