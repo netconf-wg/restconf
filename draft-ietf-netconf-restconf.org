@@ -816,7 +816,7 @@ The server might respond:
    Content-Type: application/yang-data+xml
 
    <yang-library-version
-     xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">\
+     xmlns="urn:ietf:params:xml:ns:yang:ietf-restconf">\
      2016-06-21\
    </yang-library-version>
 
