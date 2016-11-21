@@ -4717,13 +4717,13 @@ The server might respond:
    {
      "example-jukebox:jukebox" : {
        "library" : {
-         "artist" : {}
+         "artist" : []
        },
        "playlist" : [
          {
            "name" : "Foo-One",
            "description" : "example playlist 1",
-           "song" : {}
+           "song" : []
          }
        ],
        "player" : {
