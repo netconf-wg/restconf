@@ -1,0 +1,10 @@
+{
+    "username" : "developer",
+    "password" : "C1sco12345",
+    "host"     : "sandbox-iosxe-latest-1.cisco.com",
+    "headers"  : {
+      "Accept": "application/yang-data+json",
+      "Content-Type": "application/yang-data+json"
+      }
+}
+
